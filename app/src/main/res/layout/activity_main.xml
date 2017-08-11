@@ -7,227 +7,25 @@
     android:focusable="false"
     tools:context="com.example.android.babyml.MainActivity">
 
-    <Button
-        android:id="@+id/plus_milk_button"
-        android:layout_width="wrap_content"
+    <include layout="@layout/milk_entry"
+        android:id="@+id/milkRelatedLayout"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp"
-        android:text="+Milk"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/plus_nappy_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:visibility="invisible"
-        android:text="+Nappy"
-        app:layout_constraintLeft_toRightOf="@+id/plus_milk_button"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/add_10_ml_button"
-        android:layout_width="60dp"
-        android:layout_height="48dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
-        android:text="+10"
-        app:layout_constraintLeft_toRightOf="@+id/clear_button"
-        app:layout_constraintTop_toTopOf="@+id/clear_button" />
-
-    <Button
-        android:id="@+id/clear_button"
-        android:layout_width="60dp"
-        android:layout_height="48dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="7dp"
-        android:text="CLR"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/plus_nappy_button" />
-
-    <Button
-        android:id="@+id/add_20_ml_button"
-        android:layout_width="60dp"
-        android:layout_height="48dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
-        android:text="+20"
-        app:layout_constraintLeft_toRightOf="@+id/add_10_ml_button"
-        app:layout_constraintTop_toTopOf="@+id/add_10_ml_button" />
-
-    <Button
-        android:id="@+id/add_50_ml_button"
-        android:layout_width="60dp"
-        android:layout_height="48dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
-        android:text="+50"
-        app:layout_constraintLeft_toRightOf="@+id/add_20_ml_button"
-        app:layout_constraintTop_toTopOf="@+id/add_20_ml_button" />
-
-    <Button
-        android:id="@+id/add_100_ml_button"
-        android:layout_width="60dp"
-        android:layout_height="48dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
-        android:text="+100"
-        app:layout_constraintLeft_toRightOf="@+id/add_50_ml_button"
-        app:layout_constraintTop_toTopOf="@+id/add_50_ml_button" />
-
-
-
-    <!-- TODO: Add scrolling for log_tv -->
-
-    <!--<TextView-->
-        <!--android:id="@+id/log_tv"-->
-        <!--android:layout_width="0dp"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_marginBottom="8dp"-->
-        <!--android:layout_marginEnd="8dp"-->
-        <!--android:layout_marginLeft="8dp"-->
-        <!--android:layout_marginRight="8dp"-->
-        <!--android:layout_marginStart="8dp"-->
-        <!--android:layout_marginTop="8dp"-->
-        <!--android:text=""-->
-        <!--app:layout_constraintBottom_toBottomOf="parent"-->
-        <!--app:layout_constraintHorizontal_bias="0.025"-->
-        <!--app:layout_constraintLeft_toLeftOf="parent"-->
-        <!--app:layout_constraintRight_toRightOf="parent"-->
-        <!--app:layout_constraintTop_toBottomOf="@+id/store_milk_button"-->
-        <!--app:layout_constraintVertical_bias="0.0" />-->
-
-    <!-- style="@android:style/Widget.EditText" can be added as on
-         https://stackoverflow.com/questions/13508270/android-seterrorerror-not-working-in-textview -->
-    <TextView
-        android:id="@+id/milk_amount_tv"
-        android:layout_width="86dp"
-        android:layout_height="40dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="9dp"
-        android:elevation="0dp"
-        android:gravity="center"
-        android:text="0 ml"
-
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-
-
-        android:textAlignment="center"
-        android:textSize="24sp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/add_10_ml_button" />
-
-     <!-- The following android:imeOptions="actionDone" taken from stackoverflow:
-     https://stackoverflow.com/questions/2342620/how-to-hide-keyboard-after-typing-in-edittext-in-android -->
-
-    <EditText
-        android:id="@+id/milk_time_et"
+        android:layout_width="0dp"
         android:visibility="visible"
-        android:layout_width="86dp"
-        android:layout_height="40dp"
-        android:layout_marginLeft="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        android:elevation="0dp"
-        android:gravity="center"
-        android:text="12:34"
-        android:inputType="time"
-        android:textAlignment="center"
-        android:textSize="18sp"
-        android:imeOptions="actionDone"
-        android:fontFamily="false"
-        app:layout_constraintBaseline_toBaselineOf="@+id/milk_amount_tv"
-        app:layout_constraintLeft_toRightOf="@+id/milk_amount_tv" />
-
-    <Button
-        android:id="@+id/store_milk_button"
-        android:layout_width="88dp"
-        android:layout_height="48dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
-        android:text="Store"
-        app:layout_constraintLeft_toRightOf="@+id/milk_time_et"
-
-        app:layout_constraintTop_toTopOf="@+id/milk_amount_tv" />
-
-    <!-- TODO: Change this one to visible -->
-    <Button
-        android:id="@+id/delete_all"
-        android:layout_width="120dp"
-        android:layout_height="48dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginStart="8dp"
-        android:background="@color/colorAccent"
-        android:visibility="visible"
-        android:text="Delete All"
-        app:layout_constraintLeft_toRightOf="@+id/store_milk_button"
-        app:layout_constraintTop_toTopOf="@+id/milk_amount_tv" />
-
-
-    <android.support.constraint.Guideline
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/guideline"
         android:orientation="vertical"
-        tools:layout_editor_absoluteY="0dp"
-        tools:layout_editor_absoluteX="20dp"
-        app:layout_constraintGuide_percent="0.052083332" />
-
-<!--
-    <ScrollView
-        android:id="@+id/log_sv"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/store_milk_button"
-        app:layout_constraintVertical_bias="0.0">
-
-        <TextView
-            android:id="@+id/log_tv"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:text="" />
-    </ScrollView> -->
-
-    <!-- Spacer. -->
-    <View
-        android:id="@+id/spacer"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-
-        android:layout_margin="8dp"
-        android:layout_marginEnd="8dp"
-
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:background="@android:color/darker_gray"
-        android:visibility="visible"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/store_milk_button" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="8dp" />
 
 
-    <!-- TODO: Work on the RV -->
+        />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/log_rv"
         android:layout_width="0dp"
@@ -243,8 +41,10 @@
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/spacer"
+        app:layout_constraintTop_toBottomOf="@+id/milkRelatedLayout"
         app:layout_constraintVertical_bias="1.0" />
+
+
     <!-- android:background="@android:color/darker_gray" -->
 
     <!--<LinearLayout-->
@@ -281,5 +81,21 @@
         <!-- TODO: Remove scrollView -->
     <!--</LinearLayout>-->
 
+    <!-- FIXME: in T09.07 SOLUTION this was used. android:layout_margin="@dimen/fab_margin"
+                Could not find @dimen:
+                android:layout_margin="@dimen/fab_margin"
+    -->
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        app:srcCompat="@android:drawable/ic_input_add"
+        android:tint="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginBottom="16dp"
+        android:layout_marginRight="16dp"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginEnd="16dp" />
 
 </android.support.constraint.ConstraintLayout>

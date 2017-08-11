@@ -1,9 +1,11 @@
 package com.example.android.babyml;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.IBinder;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -42,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     Button clearButton, plusMilkButton, plusNappyButton, add10mlButton, add20mlButton,
             add50mlButton, add100mlButton, storeMilkButton, deleteAllButton;
     RecyclerView logRecyclerView;
+    FloatingActionButton fab;
 
     // Log-related items:
     LogAdapter mAdapter;
@@ -117,10 +120,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }
 
-//        public boolean isMilkTimeValid() {
-//            return toHoursMinArray(et.getText().toString()) != null;
-//        }
-
         public void setDefaultTimeIfEntryInvalid() {
             String entry = et.getText().toString();
             int[] hhmm = toHoursMinArray(entry);
@@ -172,8 +171,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         }
     };
-
-    //private long milkTime;
 
     // TODO: Move this to a an UTILS class:
     public static int[] toHoursMinArray(String s) {
@@ -235,6 +232,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mAdapter = new LogAdapter(mLogListItemClickListener);
         logRecyclerView.setAdapter(mAdapter);
         //logRecyclerView.setOnClickListener(this); // FIXME: Check if this works/is correct.
+
+        // Getting FloatingActionButton:
+        fab = (FloatingActionButton) findViewById(R.id.fab_add);
+        fab.setOnClickListener(this);
 
         // Add EditText field milkTimeEditText:
         // Set current time:
@@ -326,7 +327,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 milkAmountTextView.setError("Cannot be 0.");
                 return;
             }
-
             milkTimeTextWatcher.setDefaultTimeIfEntryInvalid();
             long timeMillis = milkTimeTextWatcher.getTimeMilis();
             FeedingUtils.insertFeeding(mDb, milkAmountValue, timeMillis);
@@ -339,9 +339,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // TODO: Add question first.
             FeedingUtils.deleteAllFeedings(mDb);
             updateLogRecyclerView();
-
         } else if (v.equals(logRecyclerView)) {
             Toast.makeText(this, "logRecyclerView to be handled yet", Toast.LENGTH_LONG).show();
+        } else if (v.equals(fab)) {
+            Intent intent = new Intent(this, MilkActivity.class);
+            // TODO: putExtra parameters here
+            startActivity(intent);
         } else {
             Log.d(TAG, "Unknown item clicked: " + v);
         }

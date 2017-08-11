@@ -45,26 +45,6 @@ public class FeedingUtils {
         return list;
     }
 
-//    public static String cursorAsString(Cursor cursor) {
-//        StringBuilder sb = new StringBuilder();
-//
-//        if (!cursor.moveToFirst()) {
-//            return "";
-//        }
-//
-//        do {
-//            int feedAmount = cursor.getInt(cursor.getColumnIndex(FeedingContract.FeedingEntry.COLUMN_FEED_AMOUNT));
-//            long feedTimestamp = cursor.getLong(cursor.getColumnIndex(FeedingContract.FeedingEntry.COLUMN_FEED_TIMESTAMP));
-//
-//
-//            android.text.format.DateFormat df = new android.text.format.DateFormat();
-//            CharSequence csTime = df.format("E yyyy-MM-dd hh:mm", feedTimestamp);
-//
-//            sb.append(csTime).append(" : milk= ").append(feedAmount).append("\n");
-//        } while (cursor.moveToNext());
-//        return sb.toString();
-//    }
-
     public static String cursorAsString(Cursor cursor) {
         StringBuilder sb = new StringBuilder();
         List<String> list = cursorAsStringList(cursor);

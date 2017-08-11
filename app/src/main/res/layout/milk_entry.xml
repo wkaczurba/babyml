@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical" android:layout_width="match_parent"
+
+    android:id="@+id/milkRelatedLayout"
+    android:layout_height="wrap_content"
+    app:layout_constraintHorizontal_bias="0.0"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
+
+<Button
+    android:id="@+id/plus_milk_button"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="16dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="16dp"
+    android:text="+Milk"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintTop_toTopOf="parent" />
+
+<Button
+    android:id="@+id/plus_nappy_button"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginLeft="16dp"
+    android:layout_marginStart="16dp"
+    android:layout_marginTop="16dp"
+    android:text="+Nappy"
+    android:visibility="invisible"
+    app:layout_constraintLeft_toRightOf="@+id/plus_milk_button"
+    app:layout_constraintTop_toTopOf="parent" />
+
+<LinearLayout
+    android:id="@+id/linear_buttons_row"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="8dp"
+    android:layout_marginRight="8dp"
+    android:layout_marginTop="8dp"
+    android:gravity="center"
+    android:orientation="horizontal"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/plus_milk_button">
+
+    app:layout_constraintLeft_toLeftOf="@+id/linear_buttons_row"
+    app:layout_constraintTop_toTopOf="@+id/linear_buttons_row" />
+
+    <Button
+        android:id="@+id/clear_button"
+        android:layout_width="59dp"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="8dp"
+        android:text="CLR" />
+
+    <Button
+        android:id="@+id/add_10_ml_button"
+        android:layout_width="60dp"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:text="+10" />
+    <!--
+
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/plus_nappy_button" />-->
+
+    <Button
+        android:id="@+id/add_20_ml_button"
+        android:layout_width="60dp"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:text="+20" />
+
+    <!--app:layout_constraintLeft_toRightOf="@+id/add_10_ml_button"-->
+    <!--app:layout_constraintTop_toTopOf="@+id/add_10_ml_button" />-->
+
+    <Button
+        android:id="@+id/add_50_ml_button"
+        android:layout_width="60dp"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:text="+50" />
+
+    <!--             app:layout_constraintLeft_toRightOf="@+id/add_20_ml_button"
+    app:layout_constraintTop_toTopOf="@+id/add_20_ml_button" /> -->
+
+
+    <Button
+        android:id="@+id/add_100_ml_button"
+        android:layout_width="60dp"
+        android:layout_height="match_parent"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:text="+100" />
+
+    <!--
+                app:layout_constraintLeft_toRightOf="@+id/add_50_ml_button"
+    app:layout_constraintTop_toTopOf="@+id/add_50_ml_button" />
+-->
+</LinearLayout>
+
+<!-- Spacer. -->
+<View
+    android:id="@+id/spacer"
+    android:layout_width="0dp"
+    android:layout_height="1dp"
+    android:layout_margin="8dp"
+    android:layout_marginEnd="8dp"
+    android:layout_marginLeft="8dp"
+    android:layout_marginRight="8dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginTop="8dp"
+    android:background="@android:color/darker_gray"
+    android:visibility="visible"
+    app:layout_constraintHorizontal_bias="1.0"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintRight_toRightOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/accept_buttons_row" />
+
+<LinearLayout
+    android:id="@+id/accept_buttons_row"
+    android:layout_width="368dp"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    app:layout_constraintLeft_toLeftOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/linear_buttons_row">
+
+    <!-- style="@android:style/Widget.EditText" can be added as on
+ https://stackoverflow.com/questions/13508270/android-seterrorerror-not-working-in-textview -->
+
+    <TextView
+        android:id="@+id/milk_amount_tv"
+        android:layout_width="86dp"
+        android:layout_height="48dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:gravity="center"
+        android:text="0 ml"
+        android:textAlignment="center"
+        android:textColor="@color/colorPrimary"
+        android:textSize="24sp" />
+
+    <!-- The following android:imeOptions="actionDone" taken from stackoverflow:
+https://stackoverflow.com/questions/2342620/how-to-hide-keyboard-after-typing-in-edittext-in-android -->
+
+    <EditText
+        android:id="@+id/milk_time_et"
+        android:layout_width="86dp"
+        android:layout_height="48dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:elevation="0dp"
+        android:fontFamily="false"
+        android:gravity="center"
+        android:imeOptions="actionDone"
+        android:inputType="time"
+        android:text="12:34"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        android:visibility="visible"
+        app:layout_constraintBaseline_toBaselineOf="@+id/milk_amount_tv"
+        app:layout_constraintLeft_toRightOf="@+id/milk_amount_tv" />
+
+    <Button
+        android:id="@+id/store_milk_button"
+        android:layout_width="72dp"
+        android:layout_height="48dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:text="Store"
+        app:layout_constraintLeft_toRightOf="@+id/milk_time_et"
+
+        app:layout_constraintTop_toTopOf="@+id/milk_amount_tv" />
+
+    <!-- TODO: Change this one to visible -->
+    <Button
+        android:id="@+id/delete_all"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:backgroundTint="@color/colorAccent"
+        android:elevation="0dp"
+        android:text="Erase "
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@+id/store_milk_button"
+        app:layout_constraintLeft_toRightOf="@+id/store_milk_button"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/store_milk_button" />
+
+
+    <!--<android.support.constraint.Guideline-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:id="@+id/guideline"-->
+    <!--android:orientation="vertical"-->
+    <!--tools:layout_editor_absoluteY="0dp"-->
+    <!--tools:layout_editor_absoluteX="20dp"-->
+    <!--app:layout_constraintGuide_percent="0.052083332" />-->
+
+</LinearLayout>
+
+<!-- @+id/milkRelatedLayout -->
+
+</android.support.constraint.ConstraintLayout>
