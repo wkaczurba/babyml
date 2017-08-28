@@ -10,7 +10,6 @@ import java.util.List;
 /**
  * Created by WKaczurb on 8/6/2017.
  */
-
 public class FeedingUtils {
 
     public static void insertFeeding(SQLiteDatabase db, int amount, long timestampMilis) {
@@ -19,6 +18,15 @@ public class FeedingUtils {
         values.put(FeedingContract.FeedingEntry.COLUMN_FEED_AMOUNT, amount); //10);
         values.put(FeedingContract.FeedingEntry.COLUMN_FEED_TIMESTAMP, timestampMilis); //System.currentTimeMillis());
         db.insert(FeedingContract.FeedingEntry.TABLE_NAME, null, values);
+    }
+
+    /**
+     * Delet
+     * @param db
+     * @param id
+     */
+    public static void deleteFeeding(SQLiteDatabase db, long id) {
+        db.delete(FeedingContract.FeedingEntry.TABLE_NAME, "_ID=" + id, null ); // equivalent to "_ID =" + id
     }
 
     public static List<String> cursorAsStringList(Cursor cursor) {

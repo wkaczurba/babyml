@@ -6,10 +6,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.CursorLoader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
@@ -175,6 +177,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        this.updateLogRecyclerView();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -218,6 +225,43 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mAdapter = new LogAdapter(mLogListItemClickListener);
         logRecyclerView.setAdapter(mAdapter);
 
+        // https://stackoverflow.com/questions/42792984/how-to-swipe-to-delete-on-recyclerview
+        // Handling of swiping left/right:
+        // TODO: Add this one to the top or somewhere else.
+        ItemTouchHelper.SimpleCallback simpleTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                if (direction == ItemTouchHelper.RIGHT || direction == ItemTouchHelper.LEFT) {
+
+                    LogAdapter.LogViewHolder logViewHolder = (LogAdapter.LogViewHolder) viewHolder;
+
+                    //long lid = viewHolder.getItemId();
+                    long lid = logViewHolder.getAdapterPosition();
+                    long dbId = logViewHolder.getDbId();
+                    //viewHolder.itemView.getTag()
+
+//                    Toast.makeText(MainActivity.this,
+//                            String.format("Deleting the item %d (mDbId=%d)", lid, dbId),
+//                            Toast.LENGTH_LONG).show();
+
+                    // TODO: Get ID from SQLiteDb first.
+//                    int id;
+                    FeedingUtils.deleteFeeding(mDb, dbId);
+                    updateLogRecyclerView();
+                }
+
+            }
+        };
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleTouchCallback);
+        itemTouchHelper.attachToRecyclerView(logRecyclerView);
+
         // Getting FloatingActionButton:
         fab = (FloatingActionButton) findViewById(R.id.fab_add);
         fab.setOnClickListener(this);
@@ -246,12 +290,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //        setIme(this);
     }
 
+    //List<String> list;
 
     private void updateLogRecyclerView() {
         Cursor cursor = FeedingUtils.getAllFeedingsCursor(mDb);
         //String s = FeedingUtils.cursorAsString(cursor);
-        List<String> list = FeedingUtils.cursorAsStringList(cursor);
-        mAdapter.setData(list);
+        /*List<String> */
+        //list = FeedingUtils.cursorAsStringList(cursor);
+        //mAdapter.setData(list);
+        mAdapter.swapCursor(cursor);
         //logTextView.setText(s);
     }
 
