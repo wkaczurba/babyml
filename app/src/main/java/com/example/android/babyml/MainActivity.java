@@ -4,9 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.content.CursorLoader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,20 +15,18 @@ import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 import org.joda.time.*;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import com.example.android.babyml.data.FeedingDbHelper;
 import com.example.android.babyml.data.FeedingUtils;
 import com.example.android.babyml.utils.DateUtils;
 
-import java.util.List;
+// TODO: Review these ones for sliding tabs:
+//   https://developer.android.com/training/implementing-navigation/lateral.html
+//   https://developer.android.com/samples/SlidingTabsBasic/src/com.example.android.common/view/SlidingTabLayout.html
+//
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
@@ -238,22 +234,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 if (direction == ItemTouchHelper.RIGHT || direction == ItemTouchHelper.LEFT) {
+                    int itemViewType = viewHolder.getItemViewType();
 
-                    LogAdapter.LogViewHolder logViewHolder = (LogAdapter.LogViewHolder) viewHolder;
+                    if (itemViewType == 0) { // TODO: Change 0 to use FINAL STATIC INT!!
+                        LogAdapter.FeedingViewHolder logViewHolder = (LogAdapter.FeedingViewHolder) viewHolder;
 
-                    //long lid = viewHolder.getItemId();
-                    long lid = logViewHolder.getAdapterPosition();
-                    long dbId = logViewHolder.getDbId();
-                    //viewHolder.itemView.getTag()
+                        //long lid = viewHolder.getItemId();
+                        long lid = logViewHolder.getAdapterPosition();
 
-//                    Toast.makeText(MainActivity.this,
-//                            String.format("Deleting the item %d (mDbId=%d)", lid, dbId),
-//                            Toast.LENGTH_LONG).show();
+                        if (!logViewHolder.isFeedingItem()) {
+                            throw new IllegalArgumentException("Unexpected. Holer says it is of ViewType = 0 but it does not return isFeedingItem()==true.");
+//                            updateLogRecyclerView();
+//                            return;
+                        } else {
+                            LogAdapter.FeedingItem fe = (LogAdapter.FeedingItem) logViewHolder.getItem();
+                            long dbId = fe.getDbId();
+                            FeedingUtils.deleteFeeding(mDb, dbId);
+                            updateLogRecyclerView();
+                        }
+                    } else if (itemViewType == 1){ // DATE.
+                        // DO NOTHING - CANT REMOVE A DATE GAP.
+                        updateLogRecyclerView();
+                        return;
+                    } else {
+                        throw new IllegalArgumentException("ItemViewType = " + itemViewType);
+                    }
 
-                    // TODO: Get ID from SQLiteDb first.
-//                    int id;
-                    FeedingUtils.deleteFeeding(mDb, dbId);
-                    updateLogRecyclerView();
+
                 }
 
             }
