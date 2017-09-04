@@ -38,7 +38,9 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             int mFeedAmount = cursor.getInt(cursor.getColumnIndex(FeedingContract.FeedingEntry.COLUMN_FEED_AMOUNT));
             long mFeedTimestamp = cursor.getLong(cursor.getColumnIndex(FeedingContract.FeedingEntry.COLUMN_FEED_TIMESTAMP));
             CharSequence mCsTime = DateFormat.format("E yyyy-MM-dd HH:mm", mFeedTimestamp); // TODO: Consider adding option to select 12 vs 24 hours.
-            String mStringInfo = String.format("milk = %d", mFeedAmount);
+
+            CharSequence time = DateFormat.format("HH:mm", mFeedTimestamp);
+            String mStringInfo = String.format(time + " milk = %d", mFeedAmount);
 
             return new FeedingItem(dbId, mFeedAmount, mFeedTimestamp, mCsTime, mStringInfo);
         }

@@ -16,7 +16,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MilkActivity"
+            android:name=".AddEntryActivity"
             android:label="Add milk"
             android:parentActivityName=".MainActivity">
         </activity>

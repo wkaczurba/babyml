@@ -30,7 +30,7 @@ import com.example.android.babyml.utils.DateUtils;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    // FIXME: Do we need mDb here (it has been already added to MilkActivity.
+    // FIXME: Do we need mDb here (it has been already added to AddEntryActivity.
 
     public static String TAG = MainActivity.class.getSimpleName();
 
@@ -361,7 +361,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (v.equals(logRecyclerView)) {
             Toast.makeText(this, "logRecyclerView to be handled yet", Toast.LENGTH_LONG).show();
         } else if (v.equals(fab)) {
-            Intent intent = new Intent(this, MilkActivity.class);
+            Intent intent = new Intent(this, AddEntryActivity.class);
             // TODO: putExtra parameters here
             startActivity(intent);
         } else {
