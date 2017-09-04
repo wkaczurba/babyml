@@ -30,6 +30,8 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     static abstract class Item {};
+
+    // TODO: Move FeedingItem to Utils or somewhere; it does not have to be related to LogAdapter.
     static class FeedingItem extends Item {
         private long dbId;
 

@@ -39,13 +39,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     // Database:
     SQLiteDatabase mDb;
-
-//    //TextView logTextView;
-//    TextView milkAmountTextView;
-//    EditText milkTimeEditText;
-//    Button clearButton, plusMilkButton, plusNappyButton, add10mlButton, add20mlButton,
-//            add50mlButton, add100mlButton, storeMilkButton, deleteAllButton;
-//    TimeTextWatcher milkTimeTextWatcher;
     RecyclerView logRecyclerView;
     FloatingActionButton fab;
 
@@ -273,90 +266,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         fab = (FloatingActionButton) findViewById(R.id.fab_add);
         fab.setOnClickListener(this);
 
-        // Add EditText field milkTimeEditText:
-        // Set current time:
-//        DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");
-//        milkTimeEditText.setText(dtf.print(LocalTime.now()));
-//
-//        milkTimeTextWatcher = new TimeTextWatcher(milkTimeEditText);
-//        milkTimeEditText.addTextChangedListener(milkTimeTextWatcher);
-        //milkTimeEditText.focus
-
-        // would onRestoreState
-//        if (savedInstanceState != null) {
-//            if (savedInstanceState.containsKey(MILK_AMOUNT_VALUE_KEY)) {
-//                milkAmountValue = savedInstanceState.getInt(MILK_AMOUNT_VALUE_KEY);
-//            }
-//        }
-
-
-//        updateMilkAmount();
-        //FeedingUtils.deleteAllFeedings(mDb);
-//LOG        updateLogTextView();
         updateLogRecyclerView();
-//        setIme(this);
     }
-
-    //List<String> list;
 
     private void updateLogRecyclerView() {
         Cursor cursor = FeedingUtils.getAllFeedingsCursor(mDb);
-        //String s = FeedingUtils.cursorAsString(cursor);
-        /*List<String> */
-        //list = FeedingUtils.cursorAsStringList(cursor);
-        //mAdapter.setData(list);
         mAdapter.swapCursor(cursor);
-        //logTextView.setText(s);
+
+
+        // Update last time:
+        TimeElapsedFragment timeElapsedFrag = (TimeElapsedFragment) getFragmentManager().findFragmentById(R.id.time_elapsed_frag);
+
+        cursor = FeedingUtils.getLatestFeeding(mDb);
+        switch (cursor.getCount()) {
+            case 1: {
+                cursor.moveToFirst();
+                LogAdapter.FeedingItem f = LogAdapter.FeedingItem.fromCursor(cursor);
+                timeElapsedFrag.setTimeZero(f.getmFeedTimestamp());
+                break;
+            }
+            case 0: {
+                timeElapsedFrag.setTimeZero(-1);
+                break;
+            }
+            default: throw new IllegalArgumentException("Limit did not work; cursor.getCount()=" + cursor.getCount());
+        }
     }
-
-
-
 
     @Override
     public void onClick(View v) {
         if (v == null) {
             throw new UnsupportedOperationException("Onclick provided with null value");
         }
-
-//        if (v.equals(clearButton)) {
-//            milkAmountValue = 0;
-//            updateMilkAmount();
-//        } else if (v.equals(plusMilkButton)) {
-//            Toast.makeText(this, "plusMilkButton to be handled yet", Toast.LENGTH_LONG).show();
-//        } else if (v.equals(plusNappyButton)) {
-//            Toast.makeText(this, "plusNappyButton to be handled yet", Toast.LENGTH_LONG).show();
-//        } else if (v.equals(add10mlButton)) {
-//            milkAmountValue += 10;
-//            updateMilkAmount();
-//        } else if (v.equals(add20mlButton)) {
-//            milkAmountValue += 20;
-//            updateMilkAmount();
-//        } else if (v.equals(add50mlButton)) {
-//            milkAmountValue += 50;
-//            updateMilkAmount();
-//        } else if (v.equals(add100mlButton)) {
-//            milkAmountValue += 100;
-//            updateMilkAmount();
-//        } else if (v.equals(storeMilkButton)) {
-//            // TODO: Check if not 0 ml first.
-//            //addMilkEntry(milkAmountValue , System.currentTimeMillis());
-//            if (milkAmountValue == 0) {
-//                milkAmountTextView.setError("Cannot be 0.");
-//                return;
-//            }
-//            milkTimeTextWatcher.setDefaultTimeIfEntryInvalid();
-//            long timeMillis = milkTimeTextWatcher.getTimeMilis();
-//            FeedingUtils.insertFeeding(mDb, milkAmountValue, timeMillis);
-//            updateLogRecyclerView();
-//
-//            //Toast.makeText(this, "storeMilkButton to be handled yet", Toast.LENGTH_LONG).show();
-//            milkAmountValue = 0;
-//            updateMilkAmount();
-//        } else if (v.equals(deleteAllButton)) {
-//            // TODO: Add question first.
-//            FeedingUtils.deleteAllFeedings(mDb);
-//            updateLogRecyclerView();
-//        } else
 
         if (v.equals(logRecyclerView)) {
             Toast.makeText(this, "logRecyclerView to be handled yet", Toast.LENGTH_LONG).show();

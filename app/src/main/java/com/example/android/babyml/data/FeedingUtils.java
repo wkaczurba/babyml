@@ -62,6 +62,17 @@ public class FeedingUtils {
         return sb.toString();
     }
 
+    public static Cursor getLatestFeeding(SQLiteDatabase db) {
+        return db.query(
+                FeedingContract.FeedingEntry.TABLE_NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                FeedingContract.FeedingEntry.COLUMN_FEED_TIMESTAMP + " DESC", "1");
+    }
+
     public static Cursor getAllFeedingsCursor(SQLiteDatabase db) {
         return db.query(
                 FeedingContract.FeedingEntry.TABLE_NAME,
