@@ -31,13 +31,13 @@ public class TimeElapsedFragment extends Fragment {
     }
 
     public void refreshTimeElapsed() {
-        CharSequence cs =  "--:--:--";
+        CharSequence cs =  "--:--";
 
         if (timeElapsedTv == null)
             return;
 
         long now = System.currentTimeMillis();
-        if (timeZero >= now - 24*3600*1000*2) {
+        if (timeZero >= now - 24*3600*1000) {
 //            cs = android.text.format.DateFormat.format("HH:mm:ss", now - timeZero);
             cs = android.text.format.DateFormat.format("HH:mm", now - timeZero);
         }

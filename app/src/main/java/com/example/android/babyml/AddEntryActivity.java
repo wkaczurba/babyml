@@ -1,5 +1,6 @@
 package com.example.android.babyml;
 
+import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.content.Context;
 import android.os.Bundle;
@@ -14,9 +15,11 @@ public class AddEntryActivity extends AppCompatActivity {
 
     public static String TAG = AddEntryActivity.class.getSimpleName();
     AddEntryActivity.ItemSelectedListener itemSelectedListener = new AddEntryActivity.ItemSelectedListener(this);
+    MilkAdderFragment milkAdderFragment;
+    NappyAdderFragment nappyAdderFragment;
 
     // TODO: This is for spinner -> it should select fragments.
-    public static class ItemSelectedListener implements AdapterView.OnItemSelectedListener {
+    public class ItemSelectedListener implements AdapterView.OnItemSelectedListener {
 
         Context context;
         Toast mToast;
@@ -31,6 +34,12 @@ public class AddEntryActivity extends AppCompatActivity {
             }
             mToast = Toast.makeText(context, "Item: " + position + " selected by the spinner", Toast.LENGTH_LONG);
             mToast.show();
+
+            if (position == 0) {
+                displayRightFragment(new MilkAdderFragment());
+            } else {
+                displayRightFragment(new NappyAdderFragment());
+            }
         }
 
         @Override
@@ -39,18 +48,28 @@ public class AddEntryActivity extends AppCompatActivity {
         }
     }
 
+    public void displayRightFragment(Fragment fragment) {
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.replace(R.id.activity_frag, fragment);
+        ft.addToBackStack(null); // is this needed?
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+        ft.commit();
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_entry);
 
         // Selection of spinners.
-        MilkAdderFragment milkAdderFragment = new MilkAdderFragment();
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.replace(R.id.activity_frag, milkAdderFragment);
-        ft.addToBackStack(null);
-        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-        ft.commit();
+//        MilkAdderFragment milkAdderFragment = new MilkAdderFragment();
+//        FragmentTransaction ft = getFragmentManager().beginTransaction();
+//        ft.replace(R.id.activity_frag, milkAdderFragment);
+//        ft.addToBackStack(null);
+//        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+//        ft.commit();
+        displayRightFragment(new MilkAdderFragment());
 
         Spinner addSpinner = (Spinner) findViewById(R.id.add_spinner);
 

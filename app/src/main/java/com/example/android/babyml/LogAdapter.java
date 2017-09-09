@@ -252,6 +252,7 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         switch (holder.getItemViewType()) {
             case FEEDING_VIEW_HOLDER: ((FeedingViewHolder) holder).bind(position); break;
             case DATE_VIEW_HOLDER: ((DateViewHolder) holder).bind(position); break;
+// TODO: Add another view_holder for summary of feedings.
             default: break;
         }
     }

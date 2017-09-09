@@ -2,14 +2,18 @@
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
 
-    android:id="@+id/milkRelatedLayout"
-    android:layout_height="wrap_content"
+    <!-- things remvoed from the above:
+        android:orientation="vertical"
+        android:id="@+id/milkRelatedLayout"
     app:layout_constraintHorizontal_bias="0.0"
     app:layout_constraintLeft_toLeftOf="parent"
     app:layout_constraintRight_toRightOf="parent"
-    app:layout_constraintTop_toTopOf="parent">
+    app:layout_constraintTop_toTopOf="parent"
+        -->
+
 
     <Button
         android:id="@+id/plus_milk_button"
