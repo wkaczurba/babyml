@@ -1,37 +1,21 @@
-<!-- <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:labelFor="@+id/seekBar"
-    android:orientation="vertical"
-    tools:context="com.example.android.babyml.NappyAdderFragment"> -->
-
-<android.support.constraint.ConstraintLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:layout_margin="0dp"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintLeft_toLeftOf="parent"
-    app:layout_constraintLeft_toRightOf="parent"
-    >
+    android:layout_height="wrap_content"
+    android:id="@+id/framgnet_nappy_adder_ll"
+    android:gravity="center_horizontal"
+    app:layout_constraintHorizontal_bias="0.5"
+    android:orientation="vertical">
 
-    <LinearLayout
-        android:layout_width="0dp"
+    <RadioGroup
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/radio_bar_ll"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_margin="0dp"
-        android:gravity="center">
+        android:layout_gravity="center_horizontal"
+        android:orientation="horizontal">
 
         <RadioButton
-            app:layout_constraintHorizontal_bias="0.5"
             android:id="@+id/radioButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -42,140 +26,155 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
-            android:text="Soiled"
-            />
+            android:text="Soiled" />
 
         <RadioButton
             android:id="@+id/radioButton3"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
-            android:text="Wet" /> -->
-    </LinearLayout>
+            android:text="Wet" />
 
-    <!-- TODO: Update blank fragment layout -->
+    </RadioGroup>
+
+    <!-- Sliders -->
     <android.support.constraint.ConstraintLayout
-        android:id="@+id/wet_cl"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_margin="0dp"
-        android:padding="0dp"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/radio_bar_ll"
-        >
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout_editor_absoluteY="81dp"
+        tools:layout_editor_absoluteX="0dp">
+
 
         <TextView
             android:id="@+id/wet_nappy_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
             android:text="@string/wet_nappy"
             android:textAppearance="@style/TextAppearance.AppCompat"
-            app:layout_constraintTop_toTopOf="parent"
-            android:layout_margin="0dp"
-            app:layout_constraintLeft_toLeftOf="parent" />
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <SeekBar
             android:id="@+id/wet_sb"
             style="@style/Widget.AppCompat.SeekBar.Discrete"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
 
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="24dp"
             android:clickable="false"
             android:max="4"
-
             android:progress="1"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/wet_nappy_tv"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_margin="0dp" />
+            app:layout_constraintTop_toTopOf="@+id/wet_nappy_tv"
+            tools:layout_constraintBottom_creator="1"
+            tools:layout_constraintLeft_creator="1"
+            tools:layout_constraintRight_creator="1"
+            tools:layout_constraintTop_creator="1" />
 
         <TextView
             android:id="@+id/dry_tv"
-            android:layout_width="0dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
             android:text="Dry"
-            app:layout_constraintLeft_toLeftOf="@+id/wet_sb"
-            app:layout_constraintTop_toBottomOf="@+id/wet_sb"
-            android:layout_margin="0dp"
-            />
+            app:layout_constraintBottom_toBottomOf="@+id/very_wet_tv"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/very_wet_tv"
+            tools:layout_constraintBottom_creator="1"
+            tools:layout_constraintLeft_creator="1"
+            tools:layout_constraintTop_creator="1" />
 
         <TextView
             android:id="@+id/very_wet_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="8dp"
+            android:text="Very wet"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/wet_sb"
+            tools:layout_constraintRight_creator="1"
+            tools:layout_constraintTop_creator="1" />
+
+        <!-- Soiled nappy -->
+
+        <TextView
+            android:id="@+id/soiled_nappy_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/soiled_nappy"
+            android:textAppearance="@style/TextAppearance.AppCompat"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/dry_tv" />
+
+        <SeekBar
+            android:id="@+id/soiled_sb"
+            style="@style/Widget.AppCompat.SeekBar.Discrete"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Very wet"
-            app:layout_constraintTop_toBottomOf="@+id/wet_sb"
-            app:layout_constraintRight_toRightOf="@+id/wet_sb"
-            android:layout_margin="0dp"
-            />
+            android:layout_marginEnd="8dp"
+
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="24dp"
+            android:clickable="false"
+            android:max="4"
+            android:progress="1"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/soiled_nappy_tv"
+            tools:layout_constraintBottom_creator="1"
+            tools:layout_constraintLeft_creator="1"
+            tools:layout_constraintRight_creator="1"
+            tools:layout_constraintTop_creator="1" />
+
+        <TextView
+            android:id="@+id/soiled_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
+            android:text="Light"
+            app:layout_constraintBottom_toBottomOf="@+id/very_soiled_tv"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/very_soiled_tv"
+            tools:layout_constraintBottom_creator="1"
+            tools:layout_constraintLeft_creator="1"
+            tools:layout_constraintTop_creator="1" />
+
+        <TextView
+            android:id="@+id/very_soiled_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="8dp"
+            android:text="Heavy"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/soiled_sb"
+            tools:layout_constraintRight_creator="1"
+            tools:layout_constraintTop_creator="1" />
+
 
     </android.support.constraint.ConstraintLayout>
-<!--
-
-
-    </android.support.constraint.ConstraintLayout> -->
-<!--
-        android:layout_marginTop="8dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-
-
--->
-    <!--<TextView-->
-        <!--android:id="@+id/soiled_nappy_tv"-->
-        <!--android:layout_width="wrap_content"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_marginBottom="7dp"-->
-        <!--android:layout_marginLeft="16dp"-->
-        <!--android:text="@string/soiled_nappy"-->
-        <!--android:textAppearance="@style/TextAppearance.AppCompat"-->
-        <!--app:layout_constraintLeft_toLeftOf="parent"-->
-        <!--android:layout_marginStart="16dp"-->
-        <!--android:layout_marginTop="8dp"-->
-        <!--app:layout_constraintTop_toBottomOf="@+id/soiled_lightly_tv" />-->
-
-    <!--
-    <TextView
-        android:id="@+id/soiled_lightly_tv"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Lightly"
-        app:layout_constraintLeft_toLeftOf="@+id/seekBar"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/seekBar" />
-
-    <TextView
-        android:id="@+id/soiled_heavily_tv"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:text="Heavily"
-        app:layout_constraintRight_toRightOf="@+id/seekBar"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/seekBar" /> -->
-
-    <!-- Soiled nappy -->
-
-<!--    <SeekBar
-        android:id="@+id/seekBar2"
-        style="@style/Widget.AppCompat.SeekBar.Discrete"
-        android:layout_width="0dp"
-        android:layout_height="18dp"
-        android:clickable="false"
-        android:max="4"
-        android:progress="1"
-        android:layout_marginRight="16dp"
-        app:layout_constraintRight_toRightOf="parent"
-        android:layout_marginLeft="16dp"
-        app:layout_constraintLeft_toLeftOf="parent"
-        android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="soiled_nappy_tv"
-        app:layout_constraintHorizontal_bias="0.0"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        tools:layout_editor_absoluteY="177dp" /> -->
-
-</android.support.constraint.ConstraintLayout>
+</LinearLayout>
