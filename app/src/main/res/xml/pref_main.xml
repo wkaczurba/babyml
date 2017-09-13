@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="show_time_passed"
+        android:summaryOn="Shown"
+        android:summary="Hidden"
+        android:title="Show time passed"/>
+
+    <CheckBoxPreference
+        android:defaultValue="true"
+        android:key="show_daily_summary"
+        android:summaryOn="Shown"
+        android:summary="Hidden"
+        android:title="Show daily summary"/>
+
+
+    <!--<ListPreference-->
+        <!--android:defaultValue=""-->
+</PreferenceScreen>

@@ -5,11 +5,19 @@ import android.icu.text.DateFormat;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.app.Fragment;
+//import android.app.Fragment;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import org.joda.time.LocalTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.DateTimeFormatterBuilder;
+
+import java.text.SimpleDateFormat;
 
 
 /**
@@ -20,6 +28,8 @@ public class TimeElapsedFragment extends Fragment {
     // TODO: TextViews, States -> running...
     long timeZero; //System.currentTimeMillis() - 180; // FIXME: Provide proper real time.
     TextView timeElapsedTv, timeElapsedLabelTv;
+
+    public static final String TAG = TimeElapsedFragment.class.getSimpleName();
 
     public TimeElapsedFragment() {
         // Required empty public constructor
@@ -38,8 +48,11 @@ public class TimeElapsedFragment extends Fragment {
 
         long now = System.currentTimeMillis();
         if (timeZero >= now - 24*3600*1000) {
-//            cs = android.text.format.DateFormat.format("HH:mm:ss", now - timeZero);
-            cs = android.text.format.DateFormat.format("HH:mm", now - timeZero);
+            LocalTime hhmm = LocalTime.fromMillisOfDay(now-timeZero);
+
+            DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");
+            cs = dtf.print(hhmm);
+            //cs = String.format("%02d:%02d", hhmm.getHourOfDay(), hhmm.getMinuteOfHour());
         }
         timeElapsedTv.setText(cs);
     }

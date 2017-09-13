@@ -51,7 +51,7 @@ public class AddEntryActivity extends AppCompatActivity {
     public void displayRightFragment(Fragment fragment) {
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.activity_frag, fragment);
-        ft.addToBackStack(null); // is this needed?
+        //ft.addToBackStack(null); // is this needed?
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         ft.commit();
 
