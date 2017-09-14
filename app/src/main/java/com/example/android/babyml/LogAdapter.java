@@ -10,7 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.android.babyml.data.FeedingContract;
+import com.example.android.babyml.data.FeedContract;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,9 +36,9 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private long dbId;
 
         public static FeedingItem fromCursor(Cursor cursor) {
-            long dbId = cursor.getLong(cursor.getColumnIndex(FeedingContract.FeedingEntry._ID));
-            int mFeedAmount = cursor.getInt(cursor.getColumnIndex(FeedingContract.FeedingEntry.COLUMN_FEED_AMOUNT));
-            long mFeedTimestamp = cursor.getLong(cursor.getColumnIndex(FeedingContract.FeedingEntry.COLUMN_FEED_TIMESTAMP));
+            long dbId = cursor.getLong(cursor.getColumnIndex(FeedContract.FeedingEntry._ID));
+            int mFeedAmount = cursor.getInt(cursor.getColumnIndex(FeedContract.FeedingEntry.COLUMN_FEED_AMOUNT));
+            long mFeedTimestamp = cursor.getLong(cursor.getColumnIndex(FeedContract.FeedingEntry.COLUMN_FEED_TS));
             CharSequence mCsTime = DateFormat.format("E yyyy-MM-dd HH:mm", mFeedTimestamp); // TODO: Consider adding option to select 12 vs 24 hours.
 
             CharSequence time = DateFormat.format("HH:mm", mFeedTimestamp);

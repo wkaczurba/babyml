@@ -10,14 +10,14 @@ import java.util.List;
 /**
  * Created by WKaczurb on 8/6/2017.
  */
-public class FeedingUtils {
+public class EntriesUtils {
 
     public static void insertFeeding(SQLiteDatabase db, int amount, long timestampMilis) {
         // TODO: Move this stuff into DbUtils class
         ContentValues values = new ContentValues();
-        values.put(FeedingContract.FeedingEntry.COLUMN_FEED_AMOUNT, amount); //10);
-        values.put(FeedingContract.FeedingEntry.COLUMN_FEED_TIMESTAMP, timestampMilis); //System.currentTimeMillis());
-        db.insert(FeedingContract.FeedingEntry.TABLE_NAME, null, values);
+        values.put(FeedContract.FeedingEntry.COLUMN_FEED_AMOUNT, amount); //10);
+        values.put(FeedContract.FeedingEntry.COLUMN_FEED_TS, timestampMilis); //System.currentTimeMillis());
+        db.insert(FeedContract.FeedingEntry.TABLE_NAME, null, values);
     }
 
     /**
@@ -26,7 +26,7 @@ public class FeedingUtils {
      * @param id
      */
     public static void deleteFeeding(SQLiteDatabase db, long id) {
-        db.delete(FeedingContract.FeedingEntry.TABLE_NAME, "_ID=" + id, null ); // equivalent to "_ID =" + id
+        db.delete(FeedContract.FeedingEntry.TABLE_NAME, "_ID=" + id, null ); // equivalent to "_ID =" + id
     }
 
     public static List<String> cursorAsStringList(Cursor cursor) {
@@ -37,8 +37,8 @@ public class FeedingUtils {
         }
 
         do {
-            int feedAmount = cursor.getInt(cursor.getColumnIndex(FeedingContract.FeedingEntry.COLUMN_FEED_AMOUNT));
-            long feedTimestamp = cursor.getLong(cursor.getColumnIndex(FeedingContract.FeedingEntry.COLUMN_FEED_TIMESTAMP));
+            int feedAmount = cursor.getInt(cursor.getColumnIndex(FeedContract.FeedingEntry.COLUMN_FEED_AMOUNT));
+            long feedTimestamp = cursor.getLong(cursor.getColumnIndex(FeedContract.FeedingEntry.COLUMN_FEED_TS));
 
 
             android.text.format.DateFormat df = new android.text.format.DateFormat();
@@ -64,24 +64,24 @@ public class FeedingUtils {
 
     public static Cursor getLatestFeeding(SQLiteDatabase db) {
         return db.query(
-                FeedingContract.FeedingEntry.TABLE_NAME,
+                FeedContract.FeedingEntry.TABLE_NAME,
                 null,
                 null,
                 null,
                 null,
                 null,
-                FeedingContract.FeedingEntry.COLUMN_FEED_TIMESTAMP + " DESC", "1");
+                FeedContract.FeedingEntry.COLUMN_FEED_TS + " DESC", "1");
     }
 
     public static Cursor getAllFeedingsCursor(SQLiteDatabase db) {
         return db.query(
-                FeedingContract.FeedingEntry.TABLE_NAME,
+                FeedContract.FeedingEntry.TABLE_NAME,
                 null,
                 null,
                 null,
                 null,
                 null,
-                FeedingContract.FeedingEntry.COLUMN_FEED_TIMESTAMP + " DESC");
+                FeedContract.FeedingEntry.COLUMN_FEED_TS + " DESC");
     }
 
     /**
@@ -90,7 +90,7 @@ public class FeedingUtils {
      * @return number of rows affected.
      */
     public static int deleteAllFeedings(SQLiteDatabase db) {
-        return db.delete(FeedingContract.FeedingEntry.TABLE_NAME, null, null);
+        return db.delete(FeedContract.FeedingEntry.TABLE_NAME, null, null);
     }
 }
 

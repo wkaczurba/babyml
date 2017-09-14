@@ -5,12 +5,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.SharedPreferencesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -28,8 +25,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 import org.joda.time.*;
 
-import com.example.android.babyml.data.FeedingDbHelper;
-import com.example.android.babyml.data.FeedingUtils;
+import com.example.android.babyml.data.EntriesDbHelper;
+import com.example.android.babyml.data.EntriesUtils;
 import com.example.android.babyml.utils.DateUtils;
 
 // TODO: Review these ones for sliding tabs:
@@ -193,7 +190,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
 //        // Getting database instance:
-        FeedingDbHelper dbHelper = new FeedingDbHelper(this);
+        EntriesDbHelper dbHelper = new EntriesDbHelper(this);
         mDb = dbHelper.getWritableDatabase();
 
         // RecyclerView:
@@ -243,7 +240,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         } else {
                             LogAdapter.FeedingItem fe = (LogAdapter.FeedingItem) logViewHolder.getItem();
                             long dbId = fe.getDbId();
-                            FeedingUtils.deleteFeeding(mDb, dbId);
+                            EntriesUtils.deleteFeeding(mDb, dbId);
                             updateLogRecyclerView();
                             updateTimeElapsed();
                         }
@@ -367,7 +364,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (timeElapsedFrag == null)
             return;
 
-        Cursor cursor = FeedingUtils.getLatestFeeding(mDb);
+        Cursor cursor = EntriesUtils.getLatestFeeding(mDb);
         switch (cursor.getCount()) {
             case 1: {
                 cursor.moveToFirst();
@@ -384,7 +381,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void updateLogRecyclerView() {
-        Cursor cursor = FeedingUtils.getAllFeedingsCursor(mDb);
+        Cursor cursor = EntriesUtils.getAllFeedingsCursor(mDb);
         mAdapter.swapCursor(cursor);
 
         // Update last time:

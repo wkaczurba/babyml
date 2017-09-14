@@ -18,8 +18,8 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.android.babyml.data.FeedingDbHelper;
-import com.example.android.babyml.data.FeedingUtils;
+import com.example.android.babyml.data.EntriesDbHelper;
+import com.example.android.babyml.data.EntriesUtils;
 
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
@@ -75,7 +75,7 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
 
         View view = getView();
         // Getting database instance:
-        FeedingDbHelper dbHelper = new FeedingDbHelper(context); // FIXME.
+        EntriesDbHelper dbHelper = new EntriesDbHelper(context); // FIXME.
         mDb = dbHelper.getWritableDatabase();
 
         // Added from MainActivity
@@ -199,7 +199,7 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
             }
             milkTimeTextWatcher.setDefaultTimeIfEntryInvalid();
             long timeMillis = milkTimeTextWatcher.getTimeMilis();
-            FeedingUtils.insertFeeding(mDb, milkAmountValue, timeMillis);
+            EntriesUtils.insertFeeding(mDb, milkAmountValue, timeMillis);
             Toast.makeText(context, "Item inserted ok.", Toast.LENGTH_LONG).show();
 //          updateLogRecyclerView();
 
@@ -209,7 +209,7 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
             getActivity().finish(); // FIXME: This should go to the upper.
         } else if (v.equals(deleteAllButton)) {
             // TODO: Add question first.
-            FeedingUtils.deleteAllFeedings(mDb);
+            EntriesUtils.deleteAllFeedings(mDb);
         } else {
             Log.d(TAG, "Unknown item clicked: " + v);
         }
