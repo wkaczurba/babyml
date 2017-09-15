@@ -27,6 +27,7 @@ import org.joda.time.*;
 
 import com.example.android.babyml.data.EntriesDbHelper;
 import com.example.android.babyml.data.EntriesUtils;
+import com.example.android.babyml.data.Feed;
 import com.example.android.babyml.utils.DateUtils;
 
 // TODO: Review these ones for sliding tabs:
@@ -233,17 +234,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         //long lid = viewHolder.getItemId();
                         long lid = logViewHolder.getAdapterPosition();
 
-                        if (!logViewHolder.isFeedingItem()) {
+/*                        if (!logViewHolder.isFeedingItem()) {
                             throw new IllegalArgumentException("Unexpected. Holer says it is of ViewType = 0 but it does not return isFeedingItem()==true.");
 //                            updateLogRecyclerView();
 //                            return;
-                        } else {
-                            LogAdapter.FeedingItem fe = (LogAdapter.FeedingItem) logViewHolder.getItem();
-                            long dbId = fe.getDbId();
-                            EntriesUtils.deleteFeeding(mDb, dbId);
+                        } else {*/
+                            Feed feed = logViewHolder.getItem();
+                            //long dbId = fe.getDbId();
+                            EntriesUtils.deleteFeeding(mDb, feed.getId());
                             updateLogRecyclerView();
                             updateTimeElapsed();
-                        }
+//                        }
                     } else if (itemViewType == 1){ // DATE.
                         // DO NOTHING - CANT REMOVE A DATE GAP.
                         updateLogRecyclerView();
@@ -368,8 +369,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (cursor.getCount()) {
             case 1: {
                 cursor.moveToFirst();
-                LogAdapter.FeedingItem f = LogAdapter.FeedingItem.fromCursor(cursor);
-                timeElapsedFrag.setTimeZero(f.getmFeedTimestamp());
+                //LogAdapter.FeedingItem f = LogAdapter.FeedingItem.fromCursor(cursor);
+                Feed f = LogAdapter.cursorToFeed(cursor);
+
+                //timeElapsedFrag.setTimeZero(f.getmFeedTimestamp());
+                timeElapsedFrag.setTimeZero(f.getTimestamp());
                 break;
             }
             case 0: {
@@ -381,7 +385,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void updateLogRecyclerView() {
-        Cursor cursor = EntriesUtils.getAllFeedingsCursor(mDb);
+        //Cursor cursor = EntriesUtils.getAllFeedingsCursor(mDb);
+// TODO: Enable the following
+        Cursor cursor = EntriesUtils.getAllEntriesCursor(mDb);
         mAdapter.swapCursor(cursor);
 
         // Update last time:

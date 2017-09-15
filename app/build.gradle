@@ -31,5 +31,6 @@ dependencies {
     compile 'com.android.support:preference-v7:25.3.1'
     compile 'joda-time:joda-time:2.3'
     compile 'com.android.support:support-v4:25.3.1'
+    compile 'org.projectlombok:lombok:1.16.18'
     testCompile 'junit:junit:4.12'
 }

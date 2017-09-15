@@ -10,11 +10,27 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.android.babyml.data.EntriesDbHelper;
+import com.example.android.babyml.data.Feed;
 import com.example.android.babyml.data.FeedContract;
+import com.example.android.babyml.data.Nappy;
+import com.example.android.babyml.data.Note;
 
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.SimpleTimeZone;
+import java.util.TimeZone;
 
+// FIXME: On changing TimeZones items in text moxes are not updated.
 
 // TODO: Add different viewHolders as per: https://stackoverflow.com/questions/26245139/how-to-create-recyclerview-with-multiple-view-type
 // TODO: C:\git\android\ud851-Exercises\Lesson07-Waitlist\T07.04-Exercise-UpdateTheAdapter
@@ -31,71 +47,15 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     static abstract class Item {};
 
-    // TODO: Move FeedingItem to Utils or somewhere; it does not have to be related to LogAdapter.
-    static class FeedingItem extends Item {
-        private long dbId;
+    /**
+     * Carries:
+     *   Feed for Feeds
+     *   DateTime objects for separators
+     *
+     */
+    private List<Object> items;
 
-        public static FeedingItem fromCursor(Cursor cursor) {
-            long dbId = cursor.getLong(cursor.getColumnIndex(FeedContract.FeedingEntry._ID));
-            int mFeedAmount = cursor.getInt(cursor.getColumnIndex(FeedContract.FeedingEntry.COLUMN_FEED_AMOUNT));
-            long mFeedTimestamp = cursor.getLong(cursor.getColumnIndex(FeedContract.FeedingEntry.COLUMN_FEED_TS));
-            CharSequence mCsTime = DateFormat.format("E yyyy-MM-dd HH:mm", mFeedTimestamp); // TODO: Consider adding option to select 12 vs 24 hours.
-
-            CharSequence time = DateFormat.format("HH:mm", mFeedTimestamp);
-            String mStringInfo = String.format(time + " milk = %d", mFeedAmount);
-
-            return new FeedingItem(dbId, mFeedAmount, mFeedTimestamp, mCsTime, mStringInfo);
-        }
-
-        public long getDbId() {
-            return dbId;
-        }
-
-        public int getmFeedAmount() {
-            return mFeedAmount;
-        }
-
-        public long getmFeedTimestamp() {
-            return mFeedTimestamp;
-        }
-
-        public CharSequence getmCsTime() {
-            return mCsTime;
-        }
-
-        public String getmStringInfo() {
-            return mStringInfo;
-        }
-
-        private int mFeedAmount;
-        private long mFeedTimestamp;
-        private CharSequence mCsTime;
-        private String mStringInfo;
-
-        public FeedingItem(long dbId, int mFeedAmount, long mFeedTimestamp, CharSequence mCsTime, String mStringInfo) {
-            this.dbId = dbId;
-            this.mFeedAmount = mFeedAmount;
-            this.mFeedTimestamp = mFeedTimestamp;
-            this.mCsTime = mCsTime;
-            this.mStringInfo = mStringInfo;
-        }
-    }
-
-    static class DateItem extends Item {
-        public DateItem(String sDate) {
-            this.sDate = sDate;
-        }
-
-        public String getsDate() {
-            return sDate;
-        }
-
-        private String sDate;
-    }
-
-    private List<Item> items;
     public final ListItemClickListener mOnClickListener;
-
     public LogAdapter(ListItemClickListener onClickListener) {
         mOnClickListener = onClickListener;
     }
@@ -106,17 +66,11 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public class FeedingViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        private Item item;
+        private Feed feed;
         public TextView logTextView;
 
-        public boolean isFeedingItem() {
-            if (item instanceof FeedingItem)
-                return true;
-            return false;
-        }
-
-        public Item getItem() {
-            return item;
+        public Feed getItem() {
+            return feed;
         }
 
         public FeedingViewHolder(View itemView) {
@@ -126,15 +80,33 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         private void bind(int position) {
+            Object o;
             if (position < 0 || position >= items.size())
                 return;
 
-            item = items.get(position);
+            o = items.get(position);
+            //Log.d(TAG, "Binding feed: " + position + " timezone: " + DateTimeZone.getDefault() + "TZ: " + TimeZone.getDefault());
+            //Log.d(TAG, "Binding feed: " + position + " timezone: " + DateTimeZone.getDefault() + "TZ: " + TimeZone.getDefault());
+            Log.d("TimeZone", "DateTimeZone.getDefault()=" + DateTimeZone.getDefault() + "; TimeZone.getDefault()" + TimeZone.getDefault());
 
-            if (item instanceof FeedingItem) {
-                logTextView.setText(((FeedingItem) item).mStringInfo);
-            } else if (item instanceof DateItem) {
-                throw new IllegalArgumentException("This statement should never be reached");
+            if (o instanceof Feed) {
+                feed = (Feed) o;
+
+                // Format the stuff: (TODO: Move to formatting or somewhere)
+                DateTimeZone currentTz = DateTimeZone.forTimeZone(TimeZone.getDefault());
+                DateTime dt = new DateTime(feed.getTimestamp(), currentTz);
+                DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");
+                CharSequence time = dtf.print(dt);
+
+//                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+//                sdf.format(feed, );
+//
+//
+                String s = String.format(time + " milk = %d", feed.getAmount());
+
+                logTextView.setText(s);
+            } else { //if (o instanceof DateItem) { // DateItem
+                throw new IllegalArgumentException("Invalid object; expected FeedingItem; got: " + o.getClass());
             }
         }
 
@@ -150,12 +122,6 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private Item item;
         public TextView dateTextView;
 
-        public boolean isFeedingItem() {
-            if (item instanceof FeedingItem)
-                return true;
-            return false;
-        }
-
         public Item getItem() {
             return item;
         }
@@ -167,12 +133,22 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         private void bind(int position) {
+
             if (position < 0 || position >= items.size())
                 return;
 
             Log.d(TAG, "Binding item (date): " + position);
-            item = items.get(position);
-            dateTextView.setText(((DateItem) item).sDate);
+            Object o = items.get(position);
+            if (o instanceof DateTime) {
+                DateTime dt = ((DateTime) o);
+
+                DateTimeZone currentTz = DateTimeZone.forTimeZone(TimeZone.getDefault());
+                dt = dt.withZone(currentTz);
+                DateTimeFormatter dtf = DateTimeFormat.forPattern("yyyy-MM-dd");
+                dateTextView.setText(dtf.print(dt));
+            } else {
+                throw new IllegalArgumentException("Invalid object; expected DateTime; got: " + o.getClass());
+            }
         }
 
         @Override
@@ -182,25 +158,97 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
+    // Helper:
+    public static Feed cursorToFeed(Cursor cursor) {
+        long id = cursor.getLong(cursor.getColumnIndex(FeedContract.FeedingEntry._ID));
+        int amt = cursor.getInt(cursor.getColumnIndex(FeedContract.FeedingEntry.COLUMN_FEED_AMOUNT));
+        long ts = cursor.getLong(cursor.getColumnIndex(FeedContract.FeedingEntry.COLUMN_FEED_TS));
+
+        return new Feed(id, ts, amt);
+    }
+
+    public static EntriesDbHelper.EntryType getEntryType(Cursor cursor) {
+        EntriesDbHelper.EntryType e;
+        String tb = cursor.getString(cursor.getColumnIndex(EntriesDbHelper.COLUMN_TB));
+
+
+        e = EntriesDbHelper.EntryType.getEntryType(tb);
+
+        return e;
+    }
+
+    public void oldImplementation(Cursor cursor) {
+        LocalDate oldDate = null;
+
+        Feed feed = cursorToFeed(cursor);
+
+        // Process date + add date if needed
+        //dateString = DateFormat.format("yyyy-MM-dd", item.getmFeedTimestamp()); // FIXME: use LocalDate for date.
+
+        DateTime dt = new DateTime(feed.getTimestamp(), DateTimeZone.getDefault());
+        LocalDate date = dt.toLocalDate();
+
+        if (!date.equals(oldDate)) {
+            // Create new entry with date before inserting feeding entry itself.
+            //DateItem d = new DateItem(dateString.toString()); // FIXME: Change TODAY, YESTERDAY, then dates...
+            items.add(dt);
+            oldDate = date;
+        }
+        items.add(feed);
+    }
+
     public void swapCursor(Cursor cursor) {
-        CharSequence dateString, oldDateString = null;
+        LocalDate oldDate = null;
 
         items = new ArrayList<>();
 
         // Updating all items;
         while (cursor.moveToNext()) {
-            FeedingItem item = FeedingItem.fromCursor(cursor);
 
-            // Process date + add date if needed
-            dateString = DateFormat.format("yyyy-MM-dd", item.mFeedTimestamp); // FIXME: use LocalDate for date.
-            if (!dateString.equals(oldDateString)) {
+            EntriesDbHelper.EntryType e = getEntryType(cursor);
 
-                // Create new entry with date before inserting feeding entry itself.
-                DateItem d = new DateItem(dateString.toString()); // FIXME: Change TODAY, YESTERDAY, then dates...
-                items.add(d);
-                oldDateString = dateString;
+            long id = cursor.getLong(cursor.getColumnIndex(EntriesDbHelper.COLUMN_ID));
+            long timestamp = cursor.getLong(cursor.getColumnIndex(EntriesDbHelper.COLUMN_TS));
+
+
+            // TODO: Consider changing to switch.case...:
+            Object o = null;
+            if (e.equals(EntriesDbHelper.EntryType.Feed)) {
+                int feedAmount = cursor.getInt(cursor.getColumnIndex(EntriesDbHelper.COLUMN_FEED_AMOUNT));
+                Feed f = new Feed(id, timestamp, feedAmount);
+                Log.d(TAG, "GOT: " + f);
+                o = f;
+            } else if (e.equals(EntriesDbHelper.EntryType.Nappy)) {
+                int nappyDirty = cursor.getInt(cursor.getColumnIndex(EntriesDbHelper.COLUMN_NAPPY_DIRTY));
+                Nappy n = new Nappy(id, timestamp, nappyDirty);
+                Log.d(TAG, "GOT NAPPY -> TODO");
+                o = n;
+            } else if (e.equals(EntriesDbHelper.EntryType.Note)) {
+                String noteValue = cursor.getString(cursor.getColumnIndex(EntriesDbHelper.COLUMN_NOTE_VALUE));
+                Note n = new Note(id, timestamp, noteValue);
+                Log.d(TAG, "GOT NOTE -> TODO");
+                o = n;
+            } else {
+                throw new IllegalArgumentException("Invalid enum: " + e.name());
             }
-            items.add(item);
+
+            DateTime dt = new DateTime(timestamp, DateTimeZone.forTimeZone(TimeZone.getDefault()));
+            LocalDate date = dt.toLocalDate();
+
+            if (!date.equals(oldDate)) {
+                // Create new entry with date before inserting feeding entry itself.
+                //DateItem d = new DateItem(dateString.toString()); // FIXME: Change TODAY, YESTERDAY, then dates...
+                items.add(dt);
+                oldDate = date;
+            }
+            items.add(o);
+
+
+            //oldImplementation(cursor);
+
+
+
+
         }
         notifyDataSetChanged();
     }
@@ -238,10 +286,10 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        if (items.get(position) instanceof FeedingItem) {
-            return 0;
-        } else if (items.get(position) instanceof DateItem) {
-            return 1;
+        if (items.get(position) instanceof Feed) {
+            return FEEDING_VIEW_HOLDER;
+        } else if (items.get(position) instanceof DateTime) {
+            return DATE_VIEW_HOLDER;
         } else {
             throw new IllegalArgumentException("Item at position(" + position +") is neither FeedingItem or DateItem");
         }

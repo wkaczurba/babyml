@@ -84,6 +84,17 @@ public class EntriesUtils {
                 FeedContract.FeedingEntry.COLUMN_FEED_TS + " DESC");
     }
 
+    public static Cursor getAllEntriesCursor(SQLiteDatabase db) {
+        return db.query(
+                EntriesDbHelper.ENTRIES_ALL_VIEW,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null); // The View is already sorted.
+    }
+
     /**
      * Deletes all entries in the Feedings table.
      * @param db - writeable database

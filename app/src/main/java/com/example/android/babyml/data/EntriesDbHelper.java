@@ -20,9 +20,43 @@ public class EntriesDbHelper extends SQLiteOpenHelper {
     static final String DB_NAME = "entries.db"; //"feeds.db"; // TODO: Rename it.
     static final int DB_VERSION = 1; // TODO: Rename it.
 
-    public static final String ENTRIES_VIEW = "ENTRIES_V1";
+    // TODO: Move it to a separate contract.
+    public static final String COLUMN_TB = "TB";
+    public static final String COLUMN_TS = "TS";
+    public static final String COLUMN_ID = "ID";
+    public static final String COLUMN_FEED_AMOUNT = "FEED_AMOUNT";
+    public static final String COLUMN_NAPPY_DIRTY = "NAPPY_DIRTY";
+    public static final String COLUMN_NOTE_VALUE = "NOTE_VALUE";
+    public static final String ENTRIES_ALL_VIEW = "ENTRIES_ALL_V1";
 
-    //public EntriesDbHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
+
+    public static enum EntryType {
+        Feed(FeedingEntry.TABLE_NAME),
+        Nappy(NappyEntry.TABLE_NAME),
+        Note(NoteEntry.TABLE_NAME);
+
+        private String dbTableName;
+        private EntryType(String dbTableName) {
+            dbTableName = dbTableName;
+        }
+
+        public String getTableName() {
+            return dbTableName;
+        }
+
+        public static EntryType getEntryType(String tb) {
+            switch (tb) {
+                case "FEED_TB":
+                    return EntriesDbHelper.EntryType.Feed;
+                case "NOTE_TB":
+                    return EntriesDbHelper.EntryType.Note;
+                case "NAPPY_TB":
+                    return EntriesDbHelper.EntryType.Nappy;
+                default: throw new IllegalArgumentException("Unknown value: " + tb);
+            }
+        }
+    }
+
     public EntriesDbHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
     }
@@ -75,30 +109,43 @@ public class EntriesDbHelper extends SQLiteOpenHelper {
         db.execSQL(SQL_CREATE_NOTE_TS_INDEX);
     }
 
-    private void createEntriesView(SQLiteDatabase db) {
-        String SQL_CREATE_ENTRIES_VIEW =
-                "CREATE VIEW " + ENTRIES_VIEW + " AS\n" +
+    private void createEntriesAllView(SQLiteDatabase db) {
+        String SQL_CREATE_ALL_ENTRIES_VIEW  =
+                "CREATE VIEW " + ENTRIES_ALL_VIEW + "  AS\n" +
                         "  SELECT * FROM\n" +
-                        "    (SELECT " + FeedingEntry.COLUMN_FEED_TS + " AS TS, " + FeedingEntry._ID + " AS ID, '" + FeedingEntry.TABLE_NAME + "' AS TB FROM " + FeedingEntry.TABLE_NAME + "\n" +
+                        "    (SELECT " + FeedingEntry.COLUMN_FEED_TS + " AS " + COLUMN_TS + ",\n" +
+                        "            " + FeedingEntry._ID + " AS " + COLUMN_ID + ",\n" +
+                        "            '"+ FeedingEntry.TABLE_NAME + "' AS "+ COLUMN_TB + ",\n" +
+                        "            " + FeedingEntry.COLUMN_FEED_AMOUNT +" AS " + COLUMN_FEED_AMOUNT+ ",\n" +
+                        "            NULL AS " + COLUMN_NAPPY_DIRTY + ",\n" +
+                        "            NULL AS " + COLUMN_NOTE_VALUE + "\n" +
+                        "         FROM "+ FeedingEntry.TABLE_NAME +"\n" +
                         "    UNION\n" +
-                        "    SELECT " + NappyEntry.COLUMN_NAPPY_TS + " AS TS, " + NappyEntry._ID + " AS ID, '" + NappyEntry.TABLE_NAME + "' AS TB FROM " + NappyEntry.TABLE_NAME + "\n" +
+                        "    SELECT " + NappyEntry.COLUMN_NAPPY_TS +" AS " + COLUMN_TS + ",\n" +
+                        "           " + NappyEntry._ID + " AS " + COLUMN_ID + ",\n" +
+                        "           '"+ NappyEntry.TABLE_NAME + "' AS "+ COLUMN_TB + ",\n" +
+                        "           NULL AS " + COLUMN_FEED_AMOUNT + ",\n" +
+                        "           " + NappyEntry.COLUMN_NAPPY_DIRTY +" AS " + COLUMN_NAPPY_DIRTY + ",\n" +
+                        "           NULL AS " + COLUMN_NOTE_VALUE + "\n" +
+                        "         FROM "+ NappyEntry.TABLE_NAME +"\n" +
                         "    UNION\n" +
-                        "    SELECT " + NoteEntry.COLUMN_NOTE_TS + " AS TS, " + NoteEntry._ID + " AS ID, '" + NoteEntry.TABLE_NAME + "' AS TB FROM " + NoteEntry.TABLE_NAME + ")\n" +
-                        "  ORDER BY TS DESC;\n";
-        db.execSQL(SQL_CREATE_ENTRIES_VIEW);
+                        "    SELECT "+ NoteEntry.COLUMN_NOTE_TS +" AS " + COLUMN_TS +",\n" +
+                        "           "+ NoteEntry._ID+" AS " + COLUMN_ID + ",\n" +
+                        "           '"+ NoteEntry.TABLE_NAME+ "' AS "+ COLUMN_TB + ",\n" +
+                        "           NULL AS " + COLUMN_FEED_AMOUNT+ ",\n" +
+                        "           NULL AS " + COLUMN_NAPPY_DIRTY + ",\n" +
+                        "           "+ NoteEntry.COLUMN_NOTE_VALUE +" AS NOTE_VALUE\n" +
+                        "         FROM "+ NoteEntry.TABLE_NAME +")\n" +
+                        "  ORDER BY TS DESC;";
+        db.execSQL(SQL_CREATE_ALL_ENTRIES_VIEW);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-//        String SQL_CREATE_FEEDING_TABLE = "CREATE TABLE " + FeedContract.FeedingEntry.TABLE_NAME + " (" +
-//                FeedContract.FeedingEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
-//                FeedContract.FeedingEntry.COLUMN_FEED_AMOUNT + " NUMBER(3, 0)," +
-//                FeedContract.FeedingEntry.COLUMN_FEED_TS + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP" +
-//                ")";
         createFeedTable(db);
         createNappyTable(db);
         createNoteTable(db);
-        createEntriesView(db);
+        createEntriesAllView(db);
 
         Log.d(TAG, "DB Created ok.");
     }

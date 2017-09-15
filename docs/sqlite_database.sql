@@ -50,3 +50,29 @@ CREATE VIEW ENTRIES_V1 AS
     SELECT NOTE_TS AS TS, _ID AS ID, 'NOTE_TB' AS TB FROM NOTE_TB)
   ORDER BY TS DESC;
 
+CREATE VIEW ENTRIES_ALL_V1 AS
+  SELECT * FROM
+    (SELECT FEED_TS AS TS,
+            _ID AS ID,
+            'FEED_TB' AS TB,
+            FEED_AMOUNT AS FEED_AMOUNT,
+            NULL AS NAPPY_DIRTY,
+            NULL AS NOTE_VALUE
+         FROM FEED_TB
+    UNION
+    SELECT NAPPY_TS AS TS,
+           _ID AS ID,
+           'NAPPY_TB' AS TB,
+           NULL AS FEED_AMOUNT,
+           NAPPY_DIRTY AS NAPPY_DIRTY,
+           NULL AS NOTE_VALUE
+         FROM NAPPY_TB
+    UNION
+    SELECT NOTE_TS AS TS,
+           _ID AS ID,
+           'NOTE_TB' AS TB,
+           NULL AS FEED_AMOUNT,
+           NULL AS NAPPY_DIRTY,
+           NOTE_VALUE AS NOTE_VALUE
+         FROM NOTE_TB)
+  ORDER BY TS DESC;
