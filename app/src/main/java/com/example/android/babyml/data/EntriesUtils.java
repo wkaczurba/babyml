@@ -12,12 +12,12 @@ import java.util.List;
  */
 public class EntriesUtils {
 
-    public static void insertFeeding(SQLiteDatabase db, int amount, long timestampMilis) {
+    public static long insertFeeding(SQLiteDatabase db, int amount, long timestampMilis) {
         // TODO: Move this stuff into DbUtils class
         ContentValues values = new ContentValues();
         values.put(FeedContract.FeedingEntry.COLUMN_FEED_AMOUNT, amount); //10);
         values.put(FeedContract.FeedingEntry.COLUMN_FEED_TS, timestampMilis); //System.currentTimeMillis());
-        db.insert(FeedContract.FeedingEntry.TABLE_NAME, null, values);
+        return db.insert(FeedContract.FeedingEntry.TABLE_NAME, null, values);
     }
 
     /**
@@ -103,5 +103,19 @@ public class EntriesUtils {
     public static int deleteAllFeedings(SQLiteDatabase db) {
         return db.delete(FeedContract.FeedingEntry.TABLE_NAME, null, null);
     }
+
+    public static long insertNappy(SQLiteDatabase db, int dirty, long timeStampMilis) {
+        ContentValues values = new ContentValues();
+        values.put(NappyContract.NappyEntry.COLUMN_NAPPY_TS, timeStampMilis);
+        values.put(NappyContract.NappyEntry.COLUMN_NAPPY_DIRTY, dirty);
+        return db.insert(NappyContract.NappyEntry.TABLE_NAME, null, values);
+    }
+
+    public static void deleteNappy(SQLiteDatabase db, long id) {
+        db.delete(NappyContract.NappyEntry.TABLE_NAME, "_ID=" + id, null);
+    }
+
 }
+
+
 

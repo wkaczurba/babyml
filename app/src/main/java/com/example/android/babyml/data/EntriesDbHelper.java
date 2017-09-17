@@ -14,6 +14,8 @@ import com.example.android.babyml.data.NoteContract.NoteEntry;
  * Refer to docs/sqlite_database.sql to understand how things are arranged.
  */
 
+
+// TODO: As a singleton I guess...
 public class EntriesDbHelper extends SQLiteOpenHelper {
 
     static final String TAG = EntriesDbHelper.class.getSimpleName();

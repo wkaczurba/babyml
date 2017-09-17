@@ -107,11 +107,13 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
         DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");
         milkTimeEditText.setText(dtf.print(LocalTime.now()));
 
+        // Seting Time-related things:
         milkTimeTextWatcher = new MainActivity.TimeTextWatcher(milkTimeEditText);
         milkTimeEditText.addTextChangedListener(milkTimeTextWatcher);
-
-        updateMilkAmount();
         setIme(context);
+
+        // Setting milk value:
+        updateMilkAmount();
 
     }
 
@@ -151,6 +153,7 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
     }
 
     // This is from: https://stackoverflow.com/questions/2342620/how-to-hide-keyboard-after-typing-in-edittext-in-android
+    // TODO: Consider bundling it together with TimeTextWatcher
     private void setIme(Context context) {
         InputMethodManager inputManager =
                 (InputMethodManager) context.

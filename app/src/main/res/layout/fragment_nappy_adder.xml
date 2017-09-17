@@ -9,172 +9,261 @@
     app:layout_constraintHorizontal_bias="0.5"
     android:orientation="vertical">
 
-    <RadioGroup
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:orientation="horizontal">
+    <!--<RadioGroup-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_gravity="center_horizontal"-->
+        <!--android:orientation="horizontal">-->
 
-        <RadioButton
-            android:id="@+id/radioButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Wet + Solid" />
+        <!--<RadioButton-->
+            <!--android:id="@+id/radioButton"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:text="Wet + Solid" />-->
 
-        <RadioButton
-            android:id="@+id/radioButton2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:text="Soiled" />
+        <!--<RadioButton-->
+            <!--android:id="@+id/radioButton2"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginLeft="8dp"-->
+            <!--android:text="Soiled" />-->
 
-        <RadioButton
-            android:id="@+id/radioButton3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:text="Wet" />
+        <!--<RadioButton-->
+            <!--android:id="@+id/radioButton3"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginLeft="16dp"-->
+            <!--android:text="Wet" />-->
 
-    </RadioGroup>
+    <!--</RadioGroup>-->
 
-    <!-- Sliders -->
-    <android.support.constraint.ConstraintLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:orientation="vertical"
+    <!--&lt;!&ndash; Sliders &ndash;&gt;-->
+    <!--<android.support.constraint.ConstraintLayout-->
+        <!--xmlns:android="http://schemas.android.com/apk/res/android"-->
+        <!--xmlns:app="http://schemas.android.com/apk/res-auto"-->
+        <!--xmlns:tools="http://schemas.android.com/tools"-->
+        <!--android:orientation="vertical"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--tools:layout_editor_absoluteY="81dp"-->
+        <!--tools:layout_editor_absoluteX="0dp">-->
+
+
+        <!--<TextView-->
+            <!--android:id="@+id/wet_nappy_tv"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginLeft="8dp"-->
+            <!--android:layout_marginStart="8dp"-->
+            <!--android:layout_marginTop="16dp"-->
+            <!--android:text="@string/wet_nappy"-->
+            <!--android:textAppearance="@style/TextAppearance.AppCompat"-->
+            <!--app:layout_constraintLeft_toLeftOf="parent"-->
+            <!--app:layout_constraintTop_toTopOf="parent" />-->
+
+        <!--<SeekBar-->
+            <!--android:id="@+id/wet_sb"-->
+            <!--style="@style/Widget.AppCompat.SeekBar.Discrete"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginEnd="8dp"-->
+
+            <!--android:layout_marginLeft="8dp"-->
+            <!--android:layout_marginRight="8dp"-->
+            <!--android:layout_marginStart="8dp"-->
+            <!--android:layout_marginTop="24dp"-->
+            <!--android:clickable="false"-->
+            <!--android:max="4"-->
+            <!--android:progress="1"-->
+            <!--app:layout_constraintHorizontal_bias="0.0"-->
+            <!--app:layout_constraintLeft_toLeftOf="parent"-->
+            <!--app:layout_constraintRight_toRightOf="parent"-->
+            <!--app:layout_constraintTop_toTopOf="@+id/wet_nappy_tv"-->
+            <!--tools:layout_constraintBottom_creator="1"-->
+            <!--tools:layout_constraintLeft_creator="1"-->
+            <!--tools:layout_constraintRight_creator="1"-->
+            <!--tools:layout_constraintTop_creator="1" />-->
+
+        <!--<TextView-->
+            <!--android:id="@+id/dry_tv"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginLeft="8dp"-->
+            <!--android:layout_marginStart="8dp"-->
+            <!--android:text="Dry"-->
+            <!--app:layout_constraintBottom_toBottomOf="@+id/very_wet_tv"-->
+            <!--app:layout_constraintLeft_toLeftOf="parent"-->
+            <!--app:layout_constraintTop_toTopOf="@+id/very_wet_tv"-->
+            <!--tools:layout_constraintBottom_creator="1"-->
+            <!--tools:layout_constraintLeft_creator="1"-->
+            <!--tools:layout_constraintTop_creator="1" />-->
+
+        <!--<TextView-->
+            <!--android:id="@+id/very_wet_tv"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginEnd="8dp"-->
+            <!--android:layout_marginRight="8dp"-->
+            <!--android:layout_marginTop="8dp"-->
+            <!--android:text="Very wet"-->
+            <!--app:layout_constraintRight_toRightOf="parent"-->
+            <!--app:layout_constraintTop_toBottomOf="@+id/wet_sb"-->
+            <!--tools:layout_constraintRight_creator="1"-->
+            <!--tools:layout_constraintTop_creator="1" />-->
+
+        <!--&lt;!&ndash; Soiled nappy &ndash;&gt;-->
+
+        <!--<TextView-->
+            <!--android:id="@+id/soiled_nappy_tv"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginLeft="8dp"-->
+            <!--android:layout_marginStart="8dp"-->
+            <!--android:layout_marginTop="16dp"-->
+            <!--android:text="@string/soiled_nappy"-->
+            <!--android:textAppearance="@style/TextAppearance.AppCompat"-->
+            <!--app:layout_constraintLeft_toLeftOf="parent"-->
+            <!--app:layout_constraintTop_toBottomOf="@id/dry_tv" />-->
+
+        <!--<SeekBar-->
+            <!--android:id="@+id/soiled_sb"-->
+            <!--style="@style/Widget.AppCompat.SeekBar.Discrete"-->
+            <!--android:layout_width="0dp"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginEnd="8dp"-->
+
+            <!--android:layout_marginLeft="8dp"-->
+            <!--android:layout_marginRight="8dp"-->
+            <!--android:layout_marginStart="8dp"-->
+            <!--android:layout_marginTop="24dp"-->
+            <!--android:clickable="false"-->
+            <!--android:max="4"-->
+            <!--android:progress="1"-->
+            <!--app:layout_constraintHorizontal_bias="0.0"-->
+            <!--app:layout_constraintLeft_toLeftOf="parent"-->
+            <!--app:layout_constraintRight_toRightOf="parent"-->
+            <!--app:layout_constraintTop_toTopOf="@+id/soiled_nappy_tv"-->
+            <!--tools:layout_constraintBottom_creator="1"-->
+            <!--tools:layout_constraintLeft_creator="1"-->
+            <!--tools:layout_constraintRight_creator="1"-->
+            <!--tools:layout_constraintTop_creator="1" />-->
+
+        <!--<TextView-->
+            <!--android:id="@+id/soiled_tv"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginLeft="8dp"-->
+            <!--android:layout_marginStart="8dp"-->
+            <!--android:text="Light"-->
+            <!--app:layout_constraintBottom_toBottomOf="@+id/very_soiled_tv"-->
+            <!--app:layout_constraintLeft_toLeftOf="parent"-->
+            <!--app:layout_constraintTop_toTopOf="@+id/very_soiled_tv"-->
+            <!--tools:layout_constraintBottom_creator="1"-->
+            <!--tools:layout_constraintLeft_creator="1"-->
+            <!--tools:layout_constraintTop_creator="1" />-->
+
+        <!--<TextView-->
+            <!--android:id="@+id/very_soiled_tv"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginEnd="8dp"-->
+            <!--android:layout_marginRight="8dp"-->
+            <!--android:layout_marginTop="8dp"-->
+            <!--android:text="Heavy"-->
+            <!--app:layout_constraintRight_toRightOf="parent"-->
+            <!--app:layout_constraintTop_toBottomOf="@+id/soiled_sb"-->
+            <!--tools:layout_constraintRight_creator="1"-->
+            <!--tools:layout_constraintTop_creator="1" />-->
+
+
+    <!--</android.support.constraint.ConstraintLayout>-->
+
+    <LinearLayout
+        android:id="@+id/nappy_buttons_row"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:layout_editor_absoluteY="81dp"
-        tools:layout_editor_absoluteX="0dp">
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linear_buttons_row">
 
+        <!-- style="@android:style/Widget.EditText" can be added as on
+     https://stackoverflow.com/questions/13508270/android-seterrorerror-not-working-in-textview -->
 
-        <TextView
-            android:id="@+id/wet_nappy_tv"
+<!--        <TextView
+            android:id="@+id/milk_amount_tv"
+            android:layout_width="86dp"
+            android:layout_height="48dp"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:gravity="center"
+            android:text="0 ml"
+            android:textAlignment="center"
+            android:textColor="@color/colorPrimary"
+            android:textSize="24sp" /> -->
+
+        <!-- The following android:imeOptions="actionDone" taken from stackoverflow:
+    https://stackoverflow.com/questions/2342620/how-to-hide-keyboard-after-typing-in-edittext-in-android -->
+
+        <EditText
+        android:id="@+id/nappy_time_et"
+        android:layout_width="86dp"
+        android:layout_height="48dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:elevation="0dp"
+        android:fontFamily="false"
+        android:gravity="center"
+        android:imeOptions="actionDone"
+        android:inputType="time"
+        android:text="12:34"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        android:visibility="visible" />
+
+<!--        <CheckBox
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
+            android:text="Massive"
             android:layout_marginLeft="8dp"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="16dp"
-            android:text="@string/wet_nappy"
-            android:textAppearance="@style/TextAppearance.AppCompat"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:gravity="center"
+            android:checked="false"
+            /> -->
 
-        <SeekBar
-            android:id="@+id/wet_sb"
-            style="@style/Widget.AppCompat.SeekBar.Discrete"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
+        <Button
+            android:id="@+id/store_nappy_button"
+            android:layout_width="72dp"
+            android:layout_height="48dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
+            android:text="Store"  />
+
+        <!-- TODO: Change this one to visible -->
+        <Button
+            android:id="@+id/clear_nappy_all"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginBottom="8dp"
             android:layout_marginEnd="8dp"
-
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="24dp"
-            android:clickable="false"
-            android:max="4"
-            android:progress="1"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/wet_nappy_tv"
-            tools:layout_constraintBottom_creator="1"
-            tools:layout_constraintLeft_creator="1"
-            tools:layout_constraintRight_creator="1"
-            tools:layout_constraintTop_creator="1" />
-
-        <TextView
-            android:id="@+id/dry_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginStart="8dp"
-            android:text="Dry"
-            app:layout_constraintBottom_toBottomOf="@+id/very_wet_tv"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/very_wet_tv"
-            tools:layout_constraintBottom_creator="1"
-            tools:layout_constraintLeft_creator="1"
-            tools:layout_constraintTop_creator="1" />
-
-        <TextView
-            android:id="@+id/very_wet_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
             android:layout_marginTop="8dp"
-            android:text="Very wet"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/wet_sb"
-            tools:layout_constraintRight_creator="1"
-            tools:layout_constraintTop_creator="1" />
-
-        <!-- Soiled nappy -->
-
-        <TextView
-            android:id="@+id/soiled_nappy_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="16dp"
-            android:text="@string/soiled_nappy"
-            android:textAppearance="@style/TextAppearance.AppCompat"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/dry_tv" />
-
-        <SeekBar
-            android:id="@+id/soiled_sb"
-            style="@style/Widget.AppCompat.SeekBar.Discrete"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="24dp"
-            android:clickable="false"
-            android:max="4"
-            android:progress="1"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/soiled_nappy_tv"
-            tools:layout_constraintBottom_creator="1"
-            tools:layout_constraintLeft_creator="1"
-            tools:layout_constraintRight_creator="1"
-            tools:layout_constraintTop_creator="1" />
-
-        <TextView
-            android:id="@+id/soiled_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginStart="8dp"
-            android:text="Light"
-            app:layout_constraintBottom_toBottomOf="@+id/very_soiled_tv"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/very_soiled_tv"
-            tools:layout_constraintBottom_creator="1"
-            tools:layout_constraintLeft_creator="1"
-            tools:layout_constraintTop_creator="1" />
-
-        <TextView
-            android:id="@+id/very_soiled_tv"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginTop="8dp"
-            android:text="Heavy"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/soiled_sb"
-            tools:layout_constraintRight_creator="1"
-            tools:layout_constraintTop_creator="1" />
+            android:backgroundTint="@color/colorAccent"
+            android:elevation="0dp"
+            android:text="Erase "
+            android:visibility="gone" />
 
 
-    </android.support.constraint.ConstraintLayout>
+        <!--<android.support.constraint.Guideline-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:id="@+id/guideline"-->
+        <!--android:orientation="vertical"-->
+        <!--tools:layout_editor_absoluteY="0dp"-->
+        <!--tools:layout_editor_absoluteX="20dp"-->
+        <!--app:layout_constraintGuide_percent="0.052083332" />-->
+
+    </LinearLayout>
+
 </LinearLayout>

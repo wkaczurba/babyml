@@ -3,7 +3,6 @@ package com.example.android.babyml;
 import android.content.Context;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,12 +21,8 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 
 // FIXME: On changing TimeZones items in text moxes are not updated.
@@ -40,10 +35,14 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private static final String TAG = LogAdapter.class.getSimpleName();
     public final static int FEEDING_VIEW_HOLDER = 0;
     public final static int DATE_VIEW_HOLDER = 1;
+    public static final int NAPPY_VIEW_HOLDER = 2;
+    public static final int SUMMARY_VIEW_HOLDER = 3;
 
     public interface ListItemClickListener {
         public void onListItemClick(int clickItemIndex);
     }
+
+    static class Summary {};
 
     static abstract class Item {};
 
@@ -69,7 +68,7 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private Feed feed;
         public TextView logTextView;
 
-        public Feed getItem() {
+        public Feed getFeed() {
             return feed;
         }
 
@@ -85,8 +84,6 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 return;
 
             o = items.get(position);
-            //Log.d(TAG, "Binding feed: " + position + " timezone: " + DateTimeZone.getDefault() + "TZ: " + TimeZone.getDefault());
-            //Log.d(TAG, "Binding feed: " + position + " timezone: " + DateTimeZone.getDefault() + "TZ: " + TimeZone.getDefault());
             Log.d("TimeZone", "DateTimeZone.getDefault()=" + DateTimeZone.getDefault() + "; TimeZone.getDefault()" + TimeZone.getDefault());
 
             if (o instanceof Feed) {
@@ -98,10 +95,6 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");
                 CharSequence time = dtf.print(dt);
 
-//                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
-//                sdf.format(feed, );
-//
-//
                 String s = String.format(time + " milk = %d", feed.getAmount());
 
                 logTextView.setText(s);
@@ -119,11 +112,11 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public class DateViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        private Item item;
+        private DateTime dateTime;
         public TextView dateTextView;
 
-        public Item getItem() {
-            return item;
+        public DateTime getDateTime() {
+            return dateTime;
         }
 
         public DateViewHolder(View itemView) {
@@ -137,7 +130,7 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             if (position < 0 || position >= items.size())
                 return;
 
-            Log.d(TAG, "Binding item (date): " + position);
+            Log.d(TAG, "Binding dateTime (date): " + position);
             Object o = items.get(position);
             if (o instanceof DateTime) {
                 DateTime dt = ((DateTime) o);
@@ -148,6 +141,87 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 dateTextView.setText(dtf.print(dt));
             } else {
                 throw new IllegalArgumentException("Invalid object; expected DateTime; got: " + o.getClass());
+            }
+        }
+
+        @Override
+        public void onClick(View v) {
+            int clickedPosition = getAdapterPosition();
+            mOnClickListener.onListItemClick(clickedPosition);
+        }
+    }
+
+    public class NappyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        TextView logListNappyTv;
+        private Nappy nappy;
+
+        public NappyViewHolder(View itemView) {
+            super(itemView);
+            logListNappyTv = (TextView) itemView.findViewById(R.id.log_list_nappy_tv);
+            itemView.setOnClickListener(this);
+        }
+
+        public Nappy getNappy() {
+            return nappy;
+        }
+
+        private void bind(int position) {
+            if (position < 0 || position >= items.size()) {
+                return;
+            }
+
+            Log.d(TAG, "Binding dateTime (nappy): " + position);
+            Object o = items.get(position);
+            if (o instanceof Nappy) {
+                nappy = (Nappy) o;
+
+                // Format the stuff: (TODO: Move to formatting or somewhere); it is common with FeedingViewHolder.bind(...)
+                DateTimeZone currentTz = DateTimeZone.forTimeZone(TimeZone.getDefault());
+                DateTime dt = new DateTime(nappy.getTimestamp(), currentTz);
+                DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");
+                CharSequence time = dtf.print(dt);
+
+                String s = String.format(time + " dirty nappy"); // can be "nappy=" + n.getDirrty();
+                logListNappyTv.setText(s);
+            } else { //if (o instanceof DateItem) { // DateItem
+                throw new IllegalArgumentException("Invalid object; expected Nappy; got: " + o.getClass());
+            }
+
+        }
+
+            @Override
+        public void onClick(View v) {
+            int clickedPosition = getAdapterPosition();
+                mOnClickListener.onListItemClick(clickedPosition);
+        }
+    }
+
+    public class SummaryViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+
+        private Summary summary; // FIXME: This should probabyl contain something different (?)
+        public TextView summaryTextView;
+
+        public Summary getSummary() {
+            return summary;
+        }
+
+        public SummaryViewHolder(View itemView) {
+            super(itemView);
+            summaryTextView = (TextView) itemView.findViewById(R.id.summary_tv);
+            itemView.setOnClickListener(this);
+        }
+
+        private void bind(int position) {
+            if (position < 0 || position >= items.size())
+                return;
+
+            Log.d(TAG, "Binding summary: " + position);
+            Object o = items.get(position);
+            if (o instanceof Summary) {
+                summary = (Summary) o;
+                summaryTextView.setText("<SUMMARY TODO>" + summary.toString());
+            } else {
+                throw new IllegalArgumentException("Invalid object; expected String; got: " + o.getClass());
             }
         }
 
@@ -177,25 +251,25 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return e;
     }
 
-    public void oldImplementation(Cursor cursor) {
-        LocalDate oldDate = null;
-
-        Feed feed = cursorToFeed(cursor);
-
-        // Process date + add date if needed
-        //dateString = DateFormat.format("yyyy-MM-dd", item.getmFeedTimestamp()); // FIXME: use LocalDate for date.
-
-        DateTime dt = new DateTime(feed.getTimestamp(), DateTimeZone.getDefault());
-        LocalDate date = dt.toLocalDate();
-
-        if (!date.equals(oldDate)) {
-            // Create new entry with date before inserting feeding entry itself.
-            //DateItem d = new DateItem(dateString.toString()); // FIXME: Change TODAY, YESTERDAY, then dates...
-            items.add(dt);
-            oldDate = date;
-        }
-        items.add(feed);
-    }
+//    public void oldImplementation(Cursor cursor) {
+//        LocalDate oldDate = null;
+//
+//        Feed feed = cursorToFeed(cursor);
+//
+//        // Process date + add date if needed
+//        //dateString = DateFormat.format("yyyy-MM-dd", dateTime.getmFeedTimestamp()); // FIXME: use LocalDate for date.
+//
+//        DateTime dt = new DateTime(feed.getTimestamp(), DateTimeZone.getDefault());
+//        LocalDate date = dt.toLocalDate();
+//
+//        if (!date.equals(oldDate)) {
+//            // Create new entry with date before inserting feeding entry itself.
+//            //DateItem d = new DateItem(dateString.toString()); // FIXME: Change TODAY, YESTERDAY, then dates...
+//            items.add(dt);
+//            oldDate = date;
+//        }
+//        items.add(feed);
+//    }
 
     public void swapCursor(Cursor cursor) {
         LocalDate oldDate = null;
@@ -238,6 +312,10 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             if (!date.equals(oldDate)) {
                 // Create new entry with date before inserting feeding entry itself.
                 //DateItem d = new DateItem(dateString.toString()); // FIXME: Change TODAY, YESTERDAY, then dates...
+
+                if (oldDate != null) { // this is executed when a non-first element is found.
+                    items.add(new Summary()); // FIXME: Here. reworko this stuff.
+                }
                 items.add(dt);
                 oldDate = date;
             }
@@ -245,10 +323,6 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
 
             //oldImplementation(cursor);
-
-
-
-
         }
         notifyDataSetChanged();
     }
@@ -279,6 +353,20 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 vh = new DateViewHolder(view);
                 break;
 
+            case NAPPY_VIEW_HOLDER:
+                view = layoutInflater.inflate(R.layout.log_list_nappy,
+                        parent,
+                        shouldAttachParentImmediately);
+                vh = new NappyViewHolder(view);
+                break;
+
+            case SUMMARY_VIEW_HOLDER:
+                view = layoutInflater.inflate(R.layout.log_list_summary,
+                        parent,
+                        shouldAttachParentImmediately);
+                vh = new SummaryViewHolder(view);
+                break;
+
             default: throw new IllegalArgumentException("Invalid viewType:" + vh);
         }
         return vh;
@@ -290,6 +378,10 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             return FEEDING_VIEW_HOLDER;
         } else if (items.get(position) instanceof DateTime) {
             return DATE_VIEW_HOLDER;
+        } else if (items.get(position) instanceof Nappy) {
+            return NAPPY_VIEW_HOLDER;
+        } else if (items.get(position) instanceof Summary) {
+            return SUMMARY_VIEW_HOLDER;
         } else {
             throw new IllegalArgumentException("Item at position(" + position +") is neither FeedingItem or DateItem");
         }
@@ -300,6 +392,8 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         switch (holder.getItemViewType()) {
             case FEEDING_VIEW_HOLDER: ((FeedingViewHolder) holder).bind(position); break;
             case DATE_VIEW_HOLDER: ((DateViewHolder) holder).bind(position); break;
+            case NAPPY_VIEW_HOLDER: ((NappyViewHolder) holder).bind(position); break;
+            case SUMMARY_VIEW_HOLDER: ((SummaryViewHolder) holder).bind(position); break;
 // TODO: Add another view_holder for summary of feedings.
             default: break;
         }

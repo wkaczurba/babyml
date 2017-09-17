@@ -28,7 +28,12 @@ import org.joda.time.*;
 import com.example.android.babyml.data.EntriesDbHelper;
 import com.example.android.babyml.data.EntriesUtils;
 import com.example.android.babyml.data.Feed;
+import com.example.android.babyml.data.Nappy;
 import com.example.android.babyml.utils.DateUtils;
+
+import static com.example.android.babyml.LogAdapter.DATE_VIEW_HOLDER;
+import static com.example.android.babyml.LogAdapter.FEEDING_VIEW_HOLDER;
+import static com.example.android.babyml.LogAdapter.NAPPY_VIEW_HOLDER;
 
 // TODO: Review these ones for sliding tabs:
 //   https://developer.android.com/training/implementing-navigation/lateral.html
@@ -112,6 +117,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * The following is a textWatcher for milkTimeEditText
      *
      * TODO: Implement something similar to this one;
+     * TODO: Make it as a separate class/file related to resources/UI; this class is used for Nappies
+     *   as well as for Milk and is likely to be used elsewhere
      * http://www.techrepublic.com/article/pro-tip-write-a-validate-as-you-go-android-textwatcher-for-date-entry-fields/
      */
     public static class TimeTextWatcher implements TextWatcher {
@@ -228,7 +235,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (direction == ItemTouchHelper.RIGHT || direction == ItemTouchHelper.LEFT) {
                     int itemViewType = viewHolder.getItemViewType();
 
-                    if (itemViewType == 0) { // TODO: Change 0 to use FINAL STATIC INT!!
+                    if (itemViewType == FEEDING_VIEW_HOLDER) { // TODO: Change 0 to use FINAL STATIC INT!!
                         LogAdapter.FeedingViewHolder logViewHolder = (LogAdapter.FeedingViewHolder) viewHolder;
 
                         //long lid = viewHolder.getItemId();
@@ -239,17 +246,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                            updateLogRecyclerView();
 //                            return;
                         } else {*/
-                            Feed feed = logViewHolder.getItem();
+                            Feed feed = logViewHolder.getFeed();
                             //long dbId = fe.getDbId();
                             EntriesUtils.deleteFeeding(mDb, feed.getId());
                             updateLogRecyclerView();
                             updateTimeElapsed();
 //                        }
-                    } else if (itemViewType == 1){ // DATE.
+                    } else if (itemViewType == DATE_VIEW_HOLDER){ // DATE.
                         // DO NOTHING - CANT REMOVE A DATE GAP.
                         updateLogRecyclerView();
                         updateTimeElapsed();
                         return;
+                    } else if (itemViewType == NAPPY_VIEW_HOLDER) {
+                        LogAdapter.NappyViewHolder nappyViewHolder = (LogAdapter.NappyViewHolder) viewHolder;
+                        long lid = nappyViewHolder.getAdapterPosition();
+                        Nappy nappy = nappyViewHolder.getNappy();
+                        EntriesUtils.deleteNappy(mDb, nappy.getId());
+                        updateLogRecyclerView();
+                        updateTimeElapsed();
+
                     } else {
                         throw new IllegalArgumentException("ItemViewType = " + itemViewType);
                     }

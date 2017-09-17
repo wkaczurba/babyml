@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!-- <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" -->
+<!-- TODO: Change this color to a better one! -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
+    android:background="?android:attr/detailsElementBackground"
+    android:orientation="horizontal"
+    android:padding="4dp">
+
+    <!-- TODO: look from T07.04 solution - drawable items -->
+    <!--    <ImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center_vertical"
+
+        app:srcCompat="@mipmap/baby_bottle" /> -->
+
+
+    <!-- TODO: use @string/ strings -->
+    <!-- TODO: review colors and palettes -->
+    <TextView
+        android:id="@+id/summary_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_weight="1"
+        android:fontFamily="sans-serif"
+        android:paddingLeft="8dp"
+        android:text="880ml in 8 feeds; No nappy"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="16sp" />
+
+    <!--
+        style="@style/TextAppearance.AppCompat.Title"
+        android:fontFamily="monospace"
+        android:textSize="24sp" -->
+
+</LinearLayout>
