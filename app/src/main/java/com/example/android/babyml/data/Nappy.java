@@ -1,5 +1,7 @@
 package com.example.android.babyml.data;
 
+import java.io.Serializable;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -15,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 @EqualsAndHashCode(exclude={"id"})
 @AllArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class Nappy {
+public class Nappy implements Summarizable {
 
     @Getter
     private final long id; // from the database.
@@ -25,4 +27,9 @@ public class Nappy {
 
     @Getter
     private final int dirty;
+
+    @Override
+    public void addSummary(Summary summary) {
+        summary.setDirtyNappies(summary.getDirtyNappies() + 1);
+    }
 }

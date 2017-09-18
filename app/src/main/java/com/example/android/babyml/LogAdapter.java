@@ -10,10 +10,12 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.example.android.babyml.data.EntriesDbHelper;
+import com.example.android.babyml.data.EntriesMap;
 import com.example.android.babyml.data.Feed;
 import com.example.android.babyml.data.FeedContract;
 import com.example.android.babyml.data.Nappy;
 import com.example.android.babyml.data.Note;
+import com.example.android.babyml.data.Summary;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -21,8 +23,6 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.TimeZone;
 
 // FIXME: On changing TimeZones items in text moxes are not updated.
@@ -42,22 +42,22 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         public void onListItemClick(int clickItemIndex);
     }
 
-    static class Summary {};
-
     static abstract class Item {};
+    private EntriesMap entriesMap;
 
     /**
      * Carries:
      *   Feed for Feeds
-     *   DateTime objects for separators
+     *   LocalDate objects for separators
      *
      */
-    private List<Object> items;
-
+//    private List<Object> items;
+//
     public final ListItemClickListener mOnClickListener;
     public LogAdapter(ListItemClickListener onClickListener) {
         mOnClickListener = onClickListener;
     }
+
 
     /**
      * Created by WKaczurb on 8/6/2017.
@@ -80,11 +80,10 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private void bind(int position) {
             Object o;
-            if (position < 0 || position >= items.size())
+            if (position < 0 || position >= entriesMap.size())
                 return;
 
-            o = items.get(position);
-            Log.d("TimeZone", "DateTimeZone.getDefault()=" + DateTimeZone.getDefault() + "; TimeZone.getDefault()" + TimeZone.getDefault());
+            o = entriesMap.get(position);
 
             if (o instanceof Feed) {
                 feed = (Feed) o;
@@ -112,11 +111,11 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public class DateViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        private DateTime dateTime;
+        private LocalDate date;
         public TextView dateTextView;
 
-        public DateTime getDateTime() {
-            return dateTime;
+        public LocalDate getDate() {
+            return date;
         }
 
         public DateViewHolder(View itemView) {
@@ -127,20 +126,18 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private void bind(int position) {
 
-            if (position < 0 || position >= items.size())
+            if (position < 0 || position >= entriesMap.size())
                 return;
 
-            Log.d(TAG, "Binding dateTime (date): " + position);
-            Object o = items.get(position);
-            if (o instanceof DateTime) {
-                DateTime dt = ((DateTime) o);
+            Log.d(TAG, "Binding LocalDaate: " + position);
+            Object o = entriesMap.get(position);
+            if (o instanceof LocalDate) {
+                date = ((LocalDate) o);
 
-                DateTimeZone currentTz = DateTimeZone.forTimeZone(TimeZone.getDefault());
-                dt = dt.withZone(currentTz);
                 DateTimeFormatter dtf = DateTimeFormat.forPattern("yyyy-MM-dd");
-                dateTextView.setText(dtf.print(dt));
+                dateTextView.setText(dtf.print(date));
             } else {
-                throw new IllegalArgumentException("Invalid object; expected DateTime; got: " + o.getClass());
+                throw new IllegalArgumentException("Invalid object; expected LocalDate; got: " + o.getClass());
             }
         }
 
@@ -166,12 +163,12 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         private void bind(int position) {
-            if (position < 0 || position >= items.size()) {
+            if (position < 0 || position >= entriesMap.size()) {
                 return;
             }
 
             Log.d(TAG, "Binding dateTime (nappy): " + position);
-            Object o = items.get(position);
+            Object o = entriesMap.get(position);
             if (o instanceof Nappy) {
                 nappy = (Nappy) o;
 
@@ -212,14 +209,21 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
 
         private void bind(int position) {
-            if (position < 0 || position >= items.size())
+            if (position < 0 || position >= entriesMap.size())
                 return;
 
             Log.d(TAG, "Binding summary: " + position);
-            Object o = items.get(position);
+            Object o = entriesMap.get(position);
             if (o instanceof Summary) {
                 summary = (Summary) o;
-                summaryTextView.setText("<SUMMARY TODO>" + summary.toString());
+                //summaryTextView.setText("<SUMMARY TODO>" + summary.toString());
+                String s = String.format("Total %d ml (%d %s); %d dirty %s",
+                        summary.getFeedAmount(),
+                        summary.getFeedCounts(),
+                        summary.getFeedCounts() == 1 ? "feed" : "feeds",
+                        summary.getDirtyNappies(),
+                        summary.getDirtyNappies() == 1 ? "nappy" : "nappies");
+                summaryTextView.setText(s);
             } else {
                 throw new IllegalArgumentException("Invalid object; expected String; got: " + o.getClass());
             }
@@ -251,30 +255,9 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return e;
     }
 
-//    public void oldImplementation(Cursor cursor) {
-//        LocalDate oldDate = null;
-//
-//        Feed feed = cursorToFeed(cursor);
-//
-//        // Process date + add date if needed
-//        //dateString = DateFormat.format("yyyy-MM-dd", dateTime.getmFeedTimestamp()); // FIXME: use LocalDate for date.
-//
-//        DateTime dt = new DateTime(feed.getTimestamp(), DateTimeZone.getDefault());
-//        LocalDate date = dt.toLocalDate();
-//
-//        if (!date.equals(oldDate)) {
-//            // Create new entry with date before inserting feeding entry itself.
-//            //DateItem d = new DateItem(dateString.toString()); // FIXME: Change TODAY, YESTERDAY, then dates...
-//            items.add(dt);
-//            oldDate = date;
-//        }
-//        items.add(feed);
-//    }
-
     public void swapCursor(Cursor cursor) {
         LocalDate oldDate = null;
-
-        items = new ArrayList<>();
+        entriesMap = new EntriesMap();
 
         // Updating all items;
         while (cursor.moveToNext()) {
@@ -284,45 +267,25 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             long id = cursor.getLong(cursor.getColumnIndex(EntriesDbHelper.COLUMN_ID));
             long timestamp = cursor.getLong(cursor.getColumnIndex(EntriesDbHelper.COLUMN_TS));
 
-
             // TODO: Consider changing to switch.case...:
-            Object o = null;
             if (e.equals(EntriesDbHelper.EntryType.Feed)) {
                 int feedAmount = cursor.getInt(cursor.getColumnIndex(EntriesDbHelper.COLUMN_FEED_AMOUNT));
                 Feed f = new Feed(id, timestamp, feedAmount);
                 Log.d(TAG, "GOT: " + f);
-                o = f;
+                entriesMap.addSerializable(f);
             } else if (e.equals(EntriesDbHelper.EntryType.Nappy)) {
                 int nappyDirty = cursor.getInt(cursor.getColumnIndex(EntriesDbHelper.COLUMN_NAPPY_DIRTY));
                 Nappy n = new Nappy(id, timestamp, nappyDirty);
                 Log.d(TAG, "GOT NAPPY -> TODO");
-                o = n;
+                entriesMap.addSerializable(n);
             } else if (e.equals(EntriesDbHelper.EntryType.Note)) {
                 String noteValue = cursor.getString(cursor.getColumnIndex(EntriesDbHelper.COLUMN_NOTE_VALUE));
                 Note n = new Note(id, timestamp, noteValue);
                 Log.d(TAG, "GOT NOTE -> TODO");
-                o = n;
+                entriesMap.addSerializable(n);
             } else {
                 throw new IllegalArgumentException("Invalid enum: " + e.name());
             }
-
-            DateTime dt = new DateTime(timestamp, DateTimeZone.forTimeZone(TimeZone.getDefault()));
-            LocalDate date = dt.toLocalDate();
-
-            if (!date.equals(oldDate)) {
-                // Create new entry with date before inserting feeding entry itself.
-                //DateItem d = new DateItem(dateString.toString()); // FIXME: Change TODAY, YESTERDAY, then dates...
-
-                if (oldDate != null) { // this is executed when a non-first element is found.
-                    items.add(new Summary()); // FIXME: Here. reworko this stuff.
-                }
-                items.add(dt);
-                oldDate = date;
-            }
-            items.add(o);
-
-
-            //oldImplementation(cursor);
         }
         notifyDataSetChanged();
     }
@@ -374,13 +337,13 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemViewType(int position) {
-        if (items.get(position) instanceof Feed) {
+        if (entriesMap.get(position) instanceof Feed) {
             return FEEDING_VIEW_HOLDER;
-        } else if (items.get(position) instanceof DateTime) {
+        } else if (entriesMap.get(position) instanceof LocalDate) {
             return DATE_VIEW_HOLDER;
-        } else if (items.get(position) instanceof Nappy) {
+        } else if (entriesMap.get(position) instanceof Nappy) {
             return NAPPY_VIEW_HOLDER;
-        } else if (items.get(position) instanceof Summary) {
+        } else if (entriesMap.get(position) instanceof Summary) {
             return SUMMARY_VIEW_HOLDER;
         } else {
             throw new IllegalArgumentException("Item at position(" + position +") is neither FeedingItem or DateItem");
@@ -401,9 +364,9 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        if (items == null)
+        if (entriesMap == null)
             return 0;
-        return items.size();
+        return entriesMap.size();
     }
 
 }

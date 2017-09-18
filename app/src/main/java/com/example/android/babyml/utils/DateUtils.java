@@ -1,8 +1,14 @@
 package com.example.android.babyml.utils;
 
+import com.example.android.babyml.data.Summarizable;
+
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
+
+import java.util.TimeZone;
 
 /**
  * Created by WKaczurb on 8/12/2017.
@@ -38,6 +44,15 @@ public class DateUtils {
                 ld.getDayOfMonth(),
                 lt.getHourOfDay(),
                 lt.getMinuteOfHour());
+    }
+
+    public static LocalDate summarizableToLocalDate(Summarizable s) {
+        return milisToLocalDate( s.getTimestamp() );
+    }
+
+    public static LocalDate milisToLocalDate(long millis) {
+        DateTime dt = new DateTime(millis, DateTimeZone.forTimeZone(TimeZone.getDefault()));
+        return dt.toLocalDate();
     }
 
     public static int[] toHoursMinArray(String s) {

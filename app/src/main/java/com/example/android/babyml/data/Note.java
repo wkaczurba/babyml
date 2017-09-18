@@ -15,7 +15,7 @@ import lombok.experimental.FieldDefaults;
 @EqualsAndHashCode(exclude={"id"})
 @AllArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
-public class Note {
+public class Note implements Summarizable {
 
     @Getter
     private final long id; // from the database.
@@ -25,4 +25,10 @@ public class Note {
 
     @Getter
     private final String value;
+
+    @Override
+    public void addSummary(Summary summary) {
+        // TODO: Add any summary-related stuff.
+        return;
+    }
 }

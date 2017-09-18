@@ -7,7 +7,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="56dp"
-    android:background="?android:attr/detailsElementBackground"
+    android:background="@color/colorSummary"
     android:orientation="horizontal"
     android:padding="4dp">
 
@@ -31,7 +31,6 @@
         android:fontFamily="sans-serif"
         android:paddingLeft="8dp"
         android:text="880ml in 8 feeds; No nappy"
-        android:textColor="@android:color/darker_gray"
         android:textSize="16sp" />
 
     <!--

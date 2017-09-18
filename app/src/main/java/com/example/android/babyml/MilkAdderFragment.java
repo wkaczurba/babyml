@@ -82,8 +82,8 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
         milkAmountTextView = (TextView) view.findViewById(R.id.milk_amount_tv);
         milkTimeEditText = (EditText) view.findViewById(R.id.milk_time_et);
         clearButton = (Button) view.findViewById(R.id.clear_button);
-        plusMilkButton = (Button) view.findViewById(R.id.plus_milk_button);
-        plusNappyButton = (Button) view.findViewById(R.id.plus_nappy_button);
+//        plusMilkButton = (Button) view.findViewById(R.id.plus_milk_button);
+//        plusNappyButton = (Button) view.findViewById(R.id.plus_nappy_button);
         add10mlButton = (Button) view.findViewById(R.id.add_10_ml_button);
         add20mlButton = (Button) view.findViewById(R.id.add_20_ml_button);
         add50mlButton = (Button) view.findViewById(R.id.add_50_ml_button);
@@ -93,7 +93,7 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
 
         // Set on click listener for all buttons.
         Button[] buttons = new Button[] {
-                clearButton, plusMilkButton, plusNappyButton, add10mlButton,
+                clearButton, /*plusMilkButton, plusNappyButton,*/ add10mlButton,
                 add20mlButton, add50mlButton, add100mlButton, storeMilkButton,
                 deleteAllButton
         };
