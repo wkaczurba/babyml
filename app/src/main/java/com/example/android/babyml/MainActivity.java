@@ -5,9 +5,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -25,7 +29,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 import org.joda.time.*;
 
-import com.example.android.babyml.data.EntriesDbHelper;
+import com.example.android.babyml.data.EntriesDbHandler;
+import com.example.android.babyml.data.EntriesProvider;
 import com.example.android.babyml.data.EntriesUtils;
 import com.example.android.babyml.data.Feed;
 import com.example.android.babyml.data.Nappy;
@@ -40,17 +45,20 @@ import static com.example.android.babyml.LogAdapter.NAPPY_VIEW_HOLDER;
 //   https://developer.android.com/samples/SlidingTabsBasic/src/com.example.android.common/view/SlidingTabLayout.html
 //
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
+public class MainActivity extends AppCompatActivity implements
+        View.OnClickListener, SharedPreferences.OnSharedPreferenceChangeListener,
+        LoaderManager.LoaderCallbacks<Cursor> {
 
     // FIXME: Do we need mDb here (it has been already added to AddEntryActivity.
 
     public static String TAG = MainActivity.class.getSimpleName();
+    private static final int ID_ENTRIES_LOADER = 1;
 
 //    static final String MILK_AMOUNT_VALUE_KEY = "milkAmountValue";
 //    int milkAmountValue = 0; // FIXME: Save instance.
 
     // Database:
-    SQLiteDatabase mDb;
+    EntriesDbHandler mDb; // Add closing;
     RecyclerView logRecyclerView;
     FloatingActionButton fab;
 
@@ -62,6 +70,44 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     // Log-related items:
     LogAdapter mAdapter;
     LogListItemClickListener mLogListItemClickListener;
+    private int mPosition = RecyclerView.NO_POSITION;
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        switch (id) {
+            case ID_ENTRIES_LOADER:
+                Uri entriesQueryUri = EntriesProvider.URI_ENTRIES; // FIXME: This should come from a separate class (decoupled from EntriesProvider)
+                String[] projection = null; // not used by the content provider
+                String selection = null; // not used by the content provider
+                String[] selectionArgs = null; // not used by the content provider
+                String sortOrder = null; // not used by the content provider
+
+                return new CursorLoader(this,
+                        entriesQueryUri,
+                        projection,
+                        selection,
+                        selectionArgs,
+                        sortOrder);
+            default:
+                throw new IllegalArgumentException("Invalid id supplied: " + id);
+        }
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        mAdapter.swapCursor(data);
+
+        if (mPosition == RecyclerView.NO_POSITION)
+            mPosition = 0;
+        logRecyclerView.smoothScrollToPosition(mPosition);
+
+        // Optionally: HERE -> remove Progression Icon if disaplyed
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        mAdapter.swapCursor(null);
+    }
 
 //    /**
 //     * Function gets current date time and applies particular time to it.
@@ -197,9 +243,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        // Getting database instance:
-        EntriesDbHelper dbHelper = new EntriesDbHelper(this);
-        mDb = dbHelper.getWritableDatabase();
+        // Getting database instance:
+        mDb = EntriesDbHandler.getInstance(this);
+        EntriesUtils.tryUpgradeFromOld(this); // Upgrading from OldDb to the new one.
 
         // RecyclerView:
         logRecyclerView = (RecyclerView) findViewById(R.id.log_rv);
@@ -238,17 +284,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     if (itemViewType == FEEDING_VIEW_HOLDER) { // TODO: Change 0 to use FINAL STATIC INT!!
                         LogAdapter.FeedingViewHolder logViewHolder = (LogAdapter.FeedingViewHolder) viewHolder;
 
-                        //long lid = viewHolder.getItemId();
                         long lid = logViewHolder.getAdapterPosition();
-
-/*                        if (!logViewHolder.isFeedingItem()) {
-                            throw new IllegalArgumentException("Unexpected. Holer says it is of ViewType = 0 but it does not return isFeedingItem()==true.");
-//                            updateLogRecyclerView();
-//                            return;
-                        } else {*/
                             Feed feed = logViewHolder.getFeed();
-                            //long dbId = fe.getDbId();
-                            EntriesUtils.deleteFeeding(mDb, feed.getId());
+                            mDb.deleteFeeding(feed.getId());
                             updateLogRecyclerView();
                             updateTimeElapsed();
 //                        }
@@ -261,7 +299,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         LogAdapter.NappyViewHolder nappyViewHolder = (LogAdapter.NappyViewHolder) viewHolder;
                         long lid = nappyViewHolder.getAdapterPosition();
                         Nappy nappy = nappyViewHolder.getNappy();
-                        EntriesUtils.deleteNappy(mDb, nappy.getId());
+                        mDb.deleteNappy(nappy.getId());
                         updateLogRecyclerView();
                         updateTimeElapsed();
 
@@ -280,6 +318,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Getting FloatingActionButton:
         fab = (FloatingActionButton) findViewById(R.id.fab_add);
         fab.setOnClickListener(this);
+
+        getSupportLoaderManager().initLoader(ID_ENTRIES_LOADER, null, this);
     }
 
 
@@ -380,7 +420,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if (timeElapsedFrag == null)
             return;
 
-        Cursor cursor = EntriesUtils.getLatestFeeding(mDb);
+        Cursor cursor = mDb.getLatestFeeding();
         switch (cursor.getCount()) {
             case 1: {
                 cursor.moveToFirst();
@@ -400,13 +440,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void updateLogRecyclerView() {
-        //Cursor cursor = EntriesUtils.getAllFeedingsCursor(mDb);
-// TODO: Enable the following
-        Cursor cursor = EntriesUtils.getAllEntriesCursor(mDb);
-        mAdapter.swapCursor(cursor);
+        //Cursor cursor = mDb.getAllEntriesCursor();
+        //getLoaderManager().<Cursor>initLoader(ID_ENTRIES_LOADER, null, this);
 
-        // Update last time:
-        //TimeElapsedFragment timeElapsedFrag = (TimeElapsedFragment) getFragmentManager().findFragmentById(R.id.time_elapsed_frag);
+        // FIXME: This updateLogRecyclerView is not greatest lets put it that way.
+        getSupportLoaderManager().<Cursor>restartLoader(ID_ENTRIES_LOADER, null, this);
+
+//        Cursor cursor = getContentResolver().query(EntriesProvider.URI_ENTRIES, null, null, null, null);
+//        Log.d(TAG, "getContentResolver -> received: " + cursor.getCount());
+//        mAdapter.swapCursor(cursor);
     }
 
     @Override

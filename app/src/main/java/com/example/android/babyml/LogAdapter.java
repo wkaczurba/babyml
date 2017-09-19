@@ -9,7 +9,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.android.babyml.data.EntriesDbHelper;
+import com.example.android.babyml.data.EntriesDbHandler;
 import com.example.android.babyml.data.EntriesMap;
 import com.example.android.babyml.data.Feed;
 import com.example.android.babyml.data.FeedContract;
@@ -245,12 +245,12 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return new Feed(id, ts, amt);
     }
 
-    public static EntriesDbHelper.EntryType getEntryType(Cursor cursor) {
-        EntriesDbHelper.EntryType e;
-        String tb = cursor.getString(cursor.getColumnIndex(EntriesDbHelper.COLUMN_TB));
+    public static EntriesDbHandler.EntryType getEntryType(Cursor cursor) {
+        EntriesDbHandler.EntryType e;
+        String tb = cursor.getString(cursor.getColumnIndex(EntriesDbHandler.COLUMN_TB));
 
 
-        e = EntriesDbHelper.EntryType.getEntryType(tb);
+        e = EntriesDbHandler.EntryType.getEntryType(tb);
 
         return e;
     }
@@ -259,27 +259,30 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         LocalDate oldDate = null;
         entriesMap = new EntriesMap();
 
+        if (cursor == null)
+            return;
+
         // Updating all items;
         while (cursor.moveToNext()) {
 
-            EntriesDbHelper.EntryType e = getEntryType(cursor);
+            EntriesDbHandler.EntryType e = getEntryType(cursor);
 
-            long id = cursor.getLong(cursor.getColumnIndex(EntriesDbHelper.COLUMN_ID));
-            long timestamp = cursor.getLong(cursor.getColumnIndex(EntriesDbHelper.COLUMN_TS));
+            long id = cursor.getLong(cursor.getColumnIndex(EntriesDbHandler.COLUMN_ID));
+            long timestamp = cursor.getLong(cursor.getColumnIndex(EntriesDbHandler.COLUMN_TS));
 
             // TODO: Consider changing to switch.case...:
-            if (e.equals(EntriesDbHelper.EntryType.Feed)) {
-                int feedAmount = cursor.getInt(cursor.getColumnIndex(EntriesDbHelper.COLUMN_FEED_AMOUNT));
+            if (e.equals(EntriesDbHandler.EntryType.Feed)) {
+                int feedAmount = cursor.getInt(cursor.getColumnIndex(EntriesDbHandler.COLUMN_FEED_AMOUNT));
                 Feed f = new Feed(id, timestamp, feedAmount);
                 Log.d(TAG, "GOT: " + f);
                 entriesMap.addSerializable(f);
-            } else if (e.equals(EntriesDbHelper.EntryType.Nappy)) {
-                int nappyDirty = cursor.getInt(cursor.getColumnIndex(EntriesDbHelper.COLUMN_NAPPY_DIRTY));
+            } else if (e.equals(EntriesDbHandler.EntryType.Nappy)) {
+                int nappyDirty = cursor.getInt(cursor.getColumnIndex(EntriesDbHandler.COLUMN_NAPPY_DIRTY));
                 Nappy n = new Nappy(id, timestamp, nappyDirty);
                 Log.d(TAG, "GOT NAPPY -> TODO");
                 entriesMap.addSerializable(n);
-            } else if (e.equals(EntriesDbHelper.EntryType.Note)) {
-                String noteValue = cursor.getString(cursor.getColumnIndex(EntriesDbHelper.COLUMN_NOTE_VALUE));
+            } else if (e.equals(EntriesDbHandler.EntryType.Note)) {
+                String noteValue = cursor.getString(cursor.getColumnIndex(EntriesDbHandler.COLUMN_NOTE_VALUE));
                 Note n = new Note(id, timestamp, noteValue);
                 Log.d(TAG, "GOT NOTE -> TODO");
                 entriesMap.addSerializable(n);

@@ -5,7 +5,9 @@ Just tell your wife it is all for a baby!
 This project implements following Android elements:
 
 Data/persistence-perspective:
- - SQLiteDb
+ - ContentProvider and ContentResolver for decoupling
+ - SQLiteDb in the ContentProvider
+ - CurosrLoader for ContentProvider (TODO).
  - Shared Prerences
  - Saved state
  - (no cloud as of yet)

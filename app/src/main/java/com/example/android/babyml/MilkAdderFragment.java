@@ -18,7 +18,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.android.babyml.data.EntriesDbHelper;
+import com.example.android.babyml.data.EntriesDbHandler;
 import com.example.android.babyml.data.EntriesUtils;
 
 import org.joda.time.LocalTime;
@@ -35,7 +35,7 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
     // Milk-related items:
     int milkAmountValue = 0; // FIXME: Save instance.
     static final String MILK_AMOUNT_VALUE_KEY = "milkAmountValue";
-    SQLiteDatabase mDb;
+    EntriesDbHandler mDb;
 
     //AddEntryActivity.ItemSelectedListener itemSelectedListener = new AddEntryActivity.ItemSelectedListener(this);
 
@@ -75,8 +75,8 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
 
         View view = getView();
         // Getting database instance:
-        EntriesDbHelper dbHelper = new EntriesDbHelper(context); // FIXME.
-        mDb = dbHelper.getWritableDatabase();
+        EntriesDbHandler dbHelper = EntriesDbHandler.getInstance(context); // FIXME.
+        mDb = dbHelper.getInstance(context); // TODO: Add closing of the Database. ref. ,to: https://developer.android.com/reference/android/database/sqlite/SQLiteOpenHelper.html#getWritableDatabase()
 
         // Added from MainActivity
         milkAmountTextView = (TextView) view.findViewById(R.id.milk_amount_tv);
@@ -202,7 +202,7 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
             }
             milkTimeTextWatcher.setDefaultTimeIfEntryInvalid();
             long timeMillis = milkTimeTextWatcher.getTimeMilis();
-            EntriesUtils.insertFeeding(mDb, milkAmountValue, timeMillis);
+            mDb.insertFeeding(milkAmountValue, timeMillis);
             Toast.makeText(context, "Item inserted ok.", Toast.LENGTH_LONG).show();
 //          updateLogRecyclerView();
 
@@ -212,7 +212,8 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
             getActivity().finish(); // FIXME: This should go to the upper.
         } else if (v.equals(deleteAllButton)) {
             // TODO: Add question first.
-            EntriesUtils.deleteAllFeedings(mDb);
+
+            mDb.deleteAllFeedings();
         } else {
             Log.d(TAG, "Unknown item clicked: " + v);
         }

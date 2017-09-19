@@ -13,7 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.android.babyml.data.EntriesDbHelper;
+import com.example.android.babyml.data.EntriesDbHandler;
 import com.example.android.babyml.data.EntriesUtils;
 
 import org.joda.time.LocalTime;
@@ -31,7 +31,7 @@ public class NappyAdderFragment extends Fragment implements View.OnClickListener
     Button storeNappyButton;
     MainActivity.TimeTextWatcher ttw;
 
-    private SQLiteDatabase mDb;
+    private EntriesDbHandler mDb;
 
 
     public NappyAdderFragment() {
@@ -48,9 +48,7 @@ public class NappyAdderFragment extends Fragment implements View.OnClickListener
     public void onStart() {
         Context context = getActivity();
         // Required empty public constructor
-        EntriesDbHelper edb = new EntriesDbHelper(context);
-        mDb = edb.getWritableDatabase();
-
+        EntriesDbHandler mDb = EntriesDbHandler.getInstance(context);
         View view = getView();
         super.onStart();
         nappyTimeEditText = (EditText) view.findViewById(R.id.nappy_time_et);
@@ -74,7 +72,16 @@ public class NappyAdderFragment extends Fragment implements View.OnClickListener
 
             long timemilis = ttw.getTimeMilis();
             int dirty = 1; // Possible extension: for weirdly coloured nappies.
-            long id = EntriesUtils.insertNappy(mDb, dirty, timemilis);
+            //long id = EntriesUtils.insertNappy(mDb, dirty, timemilis);
+
+
+            // mDb:
+            if (mDb == null) { // NOT SURE WHY THIS HAPPENS.
+                mDb = EntriesDbHandler.getInstance(ctx);
+            }
+            long id = mDb.insertNappy(dirty, timemilis);
+
+
             Toast.makeText(ctx, "ROWID=" + id, Toast.LENGTH_LONG).show();
 
             getActivity().finish();

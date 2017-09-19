@@ -1,6 +1,8 @@
 package com.example.android.babyml.data;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
@@ -16,11 +18,11 @@ import com.example.android.babyml.data.NoteContract.NoteEntry;
 
 
 // TODO: As a singleton I guess...
-public class EntriesDbHelper extends SQLiteOpenHelper {
+public class EntriesDbHandler extends SQLiteOpenHelper {
 
-    static final String TAG = EntriesDbHelper.class.getSimpleName();
-    static final String DB_NAME = "entries.db"; //"feeds.db"; // TODO: Rename it.
-    static final int DB_VERSION = 1; // TODO: Rename it.
+    static final String TAG = EntriesDbHandler.class.getSimpleName();
+    static final String DB_NAME = "entries.db";
+    static final int DB_VERSION = 1;
 
     // TODO: Move it to a separate contract.
     public static final String COLUMN_TB = "TB";
@@ -30,7 +32,7 @@ public class EntriesDbHelper extends SQLiteOpenHelper {
     public static final String COLUMN_NAPPY_DIRTY = "NAPPY_DIRTY";
     public static final String COLUMN_NOTE_VALUE = "NOTE_VALUE";
     public static final String ENTRIES_ALL_VIEW = "ENTRIES_ALL_V1";
-
+    private final Context context;
 
     public static enum EntryType {
         Feed(FeedingEntry.TABLE_NAME),
@@ -49,18 +51,35 @@ public class EntriesDbHelper extends SQLiteOpenHelper {
         public static EntryType getEntryType(String tb) {
             switch (tb) {
                 case "FEED_TB":
-                    return EntriesDbHelper.EntryType.Feed;
+                    return EntriesDbHandler.EntryType.Feed;
                 case "NOTE_TB":
-                    return EntriesDbHelper.EntryType.Note;
+                    return EntriesDbHandler.EntryType.Note;
                 case "NAPPY_TB":
-                    return EntriesDbHelper.EntryType.Nappy;
+                    return EntriesDbHandler.EntryType.Nappy;
                 default: throw new IllegalArgumentException("Unknown value: " + tb);
             }
         }
     }
 
-    public EntriesDbHelper(Context context) {
+    private static EntriesDbHandler instance;
+
+    public static EntriesDbHandler getInstance(Context context) {
+        if (instance == null) {
+            synchronized(EntriesDbHandler.class) {
+                if (instance == null) {
+                    instance = new EntriesDbHandler(context);
+                }
+            }
+        }
+        return instance;
+    }
+
+    public EntriesDbHandler(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
+        this.context = context;
+        if (EntriesDbHandler.instance != null) {
+            throw new UnsupportedOperationException("This constructor should not be called explicitly; use getInstance() instead.");
+        }
     }
 
     private void createFeedTable(SQLiteDatabase db) {
@@ -161,4 +180,134 @@ public class EntriesDbHelper extends SQLiteOpenHelper {
         onCreate(db);
         //}
     }
+
+    // More stuff:
+    public synchronized long insertFeeding(int amount, long timestampMilis) {
+        ContentValues values = new ContentValues();
+        values.put(FeedContract.FeedingEntry.COLUMN_FEED_AMOUNT, amount); //10);
+        values.put(FeedContract.FeedingEntry.COLUMN_FEED_TS, timestampMilis); //System.currentTimeMillis());
+
+        long rowId = instance.getWritableDatabase()
+                .insert(FeedContract.FeedingEntry.TABLE_NAME, null, values);
+
+        if (rowId != -1) {
+            notifyOnFeedChange();
+            notifyOnEntriesChange();
+        }
+        return rowId;
+    }
+
+    /**
+     * Delet
+     * @param id
+     */
+    public synchronized int deleteFeeding(long id) {
+        int rowsAffected = instance.getWritableDatabase()
+                .delete(FeedContract.FeedingEntry.TABLE_NAME, "_ID=" + id, null ); // equivalent to "_ID =" + id
+
+        if (rowsAffected > 0) {
+            notifyOnFeedChange();
+            notifyOnEntriesChange();
+        }
+        return rowsAffected;
+    }
+
+    public synchronized Cursor getLatestFeeding() {
+        return instance.getReadableDatabase().query(
+                FeedContract.FeedingEntry.TABLE_NAME,
+                null,
+                null,
+                null,
+                null,
+                null,
+                FeedContract.FeedingEntry.COLUMN_FEED_TS + " DESC", "1");
+    }
+
+    public synchronized Cursor getAllFeedingsCursor(SQLiteDatabase db) {
+        return instance.getReadableDatabase()
+                .query(
+                    FeedContract.FeedingEntry.TABLE_NAME,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    FeedContract.FeedingEntry.COLUMN_FEED_TS + " DESC");
+    }
+
+    public synchronized Cursor getAllEntriesCursor() {
+        return instance.getReadableDatabase()
+                .query(
+                    EntriesDbHandler.ENTRIES_ALL_VIEW,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null); // The View is already sorted.
+    }
+
+    /**
+     * Deletes all entries in the Feedings table.
+     * @return number of rows affected.
+     */
+    public synchronized int deleteAllFeedings() {
+        int rowsAffected = instance
+                .getWritableDatabase()
+                .delete(FeedContract.FeedingEntry.TABLE_NAME, null, null);
+
+        if (rowsAffected > 0) {
+            notifyOnFeedChange();
+            notifyOnEntriesChange();
+        }
+
+        return rowsAffected;
+    }
+
+    public synchronized long insertNappy(int dirty, long timeStampMilis) {
+        ContentValues values = new ContentValues();
+
+        values.put(NappyContract.NappyEntry.COLUMN_NAPPY_TS, timeStampMilis);
+        values.put(NappyContract.NappyEntry.COLUMN_NAPPY_DIRTY, dirty);
+
+        long rowId = instance
+                .getWritableDatabase()
+                .insert(NappyContract.NappyEntry.TABLE_NAME, null, values);
+
+        if (rowId != -1) {
+            notifyOnNappyChange();
+            notifyOnEntriesChange();
+        }
+        return rowId;
+    }
+
+    public synchronized int deleteNappy(long id) {
+        int rowsAffected = instance
+                .getWritableDatabase()
+                .delete(NappyContract.NappyEntry.TABLE_NAME, "_ID=" + id, null);
+
+        if (rowsAffected > 0) {
+            notifyOnNappyChange();
+            notifyOnEntriesChange();
+        }
+        return rowsAffected;
+    }
+
+    private void notifyOnEntriesChange() {
+        context.getContentResolver().notifyChange(EntriesProvider.URI_ENTRIES, null, false);
+    }
+
+    private void notifyOnFeedChange() {
+        context.getContentResolver().notifyChange(EntriesProvider.URI_FEEDS, null, false);
+    }
+
+//  TODO: Mechanism of notification of other stuff:
+    private void notifyOnNappyChange() {
+        context.getContentResolver().notifyChange(EntriesProvider.URI_NAPPIES, null, false);
+    }
+//
+//    private void notifyOnNoteChange() {
+//        context.getContentResolver().notifyChange(EntriesProvider.URI_ENTRIES, null, false);
+//    }
+
 }

@@ -1,31 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <View android:layout_width="0dp"
+    <TextView android:layout_width="0dp"
         android:layout_weight="0.20"
-        android:layout_height="48dp"
-        android:background="@android:color/holo_blue_bright"/>
+        android:layout_height="20dp"
+        android:background="@android:color/holo_blue_bright"
+        android:paddingLeft="8dp"
+        android:gravity="center_vertical"
+        tools:text="+Milk" />
 
-    <View android:layout_width="0dp"
+    <TextView android:layout_width="0dp"
         android:layout_weight="0.20"
-        android:layout_height="48dp"
-        android:background="@android:color/holo_blue_light"/>
+        android:layout_height="20dp"
+        android:background="@android:color/holo_blue_light"
+        android:paddingLeft="8dp"
+        android:gravity="center_vertical"
+        tools:text="+Nappy" />
 
-    <View android:layout_width="0dp"
+    <TextView android:layout_width="0dp"
         android:layout_weight="0.20"
-        android:layout_height="48dp"
-        android:background="@android:color/holo_green_light"/>
+        android:layout_height="20dp"
+        android:background="@android:color/holo_green_light"
+        android:paddingLeft="8dp"
+        android:gravity="center_vertical"
+        tools:text="+Note"/>
 
-    <View android:layout_width="0dp"
+    <TextView android:layout_width="0dp"
         android:layout_weight="0.20"
-        android:layout_height="48dp"
-        android:background="@android:color/holo_purple"/>
+        android:layout_height="20dp"
+        android:background="@android:color/holo_purple"
+        android:paddingLeft="8dp"
+        android:gravity="center_vertical"
+        tools:text="+Sleep"/>
 
-    <View android:layout_width="0dp"
+    <TextView android:layout_width="0dp"
         android:layout_weight="0.20"
-        android:layout_height="48dp"
-        android:background="@android:color/holo_orange_dark"/>
+        android:layout_height="20dp"
+        android:background="@android:color/holo_orange_dark"
+        android:paddingLeft="8dp"
+        android:gravity="center_vertical"
+        tools:text="+Temp"/>
 
 </LinearLayout>
