@@ -4,6 +4,7 @@ import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
+import android.util.Log;
 
 public class EntriesProvider extends ContentProvider {
     public static final String AUTHORITY = "com.example.android.babyml.provider";
@@ -25,6 +26,7 @@ public class EntriesProvider extends ContentProvider {
     public static final String NOTES = SCHEME + AUTHORITY + "/note";
     public static final Uri URI_NOTES = Uri.parse(NOTES);
     public static final String NOTE_BASE = NOTES + "/"; // This is for one NAPPY.
+    private static final String TAG = EntriesProvider.class.getSimpleName();
 
     // TODO: Notes URIs
     // TODO: Nappy URIs
@@ -57,16 +59,44 @@ public class EntriesProvider extends ContentProvider {
         return true;
     }
 
+
+
     @Override
     public Cursor query(Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
 
+        if (sortOrder == null) {
+            throw new IllegalArgumentException("No sortOrder specified");
+            //sortOrder = EntriesDbHandler.COLUMN_TS  + " DESC";
+//            Log.w(TAG, "potentially invalid call/query: no sort order provided; "
+//                    + " expecting, e.g. EntriesDbHandler.COLUMN_TS  + \" DESC\"");
+        }
+
         // TODO: Implement this to handle query requests from clients.
         if (URI_ENTRIES.equals(uri)) {
-            // TODO
+            String limit = null;
             Cursor cursor = EntriesDbHandler
-                    .getInstance(getContext()).getAllEntriesCursor();
+                    .getInstance(getContext())
+                        .getAllEntriesCursor(
+                            projection,
+                            selection,
+                            selectionArgs,
+                            sortOrder,
+                            limit);
+
             cursor.setNotificationUri(getContext().getContentResolver(), URI_ENTRIES);
+            return cursor;
+        } else if (URI_FEEDS.equals(uri)) {
+            String limit = null;
+            Cursor cursor = EntriesDbHandler
+                    .getInstance(getContext())
+                        .getAllFeedingsCursor(
+                            projection,
+                            selection,
+                            selectionArgs,
+                            sortOrder,
+                            limit);
+            cursor.setNotificationUri(getContext().getContentResolver(), URI_FEEDS);
             return cursor;
         } else {
             throw new UnsupportedOperationException("Not yet implemented");

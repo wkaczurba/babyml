@@ -212,39 +212,89 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
         return rowsAffected;
     }
 
-    public synchronized Cursor getLatestFeeding() {
-        return instance.getReadableDatabase().query(
-                FeedContract.FeedingEntry.TABLE_NAME,
-                null,
-                null,
-                null,
-                null,
-                null,
-                FeedContract.FeedingEntry.COLUMN_FEED_TS + " DESC", "1");
-    }
+//    @Deprecated
+//    public synchronized Cursor getLatestFeeding() {
+//        // FIXME: This should run getAllFeedings with LIMIT 1;
+//        return getAllFeedingsCursor(
+//                null,
+//                null,
+//                null,
+//                FeedContract.FeedingEntry.COLUMN_FEED_TS + " DESC",
+//                "1"
+//                );
+///*        return instance.getReadableDatabase().query(
+//                FeedContract.FeedingEntry.TABLE_NAME,
+//                null,
+//                null,
+//                null,
+//                null,
+//                null,
+//                FeedContract.FeedingEntry.COLUMN_FEED_TS + " DESC", "1"); */
+//    }
+//
+//    @Deprecated
+//    synchronized Cursor getAllFeedingsCursor() {
+//        return instance.getReadableDatabase()
+//                .query(
+//                    FeedContract.FeedingEntry.TABLE_NAME,
+//                    null,
+//                    null,
+//                    null,
+//                    null,
+//                    null,
+//                    FeedContract.FeedingEntry.COLUMN_FEED_TS + " DESC");
+//    }
 
-    public synchronized Cursor getAllFeedingsCursor(SQLiteDatabase db) {
+    /**
+     *
+     * @param projection - usually null
+     * @param selection - usually null
+     * @param selectionArgs - usually null
+     * @param sortOrder - usually: FeedContract.FeedingEntry.COLUMN_FEED_TS + " DESC"
+     * @param limit - null or 1 for the latest one;
+     * @return
+     */
+    synchronized Cursor getAllFeedingsCursor(
+            String[] projection, // null
+            String selection, //= null
+            String[] selectionArgs, //= null; // not used by the content provider
+            String sortOrder, // FeedContract.FeedingEntry.COLUMN_FEED_TS + " DESC"
+            String limit // 1 for latest feed
+    ) {
+        if (sortOrder == null) {
+            throw new IllegalArgumentException("Unexpected call -> getAllFeedinsCursor with empty sort order");
+        }
+
         return instance.getReadableDatabase()
                 .query(
-                    FeedContract.FeedingEntry.TABLE_NAME,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    FeedContract.FeedingEntry.COLUMN_FEED_TS + " DESC");
+                        FeedContract.FeedingEntry.TABLE_NAME,
+                        null,
+                        selection,
+                        selectionArgs,
+                        null,
+                        null,
+                        sortOrder,
+                        limit
+                        );
     }
 
-    public synchronized Cursor getAllEntriesCursor() {
+    synchronized Cursor getAllEntriesCursor(
+            String[] projection, // null
+            String selection, //= null
+            String[] selectionArgs, //= null; // not used by the content provider
+            String sortOrder, // TRY: Entries.DbHandler.COLUMN_TS  + " DESC"
+            String limit // 1 for latest feed
+    ) {
         return instance.getReadableDatabase()
                 .query(
                     EntriesDbHandler.ENTRIES_ALL_VIEW,
                     null,
+                    selection,
+                    selectionArgs,
                     null,
                     null,
-                    null,
-                    null,
-                    null); // The View is already sorted.
+                    sortOrder,
+                    limit); // The View is already sorted.
     }
 
     /**
