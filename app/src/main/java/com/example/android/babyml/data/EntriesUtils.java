@@ -121,7 +121,7 @@ public class EntriesUtils {
 //        return db.insert(NappyContract.NappyEntry.TABLE_NAME, null, values);
 //    }
 //
-//    public static void deleteNappy(SQLiteDatabase db, long id) {
+//    public static void deleteNappyById(SQLiteDatabase db, long id) {
 //        db.delete(NappyContract.NappyEntry.TABLE_NAME, "_ID=" + id, null);
 //    }
 
@@ -150,11 +150,14 @@ public class EntriesUtils {
                     Log.d(TAG, String.format("ALL FEEDINGS [%d]: %d ml; ts=%d", id, feedAmount, feedTimestamp));
 
                     //long newId = EntriesUtils.insertFeeding(newDb, feedAmount, feedTimestamp);
-                    long newId = EntriesDbHandler
-                            .getInstance(ctx)
-                            .insertFeeding(feedAmount, feedTimestamp);
+//                    long newId = EntriesDbHandler
+//                            .getInstance(ctx)
+//                            .insertFeeding(feedAmount, feedTimestamp);
+                    ContentValues cv = (new Feed(-1L, Feed.TABLE_NAME, feedTimestamp, feedAmount, null)).asContentValues();
+                    ctx.getContentResolver().insert(EntriesProvider.URI_FEEDS, cv);
 
-                    Log.d(TAG, "Inserted into new table Feed with id=" + newId);
+                    //Log.d(TAG, "Inserted into new table Feed with id=" + newId);
+                    Log.d(TAG, "Inserted into new table Feed");
                     cnt += 1;
                 }
 

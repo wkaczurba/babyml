@@ -11,8 +11,8 @@ import android.widget.TextView;
 
 import com.example.android.babyml.data.EntriesDbHandler;
 import com.example.android.babyml.data.EntriesMap;
+import com.example.android.babyml.data.Entry;
 import com.example.android.babyml.data.Feed;
-import com.example.android.babyml.data.FeedContract;
 import com.example.android.babyml.data.Nappy;
 import com.example.android.babyml.data.Note;
 import com.example.android.babyml.data.Summary;
@@ -51,8 +51,6 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
      *   LocalDate objects for separators
      *
      */
-//    private List<Object> items;
-//
     public final ListItemClickListener mOnClickListener;
     public LogAdapter(ListItemClickListener onClickListener) {
         mOnClickListener = onClickListener;
@@ -90,7 +88,7 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
                 // Format the stuff: (TODO: Move to formatting or somewhere)
                 DateTimeZone currentTz = DateTimeZone.forTimeZone(TimeZone.getDefault());
-                DateTime dt = new DateTime(feed.getTimestamp(), currentTz);
+                DateTime dt = new DateTime(feed.getTs(), currentTz);
                 DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");
                 CharSequence time = dtf.print(dt);
 
@@ -174,7 +172,7 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
                 // Format the stuff: (TODO: Move to formatting or somewhere); it is common with FeedingViewHolder.bind(...)
                 DateTimeZone currentTz = DateTimeZone.forTimeZone(TimeZone.getDefault());
-                DateTime dt = new DateTime(nappy.getTimestamp(), currentTz);
+                DateTime dt = new DateTime(nappy.getTs(), currentTz);
                 DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");
                 CharSequence time = dtf.print(dt);
 
@@ -238,16 +236,17 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     // Helper:
     public static Feed cursorToFeed(Cursor cursor) {
-        long id = cursor.getLong(cursor.getColumnIndex(FeedContract.FeedingEntry._ID));
-        int amt = cursor.getInt(cursor.getColumnIndex(FeedContract.FeedingEntry.COLUMN_FEED_AMOUNT));
-        long ts = cursor.getLong(cursor.getColumnIndex(FeedContract.FeedingEntry.COLUMN_FEED_TS));
+        long id = cursor.getLong(cursor.getColumnIndex(Feed.COLUMN_ID));
+        int amt = cursor.getInt(cursor.getColumnIndex(Feed.COLUMN_FEED_AMOUNT));
+        long ts = cursor.getLong(cursor.getColumnIndex(Feed.COLUMN_FEED_TS));
 
-        return new Feed(id, ts, amt);
+        //return new Feed(id, ts, amt);
+        return new Feed(id, Feed.COLUMN_FEED_TB, ts, amt, null);
     }
 
     public static EntriesDbHandler.EntryType getEntryType(Cursor cursor) {
         EntriesDbHandler.EntryType e;
-        String tb = cursor.getString(cursor.getColumnIndex(EntriesDbHandler.COLUMN_TB));
+        String tb = cursor.getString(cursor.getColumnIndex(Entry.COLUMN_ENTRY_TB)); // WAS: EntriesDbHandler.COLUMN_TB));
 
 
         e = EntriesDbHandler.EntryType.getEntryType(tb);
@@ -259,38 +258,49 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         LocalDate oldDate = null;
         entriesMap = new EntriesMap();
 
-        if (cursor == null)
+
+        if (cursor == null) {
+            Log.d(TAG, "swapCursor.cursor == null");
+            notifyDataSetChanged();
             return;
+        }
+        Log.d(TAG, "swapCursor.cursor.getCount()= " + cursor.getCount());
 
         // Updating all items;
+        cursor.moveToPosition(-1); // This is necessary as same cursor will be reused for reloading on device rotation.
         while (cursor.moveToNext()) {
 
             EntriesDbHandler.EntryType e = getEntryType(cursor);
 
-            long id = cursor.getLong(cursor.getColumnIndex(EntriesDbHandler.COLUMN_ID));
-            long timestamp = cursor.getLong(cursor.getColumnIndex(EntriesDbHandler.COLUMN_TS));
+            long id = cursor.getLong(cursor.getColumnIndex(Entry.COLUMN_ID)); // EntriesDbHandler.COLUMN_ID_FOREIGN));
+            long timestamp = cursor.getLong(cursor.getColumnIndex(Entry.COLUMN_ENTRY_TS)); //EntriesDbHandler.COLUMN_TS));
 
             // TODO: Consider changing to switch.case...:
             if (e.equals(EntriesDbHandler.EntryType.Feed)) {
-                int feedAmount = cursor.getInt(cursor.getColumnIndex(EntriesDbHandler.COLUMN_FEED_AMOUNT));
-                Feed f = new Feed(id, timestamp, feedAmount);
-                Log.d(TAG, "GOT: " + f);
+                int feedAmount = cursor.getInt(cursor.getColumnIndex(Feed.COLUMN_FEED_AMOUNT)); // EntriesDbHandler.COLUMN_FEED_AMOUNT));
+                //Feed f = new Feed(id, timestamp, feedAmount);
+                Feed f = new Feed(id, Feed.COLUMN_FEED_TB, timestamp, feedAmount, null);
                 entriesMap.addSerializable(f);
             } else if (e.equals(EntriesDbHandler.EntryType.Nappy)) {
-                int nappyDirty = cursor.getInt(cursor.getColumnIndex(EntriesDbHandler.COLUMN_NAPPY_DIRTY));
-                Nappy n = new Nappy(id, timestamp, nappyDirty);
-                Log.d(TAG, "GOT NAPPY -> TODO");
+
+                int nappyDirty = cursor.getInt(cursor.getColumnIndex(Nappy.COLUMN_NAPPY_DIRTY)); //EntriesDbHandler.COLUMN_NAPPY_DIRTY));
+                int nappyWet = cursor.getInt(cursor.getColumnIndex(Nappy.COLUMN_NAPPY_WET)); //EntriesDbHandler.COLUMN_NAPPY_DIRTY));
+                String nappyNote = cursor.getString(cursor.getColumnIndex(Nappy.COLUMN_NAPPY_NOTE)); //EntriesDbHandler.COLUMN_NAPPY_DIRTY));
+                // FIXME: More parameters to be added here.  (COLUMN_NAPPY_WET, COLUMN_NAPPY_NOTE)
+
+                //Nappy n = new Nappy(id, timestamp, nappyDirty, nappyWet, nappyNote);
+                Nappy n = new Nappy(id, Nappy.TABLE_NAME, timestamp, nappyDirty, nappyWet, nappyNote);
                 entriesMap.addSerializable(n);
             } else if (e.equals(EntriesDbHandler.EntryType.Note)) {
-                String noteValue = cursor.getString(cursor.getColumnIndex(EntriesDbHandler.COLUMN_NOTE_VALUE));
-                Note n = new Note(id, timestamp, noteValue);
-                Log.d(TAG, "GOT NOTE -> TODO");
+                String noteValue = cursor.getString(cursor.getColumnIndex(Note.COLUMN_NOTE_VALUE)); //EntriesDbHandler.COLUMN_NOTE_VALUE));
+                Note n = new Note(id, Note.TABLE_NAME, timestamp, noteValue);
                 entriesMap.addSerializable(n);
             } else {
                 throw new IllegalArgumentException("Invalid enum: " + e.name());
             }
         }
         notifyDataSetChanged();
+        Log.d(TAG, "Cursor swapped; EntryMap.size(): " + entriesMap.size());
     }
 
     @Override
@@ -367,9 +377,9 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        if (entriesMap == null)
+        if (entriesMap == null) {
             return 0;
+        }
         return entriesMap.size();
     }
-
 }

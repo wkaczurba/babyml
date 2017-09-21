@@ -2,8 +2,10 @@ package com.example.android.babyml;
 
 
 import android.app.Fragment;
+import android.content.ContentProvider;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 //import android.support.v4.app.Fragment;
@@ -19,7 +21,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.babyml.data.EntriesDbHandler;
+import com.example.android.babyml.data.EntriesProvider;
 import com.example.android.babyml.data.EntriesUtils;
+import com.example.android.babyml.data.Feed;
 
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
@@ -29,6 +33,8 @@ import org.joda.time.format.DateTimeFormatter;
 /**
  * A simple {@link Fragment} subclass.
  */
+// TODO: Sasving state and contents of elements (e.g. milkAmount)
+
 public class MilkAdderFragment extends Fragment implements View.OnClickListener {
 
     private static final String LOG = MilkAdderFragment.class.getSimpleName();
@@ -202,7 +208,14 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
             }
             milkTimeTextWatcher.setDefaultTimeIfEntryInvalid();
             long timeMillis = milkTimeTextWatcher.getTimeMilis();
-            mDb.insertFeeding(milkAmountValue, timeMillis);
+
+
+            Uri uri = context.getContentResolver().insert(EntriesProvider.URI_FEEDS,
+                    new Feed(-1, Feed.COLUMN_FEED_TB, timeMillis, milkAmountValue, null).asContentValues());
+                    //new Feed(-1, timeMillis, milkAmountValue).asContentValues());
+            Log.d(TAG, "Inserted: " + uri.toString());
+
+            //mDb.insertFeeding(milkAmountValue, timeMillis);
             Toast.makeText(context, "Item inserted ok.", Toast.LENGTH_LONG).show();
 //          updateLogRecyclerView();
 
@@ -213,7 +226,8 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
         } else if (v.equals(deleteAllButton)) {
             // TODO: Add question first.
 
-            mDb.deleteAllFeedings();
+            context.getContentResolver().delete(EntriesProvider.URI_FEEDS, null, null);
+            //mDb.deleteAllFeedings();
         } else {
             Log.d(TAG, "Unknown item clicked: " + v);
         }

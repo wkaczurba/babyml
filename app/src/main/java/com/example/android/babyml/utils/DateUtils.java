@@ -47,7 +47,7 @@ public class DateUtils {
     }
 
     public static LocalDate summarizableToLocalDate(Summarizable s) {
-        return milisToLocalDate( s.getTimestamp() );
+        return milisToLocalDate( s.getTs() );
     }
 
     public static LocalDate milisToLocalDate(long millis) {

@@ -2,8 +2,9 @@ package com.example.android.babyml;
 
 
 import android.app.Fragment;
+import android.content.ContentValues;
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +15,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.android.babyml.data.EntriesDbHandler;
-import com.example.android.babyml.data.EntriesUtils;
+import com.example.android.babyml.data.EntriesProvider;
+import com.example.android.babyml.data.Nappy;
 
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
@@ -72,6 +74,8 @@ public class NappyAdderFragment extends Fragment implements View.OnClickListener
 
             long timemilis = ttw.getTimeMilis();
             int dirty = 1; // Possible extension: for weirdly coloured nappies.
+            String note = null;
+            int wet = 0;
             //long id = EntriesUtils.insertNappy(mDb, dirty, timemilis);
 
 
@@ -79,8 +83,14 @@ public class NappyAdderFragment extends Fragment implements View.OnClickListener
             if (mDb == null) { // NOT SURE WHY THIS HAPPENS.
                 mDb = EntriesDbHandler.getInstance(ctx);
             }
-            long id = mDb.insertNappy(dirty, timemilis);
 
+            //ContentValues contentValues = new Nappy(-1, timemilis, dirty, wet, note).asContentValues();
+            ContentValues contentValues = new Nappy(-1, Nappy.COLUMN_NAPPY_TB, timemilis, dirty, wet, note).asContentValues();
+            Uri uri = getActivity().getContentResolver().insert(
+                    EntriesProvider.URI_NAPPIES,
+                    contentValues);
+            long id = Long.valueOf(uri.getLastPathSegment());
+            //long id = mDb.insertNappy(dirty, timemilis);
 
             Toast.makeText(ctx, "ROWID=" + id, Toast.LENGTH_LONG).show();
 

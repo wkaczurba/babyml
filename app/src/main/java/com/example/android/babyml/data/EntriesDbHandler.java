@@ -6,9 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-import com.example.android.babyml.data.FeedContract.FeedingEntry;
-import com.example.android.babyml.data.NappyContract.NappyEntry;
-import com.example.android.babyml.data.NoteContract.NoteEntry;
+import android.view.WindowContentFrameStats;
 
 /**
  * Created by WKaczurb on 8/5/2017.
@@ -25,19 +23,14 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
     static final int DB_VERSION = 1;
 
     // TODO: Move it to a separate contract.
-    public static final String COLUMN_TB = "TB";
-    public static final String COLUMN_TS = "TS";
-    public static final String COLUMN_ID = "ID";
-    public static final String COLUMN_FEED_AMOUNT = "FEED_AMOUNT";
-    public static final String COLUMN_NAPPY_DIRTY = "NAPPY_DIRTY";
-    public static final String COLUMN_NOTE_VALUE = "NOTE_VALUE";
-    public static final String ENTRIES_ALL_VIEW = "ENTRIES_ALL_V1";
+    public static final String VIEW_ENTRIES_V_ALL = "ENTRIES_V_ALL";
     private final Context context;
 
     public static enum EntryType {
-        Feed(FeedingEntry.TABLE_NAME),
-        Nappy(NappyEntry.TABLE_NAME),
-        Note(NoteEntry.TABLE_NAME);
+        Feed(com.example.android.babyml.data.Feed.TABLE_NAME),
+        Nappy(com.example.android.babyml.data.Nappy.TABLE_NAME),
+        Note(com.example.android.babyml.data.Note.TABLE_NAME),
+        Sleep(com.example.android.babyml.data.Sleep.TABLE_NAME);
 
         private String dbTableName;
         private EntryType(String dbTableName) {
@@ -50,12 +43,15 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
 
         public static EntryType getEntryType(String tb) {
             switch (tb) {
-                case "FEED_TB":
-                    return EntriesDbHandler.EntryType.Feed;
-                case "NOTE_TB":
-                    return EntriesDbHandler.EntryType.Note;
-                case "NAPPY_TB":
-                    return EntriesDbHandler.EntryType.Nappy;
+                case com.example.android.babyml.data.Feed.TABLE_NAME: //"FEED_TB":
+                    return EntryType.Feed;
+                case com.example.android.babyml.data.Note.TABLE_NAME: //"NOTE_TB":
+                    return EntryType.Note;
+                case com.example.android.babyml.data.Nappy.TABLE_NAME: // "NAPPY_TB":
+                    return EntryType.Nappy;
+                case com.example.android.babyml.data.Sleep.TABLE_NAME: // "SLEEP_TB":
+                    return EntryType.Sleep;
+
                 default: throw new IllegalArgumentException("Unknown value: " + tb);
             }
         }
@@ -82,113 +78,70 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
         }
     }
 
-    private void createFeedTable(SQLiteDatabase db) {
-        String SQL_CREATE_FEED_TB =
-                "CREATE TABLE " + FeedingEntry.TABLE_NAME + " (\n"
-                        + FeedingEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,\n"
-                        + FeedingEntry.COLUMN_FEED_TS + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,\n"
-                        + FeedingEntry.COLUMN_FEED_AMOUNT + " INTEGER CONSTRAINT FEED_AMOUNT_CK CHECK (FEED_AMOUNT > 0) NOT NULL\n" +
-                        ");";
-        db.execSQL(SQL_CREATE_FEED_TB);
+    @Override
+    public void onCreate(SQLiteDatabase db) {
+        Entry.createEntryTable(db); // Master-table.
 
-        String SQL_CREATE_FEED_TS_INDEX = "CREATE INDEX " +
-                FeedingEntry.INDEX_TS + " ON " +
-                FeedingEntry.TABLE_NAME+"("+FeedingEntry.COLUMN_FEED_AMOUNT+")";
-        db.execSQL(SQL_CREATE_FEED_TS_INDEX);
+        Feed.createFeedTable(db);
+        Nappy.createNappyTable(db);
+        Note.createNoteTable(db);
+        Sleep.createSleepTable(db);
+        createAllEntriesView(db);
+        Log.d(TAG, "DB Created ok.");
+
+        EntriesDbHandler.getInstance(context).printOrphans();
     }
 
-    private void createNappyTable(SQLiteDatabase db) {
-        String SQL_CREATE_NAPPY_TB =
-                "CREATE TABLE " + NappyEntry.TABLE_NAME + " (\n" +
-                        "  " + NappyEntry._ID +" INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
-                        "  " + NappyEntry.COLUMN_NAPPY_TS + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,\n" +
-                        "  " + NappyEntry.COLUMN_NAPPY_DIRTY + " INTEGER (1, 0) NOT NULL\n" +
-                        ");\n";
-
-        db.execSQL(SQL_CREATE_NAPPY_TB);
-
-        String SQL_CREATE_NAPPY_TS_INDEX = "" +
-                "CREATE INDEX " + NappyEntry.INDEX_TS + " ON " +
-                NappyEntry.TABLE_NAME + "(" + NappyEntry.COLUMN_NAPPY_TS + ");";
-
-        db.execSQL(SQL_CREATE_NAPPY_TS_INDEX);
-    }
-
-    private void createNoteTable(SQLiteDatabase db) {
-        // Notes
-        String SQL_CREATE_NOTE_TB = "CREATE TABLE " + NoteEntry.TABLE_NAME + " (\n" +
-                "  " + NoteEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT,\n" +
-                "  " + NoteEntry.COLUMN_NOTE_TS + " TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,\n" +
-                "  " + NoteEntry.COLUMN_NOTE_VALUE + " VARCHAR2(500) NOT NULL\n" +
-                ");";
-
-        db.execSQL(SQL_CREATE_NOTE_TB);
-
-        String SQL_CREATE_NOTE_TS_INDEX =
-                "CREATE INDEX " + NoteEntry.INDEX_TS + " ON " + NoteEntry.TABLE_NAME + "(" + NoteEntry.COLUMN_NOTE_TS + ");";
-
-        db.execSQL(SQL_CREATE_NOTE_TS_INDEX);
-    }
-
-    private void createEntriesAllView(SQLiteDatabase db) {
-        String SQL_CREATE_ALL_ENTRIES_VIEW  =
-                "CREATE VIEW " + ENTRIES_ALL_VIEW + "  AS\n" +
-                        "  SELECT * FROM\n" +
-                        "    (SELECT " + FeedingEntry.COLUMN_FEED_TS + " AS " + COLUMN_TS + ",\n" +
-                        "            " + FeedingEntry._ID + " AS " + COLUMN_ID + ",\n" +
-                        "            '"+ FeedingEntry.TABLE_NAME + "' AS "+ COLUMN_TB + ",\n" +
-                        "            " + FeedingEntry.COLUMN_FEED_AMOUNT +" AS " + COLUMN_FEED_AMOUNT+ ",\n" +
-                        "            NULL AS " + COLUMN_NAPPY_DIRTY + ",\n" +
-                        "            NULL AS " + COLUMN_NOTE_VALUE + "\n" +
-                        "         FROM "+ FeedingEntry.TABLE_NAME +"\n" +
-                        "    UNION\n" +
-                        "    SELECT " + NappyEntry.COLUMN_NAPPY_TS +" AS " + COLUMN_TS + ",\n" +
-                        "           " + NappyEntry._ID + " AS " + COLUMN_ID + ",\n" +
-                        "           '"+ NappyEntry.TABLE_NAME + "' AS "+ COLUMN_TB + ",\n" +
-                        "           NULL AS " + COLUMN_FEED_AMOUNT + ",\n" +
-                        "           " + NappyEntry.COLUMN_NAPPY_DIRTY +" AS " + COLUMN_NAPPY_DIRTY + ",\n" +
-                        "           NULL AS " + COLUMN_NOTE_VALUE + "\n" +
-                        "         FROM "+ NappyEntry.TABLE_NAME +"\n" +
-                        "    UNION\n" +
-                        "    SELECT "+ NoteEntry.COLUMN_NOTE_TS +" AS " + COLUMN_TS +",\n" +
-                        "           "+ NoteEntry._ID+" AS " + COLUMN_ID + ",\n" +
-                        "           '"+ NoteEntry.TABLE_NAME+ "' AS "+ COLUMN_TB + ",\n" +
-                        "           NULL AS " + COLUMN_FEED_AMOUNT+ ",\n" +
-                        "           NULL AS " + COLUMN_NAPPY_DIRTY + ",\n" +
-                        "           "+ NoteEntry.COLUMN_NOTE_VALUE +" AS NOTE_VALUE\n" +
-                        "         FROM "+ NoteEntry.TABLE_NAME +")\n" +
-                        "  ORDER BY TS DESC;";
-        db.execSQL(SQL_CREATE_ALL_ENTRIES_VIEW);
+    // TODO: ADD
+    private void createAllEntriesView(SQLiteDatabase db) {
+        String CREATE_VIEW =
+                "CREATE VIEW ENTRIES_V_ALL AS\n" +
+                  "SELECT * FROM ENTRY_TB LEFT JOIN FEED_TB USING (_ID)\n" +
+                    "LEFT JOIN NAPPY_TB USING(_ID)\n" +
+                    "LEFT JOIN SLEEP_TB USING(_ID)\n" + "LEFT JOIN NOTE_TB USING(_ID);\n";
+        db.execSQL(CREATE_VIEW);
     }
 
     @Override
-    public void onCreate(SQLiteDatabase db) {
-        createFeedTable(db);
-        createNappyTable(db);
-        createNoteTable(db);
-        createEntriesAllView(db);
-
-        Log.d(TAG, "DB Created ok.");
+    public void onConfigure(SQLiteDatabase db) {
+        super.onConfigure(db);
+        db.rawQuery("PRAGMA foreign_keys = ON;", null).close();
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        //if (oldVersion != newVersion) {
         Log.d(TAG, String.format("Upgrading of DB from %0d to %0d should take place here...; for now - old version will be dropped.", oldVersion, newVersion));
-        String SQL_DROP_OLD_TABLE = "DROP TABLE IF EXISTS " + FeedContract.FeedingEntry.TABLE_NAME;
+        String SQL_DROP_OLD_TABLE = "DROP TABLE IF EXISTS " + Feed.TABLE_NAME;
         db.execSQL(SQL_DROP_OLD_TABLE);
         onCreate(db);
         //}
     }
 
-    // More stuff:
-    public synchronized long insertFeeding(int amount, long timestampMilis) {
-        ContentValues values = new ContentValues();
-        values.put(FeedContract.FeedingEntry.COLUMN_FEED_AMOUNT, amount); //10);
-        values.put(FeedContract.FeedingEntry.COLUMN_FEED_TS, timestampMilis); //System.currentTimeMillis());
+    synchronized long insertFeed(Feed feed) {
+        SQLiteDatabase db = instance.getWritableDatabase();
+        long rowId;
 
-        long rowId = instance.getWritableDatabase()
-                .insert(FeedContract.FeedingEntry.TABLE_NAME, null, values);
+        ContentValues values = feed.asContentValues();
+        if (values.containsKey(Feed.COLUMN_ID)) {
+            values.remove(Feed.COLUMN_ID);
+        }
+
+        db.beginTransaction();
+        try {
+            // TODO: Replace the below with string contstants (e.g. Entry.COLUMN...)
+            // Or change into db.insert(..)
+            ContentValues entryCv = feed.asEntry().asContentValues();
+            entryCv.remove(Entry.COLUMN_ID);
+            rowId = db.insert(Entry.TABLE_NAME, null, entryCv);
+
+            ContentValues feedCv = feed.asContentValues();
+            feedCv.put(Feed.COLUMN_ID, rowId);
+
+            db.insert(Feed.TABLE_NAME, null, feedCv);
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
 
         if (rowId != -1) {
             notifyOnFeedChange();
@@ -197,60 +150,44 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
         return rowId;
     }
 
-    /**
-     * Delet
-     * @param id
-     */
-    public synchronized int deleteFeeding(long id) {
+    // Delets all feeds.
+    synchronized int deleteAllFeeds() {
         int rowsAffected = instance.getWritableDatabase()
-                .delete(FeedContract.FeedingEntry.TABLE_NAME, "_ID=" + id, null ); // equivalent to "_ID =" + id
+                .delete(
+                        Entry.TABLE_NAME,
+                        null,
+                        null ); // equivalent to "_ID =" + id
 
         if (rowsAffected > 0) {
-            notifyOnFeedChange();
+            notifyOnFeedChange(); // what about other ones, e.g. NOTES, ETC... (?)
             notifyOnEntriesChange();
         }
         return rowsAffected;
     }
 
-//    @Deprecated
-//    public synchronized Cursor getLatestFeeding() {
-//        // FIXME: This should run getAllFeedings with LIMIT 1;
-//        return getAllFeedingsCursor(
-//                null,
-//                null,
-//                null,
-//                FeedContract.FeedingEntry.COLUMN_FEED_TS + " DESC",
-//                "1"
-//                );
-///*        return instance.getReadableDatabase().query(
-//                FeedContract.FeedingEntry.TABLE_NAME,
-//                null,
-//                null,
-//                null,
-//                null,
-//                null,
-//                FeedContract.FeedingEntry.COLUMN_FEED_TS + " DESC", "1"); */
-//    }
-//
-//    @Deprecated
-//    synchronized Cursor getAllFeedingsCursor() {
-//        return instance.getReadableDatabase()
-//                .query(
-//                    FeedContract.FeedingEntry.TABLE_NAME,
-//                    null,
-//                    null,
-//                    null,
-//                    null,
-//                    null,
-//                    FeedContract.FeedingEntry.COLUMN_FEED_TS + " DESC");
-//    }
+    synchronized int deleteFeedById(long id) {
+        int rowsAffected = instance.getWritableDatabase()
+                .delete(
+                        Entry.TABLE_NAME,
+                        Entry.COLUMN_ID + "=? AND " +
+                        Entry.COLUMN_ENTRY_TB + "=?",
+                        new String[] { String.valueOf( id ), Feed.TABLE_NAME } ); // equivalent to "_ID =" + id
+
+        if (rowsAffected > 0) {
+            notifyOnFeedChange();
+            notifyOnEntriesChange();
+        } else {
+            throw new IllegalArgumentException("Could not delete Feed.id" + id);
+        }
+        return rowsAffected;
+    }
 
     /**
      *
      * @param projection - usually null
      * @param selection - usually null
      * @param selectionArgs - usually null
-     * @param sortOrder - usually: FeedContract.FeedingEntry.COLUMN_FEED_TS + " DESC"
+     * @param sortOrder - usually: Feed.COLUMN_FEED_TS + " DESC"
      * @param limit - null or 1 for the latest one;
      * @return
      */
@@ -258,16 +195,21 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
             String[] projection, // null
             String selection, //= null
             String[] selectionArgs, //= null; // not used by the content provider
-            String sortOrder, // FeedContract.FeedingEntry.COLUMN_FEED_TS + " DESC"
+            String sortOrder, // Feed.COLUMN_FEED_TS + " DESC"
             String limit // 1 for latest feed
     ) {
+
+        // TODO: SELECT * FROM ENTRY_TB JOIN FEED_TB USING (_ID);
+
         if (sortOrder == null) {
             throw new IllegalArgumentException("Unexpected call -> getAllFeedinsCursor with empty sort order");
         }
 
+        printOrphans();
+
         return instance.getReadableDatabase()
                 .query(
-                        FeedContract.FeedingEntry.TABLE_NAME,
+                        Feed.TABLE_NAME,
                         null,
                         selection,
                         selectionArgs,
@@ -285,9 +227,11 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
             String sortOrder, // TRY: Entries.DbHandler.COLUMN_TS  + " DESC"
             String limit // 1 for latest feed
     ) {
+        printOrphans();
+
         return instance.getReadableDatabase()
                 .query(
-                    EntriesDbHandler.ENTRIES_ALL_VIEW,
+                    EntriesDbHandler.VIEW_ENTRIES_V_ALL,
                     null,
                     selection,
                     selectionArgs,
@@ -297,48 +241,67 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
                     limit); // The View is already sorted.
     }
 
-    /**
-     * Deletes all entries in the Feedings table.
-     * @return number of rows affected.
-     */
-    public synchronized int deleteAllFeedings() {
-        int rowsAffected = instance
-                .getWritableDatabase()
-                .delete(FeedContract.FeedingEntry.TABLE_NAME, null, null);
+    synchronized long insertNappy(Nappy nappy) {
+            SQLiteDatabase db = instance.getWritableDatabase();
+            long rowId;
 
-        if (rowsAffected > 0) {
-            notifyOnFeedChange();
-            notifyOnEntriesChange();
+            ContentValues values = nappy.asContentValues();
+            if (values.containsKey(Nappy.COLUMN_ID)) {
+                values.remove(Nappy.COLUMN_ID);
+            }
+
+            db.beginTransaction();
+            try {
+                // TODO: Replace the below with string contstants (e.g. Entry.COLUMN...)
+                // Or change into db.insert(..)
+                ContentValues entryCv = nappy.asEntry().asContentValues();
+                entryCv.remove(Entry.COLUMN_ID);
+                rowId = db.insert(Entry.TABLE_NAME, null, entryCv);
+
+                ContentValues nappyCv = nappy.asContentValues();
+                nappyCv.put(Nappy.COLUMN_ID, rowId);
+// FIXME: Fails constraints: ENTRY_TB_CK
+                db.insert(Nappy.TABLE_NAME, null, nappyCv);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+
+            if (rowId != -1) {
+                notifyOnNappyChange();
+                notifyOnEntriesChange();
+            }
+            return rowId;
         }
 
-        return rowsAffected;
-    }
 
-    public synchronized long insertNappy(int dirty, long timeStampMilis) {
-        ContentValues values = new ContentValues();
+//        ContentValues cv = nappy.asContentValues();
+//        cv.remove("_id"); // if _id is specified -> it most likely give an error.
+//
+//        long rowId = instance.getWritableDatabase()
+//                .insert(Nappy.TABLE_NAME, null, cv);
+//
+//        if (rowId != -1) {
+//            notifyOnNappyChange();
+//            notifyOnEntriesChange();
+//        }
+//        return rowId;
+//    }
 
-        values.put(NappyContract.NappyEntry.COLUMN_NAPPY_TS, timeStampMilis);
-        values.put(NappyContract.NappyEntry.COLUMN_NAPPY_DIRTY, dirty);
-
-        long rowId = instance
-                .getWritableDatabase()
-                .insert(NappyContract.NappyEntry.TABLE_NAME, null, values);
-
-        if (rowId != -1) {
-            notifyOnNappyChange();
-            notifyOnEntriesChange();
-        }
-        return rowId;
-    }
-
-    public synchronized int deleteNappy(long id) {
-        int rowsAffected = instance
-                .getWritableDatabase()
-                .delete(NappyContract.NappyEntry.TABLE_NAME, "_ID=" + id, null);
+    // FIXME
+    synchronized int deleteNappyById(long id) {
+        int rowsAffected = instance.getWritableDatabase()
+                .delete(
+                        Entry.TABLE_NAME,
+                        Entry.COLUMN_ID + "=? AND " +
+                                Entry.COLUMN_ENTRY_TB + "=?",
+                        new String[] { String.valueOf( id ), Nappy.TABLE_NAME } ); // equivalent to "_ID =" + id
 
         if (rowsAffected > 0) {
             notifyOnNappyChange();
             notifyOnEntriesChange();
+        } else {
+            throw new IllegalArgumentException("Could not delete Nappy.id=" + id);
         }
         return rowsAffected;
     }
@@ -354,6 +317,29 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
 //  TODO: Mechanism of notification of other stuff:
     private void notifyOnNappyChange() {
         context.getContentResolver().notifyChange(EntriesProvider.URI_NAPPIES, null, false);
+    }
+
+    public void printOrphans() {
+        Cursor cursor = getInstance(context).getReadableDatabase().rawQuery(
+            "SELECT _ID, ENTRY_TB FROM ENTRY_TB WHERE\n" +
+                    "    (ENTRY_TB='SLEEP_TB' AND _ID NOT IN (SELECT _ID FROM SLEEP_TB)) OR\n" +
+                    "    (ENTRY_TB='FEED_TB' AND _ID NOT IN (SELECT _ID FROM FEED_TB)) OR\n" +
+                    "    (ENTRY_TB='NAPPY_TB' AND _ID NOT IN (SELECT _ID FROM NAPPY_TB)) OR\n" +
+                    "    (ENTRY_TB='NOTE_TB' AND _ID NOT IN (SELECT _ID FROM NOTE_TB));", null);
+
+        Log.d(TAG, String.format("printOrphans.cursor.getCount()= " + cursor.getCount()));
+
+        if (cursor.getCount() > 0) {
+            Log.d(TAG, String.format("Found : %d orphans", cursor.getCount()));
+
+            while (cursor.moveToNext()) {
+                long id   = cursor.getLong(cursor.getColumnIndex("_ID"));
+                String tb = cursor.getString(cursor.getColumnIndex("ENTRY_TB"));
+                Log.d(TAG, String.format("ID=%d; %s", id, tb));
+            }
+        } else {
+
+        }
     }
 //
 //    private void notifyOnNoteChange() {

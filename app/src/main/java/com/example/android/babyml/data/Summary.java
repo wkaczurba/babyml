@@ -9,6 +9,7 @@ import lombok.Setter;
  * Created by wkaczurb on 9/18/2017.
  */
 
+// TODO: Use decorator pattern for Summary;
 public class Summary {
     //DateTime day;
     public final LocalDate date;

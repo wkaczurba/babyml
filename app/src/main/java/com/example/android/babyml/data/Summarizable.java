@@ -12,5 +12,5 @@ import java.sql.Date;
 
 public interface Summarizable {
     public void addSummary(Summary summary);
-    public long getTimestamp();
+    public long getTs();
 }

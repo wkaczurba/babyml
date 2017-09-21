@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
@@ -32,10 +31,12 @@ import org.joda.time.*;
 import com.example.android.babyml.data.EntriesDbHandler;
 import com.example.android.babyml.data.EntriesProvider;
 import com.example.android.babyml.data.EntriesUtils;
+import com.example.android.babyml.data.Entry;
 import com.example.android.babyml.data.Feed;
-import com.example.android.babyml.data.FeedContract;
+//import com.example.android.babyml.data.FeedContract;
 import com.example.android.babyml.data.Nappy;
 import com.example.android.babyml.utils.DateUtils;
+import com.example.android.babyml.utils.DebugUtils;
 
 import static com.example.android.babyml.LogAdapter.DATE_VIEW_HOLDER;
 import static com.example.android.babyml.LogAdapter.FEEDING_VIEW_HOLDER;
@@ -55,9 +56,6 @@ public class MainActivity extends AppCompatActivity implements
     public static String TAG = MainActivity.class.getSimpleName();
     private static final int ID_ENTRIES_LOADER = 1;
     private static final int ID_LATEST_FEED_LOADER = 2;
-
-//    static final String MILK_AMOUNT_VALUE_KEY = "milkAmountValue";
-//    int milkAmountValue = 0; // FIXME: Save instance.
 
     // Database:
     EntriesDbHandler mDb; // Add closing;
@@ -89,15 +87,15 @@ public class MainActivity extends AppCompatActivity implements
                         projection,
                         selection,
                         selectionArgs,
-                        EntriesDbHandler.COLUMN_TS  + " DESC");
+                        Entry.COLUMN_ENTRY_TS + " DESC");
             case ID_LATEST_FEED_LOADER:
-                Uri latestFeedUri = EntriesProvider.URI_FEEDS;
+                Uri feedsUri = EntriesProvider.URI_FEEDS;
                 return new CursorLoader(this,
-                        latestFeedUri,
+                        feedsUri,
                         null,
                         null,
                         null,
-                        FeedContract.FeedingEntry.COLUMN_FEED_TS + " DESC");
+                        Feed.COLUMN_FEED_TS + " DESC");
             default:
                 throw new IllegalArgumentException("Invalid id supplied: " + id);
         }
@@ -105,6 +103,9 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+        DebugUtils.printAllEntries(this, TAG);
+        DebugUtils.printAllFeeds(this, TAG);
+
         switch (loader.getId()) {
             case ID_ENTRIES_LOADER:
                 mAdapter.swapCursor(data);
@@ -125,8 +126,13 @@ public class MainActivity extends AppCompatActivity implements
         // TODO: Update time.
     }
 
+
     // TODO: Remove it or move to loader!
     private void updateTimeElapsed(Cursor cursor) {
+        Log.d(TAG,
+                "updateTimeElpased called; cursorCount=" + cursor.getCount() + "; pos=" + cursor.getPosition() + "\n" +
+                "timeElapsedFrag: isNull?=" + (timeElapsedFrag == null));
+
         if (timeElapsedFrag == null)
             return;
 
@@ -137,7 +143,7 @@ public class MainActivity extends AppCompatActivity implements
             cursor.moveToFirst();
             Feed f = LogAdapter.cursorToFeed(cursor);
 
-            timeElapsedFrag.setTimeZero(f.getTimestamp());
+            timeElapsedFrag.setTimeZero(f.getTs());
         }
     }
 
@@ -145,6 +151,7 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         mAdapter.swapCursor(null);
+        updateTimeElapsed(null);
     }
 
 //    /**
@@ -315,6 +322,24 @@ public class MainActivity extends AppCompatActivity implements
             }
 
             @Override
+            public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+                // From: https://stackoverflow.com/questions/30713121/disable-swipe-for-position-in-recyclerview-using-itemtouchhelper-simplecallback
+                int dragFlags = 0;
+                int swipeFlags = 0;
+                int itemViewType = viewHolder.getItemViewType();
+                switch (itemViewType) {
+                    case FEEDING_VIEW_HOLDER: // fall-through
+                    case NAPPY_VIEW_HOLDER:
+                        swipeFlags = ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT;
+                        break;
+                    default:
+                        break;
+                }
+                return makeMovementFlags(dragFlags, swipeFlags);
+                //return super.getMovementFlags(recyclerView, viewHolder);
+            }
+
+            @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
                 if (direction == ItemTouchHelper.RIGHT || direction == ItemTouchHelper.LEFT) {
                     int itemViewType = viewHolder.getItemViewType();
@@ -323,29 +348,30 @@ public class MainActivity extends AppCompatActivity implements
                         LogAdapter.FeedingViewHolder logViewHolder = (LogAdapter.FeedingViewHolder) viewHolder;
 
                         long lid = logViewHolder.getAdapterPosition();
-                            Feed feed = logViewHolder.getFeed();
-                            mDb.deleteFeeding(feed.getId());
-//                            updateLogRecyclerView();
-//                            updateTimeElapsed();
-//                        }
-                    } else if (itemViewType == DATE_VIEW_HOLDER){ // DATE.
-                        // DO NOTHING - CANT REMOVE A DATE GAP.
-//                        updateLogRecyclerView();
-//                        updateTimeElapsed();
-                        return;
+                        Feed feed = logViewHolder.getFeed();
+                            //mDb.deleteFeeding(feed.getId());
+
+                        Uri deleteFeedUri = EntriesProvider.URI_FEEDS
+                                .buildUpon()
+                                .appendPath(String.valueOf(feed.get_id()))
+                                .build();
+
+                        getContentResolver().delete(deleteFeedUri, null, null);
                     } else if (itemViewType == NAPPY_VIEW_HOLDER) {
                         LogAdapter.NappyViewHolder nappyViewHolder = (LogAdapter.NappyViewHolder) viewHolder;
                         long lid = nappyViewHolder.getAdapterPosition();
                         Nappy nappy = nappyViewHolder.getNappy();
-                        mDb.deleteNappy(nappy.getId());
-//                        updateLogRecyclerView();
-//                        updateTimeElapsed();
-
+                        //mDb.deleteNappy(nappy.getId());
+                        Uri deleteUri = EntriesProvider.URI_NAPPIES.buildUpon()
+                                        .appendPath(String.valueOf(nappy.get_id()))
+                                        .build();
+                        getContentResolver().delete(deleteUri, null, null);
                     } else {
-                        throw new IllegalArgumentException("ItemViewType = " + itemViewType);
+
+                        return;
+                        // DO NOTHING. This can be: DATE_VIEW_HOLDER or SUMMARY_VIEW_HOLDER or other.
+                        //throw new IllegalArgumentException("ItemViewType = " + itemViewType);
                     }
-
-
                 }
             }
         };
@@ -459,7 +485,7 @@ public class MainActivity extends AppCompatActivity implements
 
 /*    private void updateLogRecyclerView() {
         // FIXME: This updateLogRecyclerView is not greatest lets put it that way.
-//        getSupportLoaderManager().<Cursor>restartLoader(ID_ENTRIES_LOADER, null, this);
+        getSupportLoaderManager().<Cursor>restartLoader(ID_ENTRIES_LOADER, null, this);
 
     }*/
 
