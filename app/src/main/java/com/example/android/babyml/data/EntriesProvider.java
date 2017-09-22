@@ -34,6 +34,13 @@ public class EntriesProvider extends ContentProvider {
     public static final Uri URI_NAPPIES = Uri.parse(NAPPIES);
     public static final String NAPPY_BASE = NAPPIES + "/"; // This is for one NAPPY.
 
+    // TODO: SLEEP
+    public static final String PATH_SLEEP = "sleep";
+    public static final int CODE_SLEEP = 400;
+    public static final int CODE_SLEEP_WITH_ID = 401;
+    public static final String SLEEPS = SCHEME + AUTHORITY + "/sleep";
+    public static final Uri URI_SLEEPS = Uri.parse(SLEEPS);
+
     public static final String NOTES = SCHEME + AUTHORITY + "/note";
     public static final Uri URI_NOTES = Uri.parse(NOTES);
     public static final String NOTE_BASE = NOTES + "/"; // This is for one NAPPY.
@@ -53,6 +60,9 @@ public class EntriesProvider extends ContentProvider {
 
         uriMatcher.addURI(AUTHORITY, PATH_NAPPY, CODE_NAPPY);
         uriMatcher.addURI(AUTHORITY, PATH_NAPPY + "/#", CODE_NAPPY_WITH_ID);
+
+        uriMatcher.addURI(AUTHORITY, PATH_NAPPY, CODE_SLEEP);
+        uriMatcher.addURI(AUTHORITY, PATH_NAPPY + "/#", CODE_SLEEP_WITH_ID);
 
         return uriMatcher;
     }
@@ -90,6 +100,10 @@ public class EntriesProvider extends ContentProvider {
                 long id = Long.valueOf(uri.getLastPathSegment());
                 return EntriesDbHandler.getInstance(getContext()).deleteNappyById(id);
             }
+            case CODE_SLEEP_WITH_ID: {
+                long id = Long.valueOf(uri.getLastPathSegment());
+                return EntriesDbHandler.getInstance(getContext()).deleteSleepById(id);
+            }
             default:
                 throw new IllegalArgumentException("Unhandled query; sUriMatcher=" + sUriMatcher.match(uri));
         }
@@ -123,6 +137,11 @@ public class EntriesProvider extends ContentProvider {
                         .insertNappy(Nappy.fromContentValues(values));
 
                 return URI_NAPPIES.buildUpon().appendPath(String.valueOf(_id)).build();
+
+            case CODE_SLEEP:
+                _id = EntriesDbHandler.getInstance(getContext())
+                        .insertSleep(Sleep.fromContentValues(values));
+                return URI_SLEEPS.buildUpon().appendPath(String.valueOf(_id)).build();
 
             default:
                 // TODO: Implement this to handle requests to insert a new row.

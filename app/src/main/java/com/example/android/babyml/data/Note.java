@@ -16,7 +16,7 @@ import lombok.experimental.FieldDefaults;
  */
 
 @ToString
-@EqualsAndHashCode(exclude={"id"})
+@EqualsAndHashCode(exclude={"_id"})
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 // TODO: make it extending from Entry
 public class Note implements Summarizable {

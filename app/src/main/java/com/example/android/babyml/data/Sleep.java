@@ -16,7 +16,7 @@ import lombok.experimental.FieldDefaults;
  */
 
 @ToString
-@EqualsAndHashCode(exclude={"id"})
+@EqualsAndHashCode(exclude={"_id"})
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 public class Sleep implements Summarizable {
     // DB-related

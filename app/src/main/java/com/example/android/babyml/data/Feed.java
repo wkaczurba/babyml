@@ -17,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 
 @ToString
 //@AllArgsConstructor (implemented manually to check for tb.
-@EqualsAndHashCode
+@EqualsAndHashCode(exclude={"_id"})
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
 //public class Feed extends Entry implements Summarizable {
 public final class Feed implements Summarizable {

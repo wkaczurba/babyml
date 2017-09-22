@@ -1,11 +1,11 @@
 package com.example.android.babyml;
 
 
-import android.support.v4.app.Fragment;
 import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +16,7 @@ import android.widget.Toast;
 
 import com.example.android.babyml.data.EntriesDbHandler;
 import com.example.android.babyml.data.EntriesProvider;
-import com.example.android.babyml.data.Nappy;
+import com.example.android.babyml.data.Note;
 
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
@@ -26,24 +26,25 @@ import org.joda.time.format.DateTimeFormatter;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class NappyAdderFragment extends Fragment implements View.OnClickListener {
+public class NoteAdderFragment extends Fragment implements View.OnClickListener {
 
-    // TODO: Rename member variables to match MilkAdderFramgent' convention
-    EditText nappyTimeEditText;
-    Button storeNappyButton;
+    // TODO: Rework everything.
+
+    EditText noteTimeEditText;
+    Button storeNoteButton;
     MainActivity.TimeTextWatcher ttw;
 
     private EntriesDbHandler mDb;
 
 
-    public NappyAdderFragment() {
+    public NoteAdderFragment() {
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_nappy_adder, container, false);
+        return inflater.inflate(R.layout.fragment_note_adder, container, false);
     }
 
     @Override
@@ -53,16 +54,16 @@ public class NappyAdderFragment extends Fragment implements View.OnClickListener
         EntriesDbHandler mDb = EntriesDbHandler.getInstance(context);
         View view = getView();
         super.onStart();
-        nappyTimeEditText = (EditText) view.findViewById(R.id.nappy_time_et);
+        noteTimeEditText = (EditText) view.findViewById(R.id.note_time_et);
 
         DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");
-        nappyTimeEditText.setText(dtf.print(LocalTime.now()));
-        ttw = new MainActivity.TimeTextWatcher(nappyTimeEditText);
-        nappyTimeEditText.addTextChangedListener(ttw);
+        noteTimeEditText.setText(dtf.print(LocalTime.now()));
+        ttw = new MainActivity.TimeTextWatcher(noteTimeEditText);
+        noteTimeEditText.addTextChangedListener(ttw);
         setIme(context);
 
-        storeNappyButton = (Button) view.findViewById(R.id.store_nappy_button);
-        storeNappyButton.setOnClickListener(this);
+        storeNoteButton = (Button) view.findViewById(R.id.store_note_button);
+        storeNoteButton.setOnClickListener(this);
 
     }
 
@@ -70,27 +71,21 @@ public class NappyAdderFragment extends Fragment implements View.OnClickListener
     public void onClick(View v) {
         Context ctx = getActivity();
 
-        if (v.equals(this.storeNappyButton)) {
+        if (v.equals(this.storeNoteButton)) {
 
             long timemilis = ttw.getTimeMilis();
-            int dirty = 1; // Possible extension: for weirdly coloured nappies.
             String note = null;
-            int wet = 0;
-            //long id = EntriesUtils.insertNappy(mDb, dirty, timemilis);
-
 
             // mDb:
             if (mDb == null) { // NOT SURE WHY THIS HAPPENS.
                 mDb = EntriesDbHandler.getInstance(ctx);
             }
 
-            //ContentValues contentValues = new Nappy(-1, timemilis, dirty, wet, note).asContentValues();
-            ContentValues contentValues = new Nappy(-1, Nappy.COLUMN_NAPPY_TB, timemilis, dirty, wet, note).asContentValues();
-            Uri uri = getActivity().getContentResolver().insert(
-                    EntriesProvider.URI_NAPPIES,
+            ContentValues contentValues = new Note(-1, Note.TABLE_NAME, timemilis, note).asContentValues();
+                    Uri uri = getActivity().getContentResolver().insert(
+                    EntriesProvider.URI_NOTES,
                     contentValues);
             long id = Long.valueOf(uri.getLastPathSegment());
-            //long id = mDb.insertNappy(dirty, timemilis);
 
             Toast.makeText(ctx, "ROWID=" + id, Toast.LENGTH_LONG).show();
 
@@ -107,7 +102,7 @@ public class NappyAdderFragment extends Fragment implements View.OnClickListener
                 (InputMethodManager) context.
                         getSystemService(Context.INPUT_METHOD_SERVICE);
 
-        View view = nappyTimeEditText;
+        View view = noteTimeEditText;
 
         inputManager.hideSoftInputFromWindow(
                 view.getWindowToken(),

@@ -1,7 +1,8 @@
 package com.example.android.babyml;
 
-import android.app.Fragment;
-import android.app.FragmentTransaction;
+//import android.app.Fragment;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -15,7 +16,8 @@ public class AddEntryActivity extends AppCompatActivity {
 
     public static String TAG = AddEntryActivity.class.getSimpleName();
     AddEntryActivity.ItemSelectedListener itemSelectedListener = new AddEntryActivity.ItemSelectedListener(this);
-    MilkAdderFragment milkAdderFragment;
+
+    //MilkAdderFragment milkAdderFragment;
     NappyAdderFragment nappyAdderFragment;
 
     // TODO: This is for spinner -> it should select fragments.
@@ -49,7 +51,7 @@ public class AddEntryActivity extends AppCompatActivity {
     }
 
     public void displayRightFragment(Fragment fragment) {
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.activity_frag, fragment);
         //ft.addToBackStack(null); // is this needed?
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
@@ -69,7 +71,14 @@ public class AddEntryActivity extends AppCompatActivity {
 //        ft.addToBackStack(null);
 //        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
 //        ft.commit();
-        displayRightFragment(new MilkAdderFragment());
+        final MilkAdderFragment milkAdderFragment = new MilkAdderFragment();
+        milkAdderFragment.setCloseListener(new MilkAdderFragment.OnCloseListener() {
+            @Override
+            public void close() {
+                milkAdderFragment.getActivity().finish();
+            }
+        });
+        displayRightFragment(milkAdderFragment);
 
         Spinner addSpinner = (Spinner) findViewById(R.id.add_spinner);
 

@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
@@ -25,6 +26,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 import org.joda.time.*;
 
@@ -33,19 +35,22 @@ import com.example.android.babyml.data.EntriesProvider;
 import com.example.android.babyml.data.EntriesUtils;
 import com.example.android.babyml.data.Entry;
 import com.example.android.babyml.data.Feed;
-//import com.example.android.babyml.data.FeedContract;
 import com.example.android.babyml.data.Nappy;
 import com.example.android.babyml.utils.DateUtils;
 import com.example.android.babyml.utils.DebugUtils;
 
-import static com.example.android.babyml.LogAdapter.DATE_VIEW_HOLDER;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.zip.Inflater;
+
 import static com.example.android.babyml.LogAdapter.FEEDING_VIEW_HOLDER;
 import static com.example.android.babyml.LogAdapter.NAPPY_VIEW_HOLDER;
 
 // TODO: Review these ones for sliding tabs:
 //   https://developer.android.com/training/implementing-navigation/lateral.html
 //   https://developer.android.com/samples/SlidingTabsBasic/src/com.example.android.common/view/SlidingTabLayout.html
-//
 
 public class MainActivity extends AppCompatActivity implements
         View.OnClickListener, SharedPreferences.OnSharedPreferenceChangeListener,
@@ -54,18 +59,30 @@ public class MainActivity extends AppCompatActivity implements
     // FIXME: Do we need mDb here (it has been already added to AddEntryActivity.
 
     public static String TAG = MainActivity.class.getSimpleName();
-    private static final int ID_ENTRIES_LOADER = 1;
+    private static final int ID_ENTRIES_LOADER     = 1;
     private static final int ID_LATEST_FEED_LOADER = 2;
 
     // Database:
     EntriesDbHandler mDb; // Add closing;
     RecyclerView logRecyclerView;
     FloatingActionButton fab;
+    TextView bottomBarMilkTv;
+    TextView bottomBarNappyTv;
+    TextView bottomBarNoteTv;
+    TextView bottomBarSleepTv;
 
     // FRAGMENTS:
-    TimeElapsedFragment timeElapsedFrag;
-    public static final String TIME_ELAPSED_FRAG_TAG = "TIME_ELAPSED_FRAG";
+//    TimeElapsedFragment timeElapsedFrag;
+//    MilkAdderFragment milkAdderFragment;
+//    NappyAdderFragment nappyAdderFragment;
+//    SleepAdderFragment sleepAdderFragment;
+//    NoteAdderFragment noteAdderFragment;
 
+    public static final String TIME_ELAPSED_FRAG_TAG = "TIME_ELAPSED_FRAG";
+    public static final String MILK_ADDER_FRAG_TAG = "MILK_ADDER_FRAG";
+    public static final String NAPPY_ADDER_FRAG_TAG = "NAPPY_ADDER_FRAG";
+    public static final String SLEEP_ADDER_FRAG_TAG = "SLEEP_ADDER_FRAG";
+    public static final String NOTE_ADDER_FRAG_TAG = "NOTE_ADDER_FRAG";
 
     // Log-related items:
     LogAdapter mAdapter;
@@ -129,21 +146,22 @@ public class MainActivity extends AppCompatActivity implements
 
     // TODO: Remove it or move to loader!
     private void updateTimeElapsed(Cursor cursor) {
+        TimeElapsedFragment frag = (TimeElapsedFragment) fragments.get(TIME_ELAPSED_FRAG_TAG);
         Log.d(TAG,
                 "updateTimeElpased called; cursorCount=" + cursor.getCount() + "; pos=" + cursor.getPosition() + "\n" +
-                "timeElapsedFrag: isNull?=" + (timeElapsedFrag == null));
+                "timeElapsedFrag: isNull?=" + (frag == null));
 
-        if (timeElapsedFrag == null)
+        if (frag == null)
             return;
 
         //Cursor cursor = mDb.getLatestFeeding();
         if (cursor.getCount() == 0) {
-            timeElapsedFrag.setTimeZero(-1);
+            frag.setTimeZero(-1);
         } else {
             cursor.moveToFirst();
             Feed f = LogAdapter.cursorToFeed(cursor);
 
-            timeElapsedFrag.setTimeZero(f.getTs());
+            frag.setTimeZero(f.getTs());
         }
     }
 
@@ -153,37 +171,6 @@ public class MainActivity extends AppCompatActivity implements
         mAdapter.swapCursor(null);
         updateTimeElapsed(null);
     }
-
-//    /**
-//     * Function gets current date time and applies particular time to it.
-//     * If hour/min are ahead of current time - a day earlier is returned.
-//     *
-//     * TODO: Move this to Utils class.
-//     *
-//     * @return
-//     */
-//    public static LocalDateTime applyTimeToCurrentLocalDate(int hour, int min) {
-//        LocalDateTime ldtNow = LocalDateTime.now();
-//        LocalTime ltNow = ldtNow.toLocalTime();
-//
-//        LocalDate ld; // date to be used (either today or yesterday)
-//        LocalTime lt = new LocalTime(hour, min, 0); // time to be used
-//
-//        if (lt.isAfter(ltNow)) {
-//            // Use yesterday's date as hour/time specifies time before midnight.
-//            ld = ldtNow.toLocalDate().minusDays(1);
-//        } else {
-//            // Use yesterday's date as hour/time specifies today's time during.
-//            ld = ldtNow.toLocalDate();
-//        }
-//
-//        return new LocalDateTime(
-//                ld.getYear(),
-//                ld.getMonthOfYear(),
-//                ld.getDayOfMonth(),
-//                lt.getHourOfDay(),
-//                lt.getMinuteOfHour());
-//    }
 
     public static class LogListItemClickListener implements LogAdapter.ListItemClickListener {
         Context context;
@@ -283,6 +270,30 @@ public class MainActivity extends AppCompatActivity implements
 //        this.updateTimeElapsed();
     }
 
+    public void populateFragmentsMap() {
+        String[] tags = new String[] {
+            TIME_ELAPSED_FRAG_TAG,
+            MILK_ADDER_FRAG_TAG,
+            NAPPY_ADDER_FRAG_TAG,
+            SLEEP_ADDER_FRAG_TAG,
+            NOTE_ADDER_FRAG_TAG
+        };
+
+        for (String tag : tags) {
+            Fragment frag = getSupportFragmentManager().findFragmentByTag(tag);
+            if (frag != null)
+                fragments.put(tag, frag);
+        }
+//
+//        timeElapsedFrag = (TimeElapsedFragment) getSupportFragmentManager().findFragmentByTag(TIME_ELAPSED_FRAG_TAG);
+//        milkAdderFragment = (MilkAdderFragment) getSupportFragmentManager().findFragmentByTag(MILK_ADDER_FRAG_TAG);
+//        nappyAdderFragment = (NappyAdderFragment) getSupportFragmentManager().findFragmentByTag(NAPPY_ADDER_FRAG_TAG);
+//        sleepAdderFragment = (SleepAdderFragment) getSupportFragmentManager().findFragmentByTag(SLEEP_ADDER_FRAG_TAG);
+//        noteAdderFragment = (NoteAdderFragment) getSupportFragmentManager().findFragmentByTag(NOTE_ADDER_FRAG_TAG);
+//
+//
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -306,10 +317,12 @@ public class MainActivity extends AppCompatActivity implements
         // add Time Elapsed Fragment
         //addTimeElapsedFrag();
 
-        timeElapsedFrag = (TimeElapsedFragment) getSupportFragmentManager().findFragmentByTag(TIME_ELAPSED_FRAG_TAG);
+        // Is this needed?:
+        populateFragmentsMap();
 
+        Log.d(TAG, "fragments; timeElapsedFrag =" + fragments.get(TIME_ELAPSED_FRAG_TAG));
+        Log.d(TAG, "fragments; milkAdderFragment =" + fragments.get(MILK_ADDER_FRAG_TAG));
         setupSharedPreferences();
-
 
         // https://stackoverflow.com/questions/42792984/how-to-swipe-to-delete-on-recyclerview
         // Handling of swiping left/right:
@@ -383,6 +396,17 @@ public class MainActivity extends AppCompatActivity implements
         fab = (FloatingActionButton) findViewById(R.id.fab_add);
         fab.setOnClickListener(this);
 
+        // Adding bottom-bar items:
+        bottomBarMilkTv = (TextView) findViewById(R.id.bottom_bar_milk_tv);
+        bottomBarNappyTv = (TextView) findViewById(R.id.bottom_bar_nappy_tv);
+        bottomBarNoteTv = (TextView) findViewById(R.id.bottom_bar_note_tv);
+        bottomBarSleepTv = (TextView) findViewById(R.id.bottom_bar_sleep_tv);
+
+        for(TextView tv : new TextView[] { bottomBarMilkTv, bottomBarNappyTv, bottomBarNoteTv, bottomBarSleepTv }) {
+            tv.setOnClickListener(this);
+        }
+
+
         // Two loaders:
         getSupportLoaderManager().initLoader(ID_ENTRIES_LOADER, null, this);
         getSupportLoaderManager().initLoader(ID_LATEST_FEED_LOADER, null, this);
@@ -409,26 +433,125 @@ public class MainActivity extends AppCompatActivity implements
 //
 //    }
 
-    public void safeAddTimeElapsedFrag() {
+
+/*    public void safeAddTimeElapsedFrag() {
         if (timeElapsedFrag == null) {
             timeElapsedFrag = new TimeElapsedFragment();
         }
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.top_main_fragment, timeElapsedFrag, TIME_ELAPSED_FRAG_TAG);
+        ft.addToBackStack(null);
+        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
+        ft.commit();
+    } */
+
+// FRAGMENTS.
+    Map<String, Fragment> fragments = new HashMap<>();
+
+    MilkAdderFragment.OnCloseListener backButton = new MilkAdderFragment.OnCloseListener() {
+        @Override
+        public void close() {
+            onBackPressed();
+        }
+    };
+
+    public void safeAddWhatever(String fragment_id) {
+        Fragment frag;
+
+        if (!fragments.containsKey(fragment_id)) {
+
+            // TODO: Replece the stuff here with a fragment factory:
+            switch (fragment_id) {
+                case MILK_ADDER_FRAG_TAG: {
+                    frag = new MilkAdderFragment();
+                    break;
+                }
+                case TIME_ELAPSED_FRAG_TAG: {
+                    frag = new TimeElapsedFragment();
+                    break;
+                }
+                case NAPPY_ADDER_FRAG_TAG: {
+                    frag = new NappyAdderFragment();
+                    break;
+                }
+                case SLEEP_ADDER_FRAG_TAG: {
+                    frag = new SleepAdderFragment();
+                    break;
+                }
+                case NOTE_ADDER_FRAG_TAG: {
+                    frag = new NoteAdderFragment();
+                    break;
+                }
+                default: {
+                    throw new IllegalArgumentException("Invalid FRAGMENT_ID number");
+                }
+            }
+            fragments.put(fragment_id, frag);
+        } else {
+            frag = fragments.get(fragment_id);
+        }
+
+        // Do not add fragment if it is already visible.
+        if (frag.isVisible()) {
+            return;
+        }
+
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+
+        ft.replace(R.id.top_main_fragment, frag, fragment_id);
+        ft.addToBackStack(null);
         ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
         ft.commit();
     }
 
-    public void safeDeleteTimeElapsedFrag() {
-        //getFragmentManager().findFragmentByTag(TIME_ELAPSED_FRAG_TAG);
-        if (timeElapsedFrag == null) {
+//    public void safeDeleteTimeElapsedFrag() {
+//        // TODO: Rewrite to support other fragments.
+//
+//        //getFragmentManager().findFragmentByTag(TIME_ELAPSED_FRAG_TAG);
+//        if (timeElapsedFrag != null) {
+//            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+//            ft.remove(timeElapsedFrag);
+//            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+//            ft.commit();
+//            timeElapsedFrag = null;
+//            fragments.remove(TIME_ELAPSED_FRAG_TAG);
+//        } else if (milkAdderFragment != null) {
+//            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+//            ft.remove(milkAdderFragment);
+//            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+//            ft.commit();
+//            milkAdderFragment= null;
+//            fragments.remove(MILK_ADDER_FRAG_TAG);
+//        }
+//    }
+
+    public void safeDeleteFragment(String tag) {
+        Fragment frag = null;
+        // TODO: Rewrite to support other fragments.
+
+        //Fragment frag = getSupportFragmentManager().findFragmentByTag(tag);
+        if (fragments.containsKey(tag)) {
+            frag = fragments.get(tag);
+            assert(frag != null);
+        } else {
             return;
         }
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.remove(timeElapsedFrag);
-        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
-        ft.commit();
-        timeElapsedFrag = null;
+
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.remove(frag);
+            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+            ft.commit();
+            fragments.remove(tag);
+//            timeElapsedFrag = null;
+            fragments.remove(TIME_ELAPSED_FRAG_TAG);
+//        } else if (milkAdderFragment != null) {
+//            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+//            ft.remove(milkAdderFragment);
+//            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_CLOSE);
+//            ft.commit();
+//            milkAdderFragment= null;
+//            fragments.remove(MILK_ADDER_FRAG_TAG);
+//        }
     }
 
     // TODO: rework this function.
@@ -436,9 +559,11 @@ public class MainActivity extends AppCompatActivity implements
         boolean showTimeElapsed = sharedPreferences.getBoolean("show_time_passed", true);
 
         if (showTimeElapsed) {
-            safeAddTimeElapsedFrag();
+            //safeAddTimeElapsedFrag();
+            safeAddWhatever(TIME_ELAPSED_FRAG_TAG);
         } else {
-            safeDeleteTimeElapsedFrag();
+            //safeDeleteTimeElapsedFrag();
+            safeDeleteFragment(TIME_ELAPSED_FRAG_TAG);
         }
     }
 
@@ -480,15 +605,6 @@ public class MainActivity extends AppCompatActivity implements
         return super.onOptionsItemSelected(item);
     }
 
-
-
-
-/*    private void updateLogRecyclerView() {
-        // FIXME: This updateLogRecyclerView is not greatest lets put it that way.
-        getSupportLoaderManager().<Cursor>restartLoader(ID_ENTRIES_LOADER, null, this);
-
-    }*/
-
     @Override
     public void onClick(View v) {
         if (v == null) {
@@ -501,8 +617,19 @@ public class MainActivity extends AppCompatActivity implements
             Intent intent = new Intent(this, AddEntryActivity.class);
             // TODO: putExtra parameters here
             startActivity(intent);
+
+        } else if (v.equals(bottomBarMilkTv)) {
+            safeAddWhatever(MILK_ADDER_FRAG_TAG);
+            //safeAddMilkAdderFrag();
+        } else if (v.equals(bottomBarNappyTv)) {
+            safeAddWhatever(NAPPY_ADDER_FRAG_TAG);
+        } else if (v.equals(bottomBarNoteTv)) {
+            safeAddWhatever(NOTE_ADDER_FRAG_TAG);
+        } else if (v.equals(bottomBarSleepTv)) {
+            safeAddWhatever(SLEEP_ADDER_FRAG_TAG);
         } else {
-            Log.d(TAG, "Unknown item clicked: " + v);
+            throw new UnsupportedOperationException(
+                    "Unhandled item clicked: " + v.getClass() + "[" + v +" ]");
         }
     }
 

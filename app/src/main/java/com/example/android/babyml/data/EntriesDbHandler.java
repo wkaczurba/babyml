@@ -274,6 +274,12 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
             return rowId;
         }
 
+        synchronized long insertSleep(Sleep sleep) {
+            throw new UnsupportedOperationException("insertSleep not implemented yet");
+        }
+
+
+
 
 //        ContentValues cv = nappy.asContentValues();
 //        cv.remove("_id"); // if _id is specified -> it most likely give an error.
@@ -305,6 +311,12 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
         }
         return rowsAffected;
     }
+
+    synchronized int deleteSleepById(long id) {
+        throw new UnsupportedOperationException("deleteSleepById was not implemented yet");
+    }
+
+
 
     private void notifyOnEntriesChange() {
         context.getContentResolver().notifyChange(EntriesProvider.URI_ENTRIES, null, false);

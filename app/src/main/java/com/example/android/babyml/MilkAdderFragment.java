@@ -1,14 +1,10 @@
 package com.example.android.babyml;
 
-
-import android.app.Fragment;
-import android.content.ContentProvider;
+import android.support.v4.app.Fragment;
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-//import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,13 +18,14 @@ import android.widget.Toast;
 
 import com.example.android.babyml.data.EntriesDbHandler;
 import com.example.android.babyml.data.EntriesProvider;
-import com.example.android.babyml.data.EntriesUtils;
 import com.example.android.babyml.data.Feed;
 
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -37,13 +34,24 @@ import org.joda.time.format.DateTimeFormatter;
 
 public class MilkAdderFragment extends Fragment implements View.OnClickListener {
 
+    public static interface OnCloseListener {
+        public void close();
+    }
+
+    @Getter
+    @Setter
+    private OnCloseListener closeListener = new OnCloseListener() {
+        @Override
+        public void close() {
+            getActivity().finish();
+        }
+    };
+
     private static final String LOG = MilkAdderFragment.class.getSimpleName();
     // Milk-related items:
     int milkAmountValue = 0; // FIXME: Save instance.
     static final String MILK_AMOUNT_VALUE_KEY = "milkAmountValue";
     EntriesDbHandler mDb;
-
-    //AddEntryActivity.ItemSelectedListener itemSelectedListener = new AddEntryActivity.ItemSelectedListener(this);
 
     TextView milkAmountTextView;
     EditText milkTimeEditText;
@@ -222,7 +230,10 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
             //Toast.makeText(this, "storeMilkButton to be handled yet", Toast.LENGTH_LONG).show();
             milkAmountValue = 0;
             updateMilkAmount();
-            getActivity().finish(); // FIXME: This should go to the upper.
+
+            // TODO: Deal with this one here:
+//            getActivity().finish(); // FIXME: This should go to the upper.
+            closeListener.close();
         } else if (v.equals(deleteAllButton)) {
             // TODO: Add question first.
 

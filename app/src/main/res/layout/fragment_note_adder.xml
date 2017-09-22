@@ -1,0 +1,78 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:id="@+id/fragment_note_adder_ll"
+    android:gravity="center_horizontal"
+    app:layout_constraintHorizontal_bias="0.5"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/note_buttons_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linear_buttons_row">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_height="wrap_content"
+            android:text="NOTE"
+            android:layout_width="wrap_content" />
+
+        <EditText
+        android:id="@+id/note_time_et"
+        android:layout_width="86dp"
+        android:layout_height="48dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:elevation="0dp"
+        android:fontFamily="false"
+        android:gravity="center"
+        android:imeOptions="actionDone"
+        android:inputType="time"
+        android:text="12:34"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        android:visibility="visible" />
+
+        <Button
+            android:id="@+id/store_note_button"
+            android:layout_width="72dp"
+            android:layout_height="48dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
+            android:text="Store"  />
+
+        <!-- TODO: Change this one to visible -->
+        <Button
+            android:id="@+id/clear_note_all"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:backgroundTint="@color/colorAccent"
+            android:elevation="0dp"
+            android:text="Erase "
+            android:visibility="gone" />
+
+
+        <!--<android.support.constraint.Guideline-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:id="@+id/guideline"-->
+        <!--android:orientation="vertical"-->
+        <!--tools:layout_editor_absoluteY="0dp"-->
+        <!--tools:layout_editor_absoluteX="20dp"-->
+        <!--app:layout_constraintGuide_percent="0.052083332" />-->
+
+    </LinearLayout>
+
+</LinearLayout>

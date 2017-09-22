@@ -18,7 +18,7 @@ import lombok.experimental.FieldDefaults;
  */
 
 @ToString
-@EqualsAndHashCode(exclude={"id"})
+@EqualsAndHashCode(exclude={"_id"})
 @AllArgsConstructor
 @FieldDefaults(makeFinal = true, level = AccessLevel.PROTECTED)
 public class Entry {
