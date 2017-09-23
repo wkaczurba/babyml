@@ -72,7 +72,8 @@ public class AddEntryActivity extends AppCompatActivity {
 //        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
 //        ft.commit();
         final MilkAdderFragment milkAdderFragment = new MilkAdderFragment();
-        milkAdderFragment.setCloseListener(new MilkAdderFragment.OnCloseListener() {
+
+        milkAdderFragment.setOnCloseListener(new OnCloseListener() {
             @Override
             public void close() {
                 milkAdderFragment.getActivity().finish();

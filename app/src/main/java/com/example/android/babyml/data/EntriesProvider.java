@@ -61,8 +61,8 @@ public class EntriesProvider extends ContentProvider {
         uriMatcher.addURI(AUTHORITY, PATH_NAPPY, CODE_NAPPY);
         uriMatcher.addURI(AUTHORITY, PATH_NAPPY + "/#", CODE_NAPPY_WITH_ID);
 
-        uriMatcher.addURI(AUTHORITY, PATH_NAPPY, CODE_SLEEP);
-        uriMatcher.addURI(AUTHORITY, PATH_NAPPY + "/#", CODE_SLEEP_WITH_ID);
+        uriMatcher.addURI(AUTHORITY, PATH_SLEEP, CODE_SLEEP);
+        uriMatcher.addURI(AUTHORITY, PATH_SLEEP + "/#", CODE_SLEEP_WITH_ID);
 
         return uriMatcher;
     }

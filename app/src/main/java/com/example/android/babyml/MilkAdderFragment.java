@@ -34,13 +34,9 @@ import lombok.Setter;
 
 public class MilkAdderFragment extends Fragment implements View.OnClickListener {
 
-    public static interface OnCloseListener {
-        public void close();
-    }
-
     @Getter
     @Setter
-    private OnCloseListener closeListener = new OnCloseListener() {
+    private OnCloseListener onCloseListener = new OnCloseListener() {
         @Override
         public void close() {
             getActivity().finish();
@@ -233,7 +229,7 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
 
             // TODO: Deal with this one here:
 //            getActivity().finish(); // FIXME: This should go to the upper.
-            closeListener.close();
+            onCloseListener.close();
         } else if (v.equals(deleteAllButton)) {
             // TODO: Add question first.
 

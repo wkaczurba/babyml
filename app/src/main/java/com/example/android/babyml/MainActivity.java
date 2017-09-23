@@ -39,11 +39,8 @@ import com.example.android.babyml.data.Nappy;
 import com.example.android.babyml.utils.DateUtils;
 import com.example.android.babyml.utils.DebugUtils;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.zip.Inflater;
 
 import static com.example.android.babyml.LogAdapter.FEEDING_VIEW_HOLDER;
 import static com.example.android.babyml.LogAdapter.NAPPY_VIEW_HOLDER;
@@ -143,19 +140,15 @@ public class MainActivity extends AppCompatActivity implements
         // TODO: Update time.
     }
 
-
     // TODO: Remove it or move to loader!
     private void updateTimeElapsed(Cursor cursor) {
         TimeElapsedFragment frag = (TimeElapsedFragment) fragments.get(TIME_ELAPSED_FRAG_TAG);
-        Log.d(TAG,
-                "updateTimeElpased called; cursorCount=" + cursor.getCount() + "; pos=" + cursor.getPosition() + "\n" +
-                "timeElapsedFrag: isNull?=" + (frag == null));
 
-        if (frag == null)
+        if (frag == null) {
             return;
+        }
 
-        //Cursor cursor = mDb.getLatestFeeding();
-        if (cursor.getCount() == 0) {
+        if (cursor == null || cursor.getCount() == 0) {
             frag.setTimeZero(-1);
         } else {
             cursor.moveToFirst();
@@ -448,7 +441,7 @@ public class MainActivity extends AppCompatActivity implements
 // FRAGMENTS.
     Map<String, Fragment> fragments = new HashMap<>();
 
-    MilkAdderFragment.OnCloseListener backButton = new MilkAdderFragment.OnCloseListener() {
+    OnCloseListener backButton = new OnCloseListener() {
         @Override
         public void close() {
             onBackPressed();
@@ -464,6 +457,7 @@ public class MainActivity extends AppCompatActivity implements
             switch (fragment_id) {
                 case MILK_ADDER_FRAG_TAG: {
                     frag = new MilkAdderFragment();
+                    ((MilkAdderFragment) frag).setOnCloseListener(backButton);
                     break;
                 }
                 case TIME_ELAPSED_FRAG_TAG: {
@@ -472,6 +466,7 @@ public class MainActivity extends AppCompatActivity implements
                 }
                 case NAPPY_ADDER_FRAG_TAG: {
                     frag = new NappyAdderFragment();
+
                     break;
                 }
                 case SLEEP_ADDER_FRAG_TAG: {

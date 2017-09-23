@@ -22,11 +22,23 @@ import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import lombok.Getter;
+import lombok.Setter;
+
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class NappyAdderFragment extends Fragment implements View.OnClickListener {
+
+    @Getter
+    @Setter
+    OnCloseListener onCloseListener = new OnCloseListener() {
+        @Override
+        public void close() {
+            getActivity().finish();
+        }
+    };
 
     // TODO: Rename member variables to match MilkAdderFramgent' convention
     EditText nappyTimeEditText;
@@ -94,7 +106,8 @@ public class NappyAdderFragment extends Fragment implements View.OnClickListener
 
             Toast.makeText(ctx, "ROWID=" + id, Toast.LENGTH_LONG).show();
 
-            getActivity().finish();
+            //getActivity().finish();
+            onCloseListener.close();
         } else {
             Toast.makeText(ctx, "Invalid clik",Toast.LENGTH_LONG).show();
         }
