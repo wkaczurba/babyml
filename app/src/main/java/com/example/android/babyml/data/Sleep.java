@@ -11,10 +11,6 @@ import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
-/**
- * Created by wkaczurb on 9/20/2017.
- */
-
 @ToString
 @EqualsAndHashCode(exclude={"_id"})
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -57,12 +53,12 @@ public class Sleep implements Summarizable {
     @Override
     public void addSummary(Summary summary) {
         // TODO: Add any summary-related stuff.
-        return;
     }
 
     public ContentValues asContentValues() {
-        assert (tb == TABLE_NAME);
-
+        if (!tb.equals(TABLE_NAME)) {
+            throw new IllegalArgumentException("tb does not equal " + TABLE_NAME + "; got: " + tb + " instead.");
+        }
         ContentValues values = new ContentValues();
         values.put(COLUMN_ID, _id);
         values.put(COLUMN_SLEEP_TB, tb);
@@ -89,6 +85,11 @@ public class Sleep implements Summarizable {
                 cursor.getLong(cursor.getColumnIndex(COLUMN_SLEEP_END_TS)),
                 cursor.getString(cursor.getColumnIndex(COLUMN_SLEEP_NOTE)));
     }
+
+    public Entry asEntry() {
+        return new Entry(_id, this.tb, ts);
+    }
+
 
     //public static final String COLUMN_FEED_TB = "FEED_TB";
 

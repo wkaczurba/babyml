@@ -15,6 +15,7 @@ import com.example.android.babyml.data.Entry;
 import com.example.android.babyml.data.Feed;
 import com.example.android.babyml.data.Nappy;
 import com.example.android.babyml.data.Note;
+import com.example.android.babyml.data.Sleep;
 import com.example.android.babyml.data.Summary;
 
 import org.joda.time.DateTime;
@@ -37,6 +38,8 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public final static int DATE_VIEW_HOLDER = 1;
     public static final int NAPPY_VIEW_HOLDER = 2;
     public static final int SUMMARY_VIEW_HOLDER = 3;
+    private static final int SLEEP_VIEW_HOLDER = 4;
+    private static final int NOTE_VIEW_HOLDER = 5;
 
     public interface ListItemClickListener {
         public void onListItemClick(int clickItemIndex);
@@ -234,6 +237,95 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
+    public class SleepViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        TextView logListSleepTv;
+        private Sleep sleep;
+
+        public SleepViewHolder(View itemView) {
+            super(itemView);
+            logListSleepTv = (TextView) itemView.findViewById(R.id.log_list_sleep_tv);
+            itemView.setOnClickListener(this);
+        }
+
+        public Sleep getSleep() {
+            return sleep;
+        }
+
+        private void bind(int position) {
+            if (position < 0 || position >= entriesMap.size()) {
+                return;
+            }
+
+            Log.d(TAG, "Binding (sleep): " + position);
+            Object o = entriesMap.get(position);
+            if (o instanceof Sleep) {
+                sleep = (Sleep) o;
+
+                // Format the stuff: (TODO: Move to formatting or somewhere); it is common with FeedingViewHolder.bind(...)
+                DateTimeZone currentTz = DateTimeZone.forTimeZone(TimeZone.getDefault());
+                DateTime dt = new DateTime(sleep.getTs(), currentTz);
+                DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");
+                CharSequence time = dtf.print(dt);
+
+                String s = String.format(time + " sleep"); // can be "sleep=" + n.getDirrty();
+                logListSleepTv.setText(s);
+            } else { //if (o instanceof DateItem) { // DateItem
+                throw new IllegalArgumentException("Invalid object; expected Sleep; got: " + o.getClass());
+            }
+        }
+
+        @Override
+        public void onClick(View v) {
+            int clickedPosition = getAdapterPosition();
+            mOnClickListener.onListItemClick(clickedPosition);
+        }
+    }
+
+    public class NoteViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        TextView logListNoteTv;
+        private Note note;
+
+        public NoteViewHolder(View itemView) {
+            super(itemView);
+            logListNoteTv = (TextView) itemView.findViewById(R.id.log_list_note_tv);
+            itemView.setOnClickListener(this);
+        }
+
+        public Note getNote() {
+            return note;
+        }
+
+        private void bind(int position) {
+            if (position < 0 || position >= entriesMap.size()) {
+                return;
+            }
+
+            Log.d(TAG, "Binding (note): " + position);
+            Object o = entriesMap.get(position);
+            if (o instanceof Note) {
+                note = (Note) o;
+
+                // Format the stuff: (TODO: Move to formatting or somewhere); it is common with FeedingViewHolder.bind(...)
+                DateTimeZone currentTz = DateTimeZone.forTimeZone(TimeZone.getDefault());
+                DateTime dt = new DateTime(note.getTs(), currentTz);
+                DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");
+                CharSequence time = dtf.print(dt);
+
+                String s = String.format(time + " note"); // can be "note=" + n.getDirrty();
+                logListNoteTv.setText(s);
+            } else { //if (o instanceof DateItem) { // DateItem
+                throw new IllegalArgumentException("Invalid object; expected Note; got: " + o.getClass());
+            }
+        }
+
+        @Override
+        public void onClick(View v) {
+            int clickedPosition = getAdapterPosition();
+            mOnClickListener.onListItemClick(clickedPosition);
+        }
+    }
+
+
     // Helper:
     public static Feed cursorToFeed(Cursor cursor) {
         long id = cursor.getLong(cursor.getColumnIndex(Feed.COLUMN_ID));
@@ -280,7 +372,7 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 int feedAmount = cursor.getInt(cursor.getColumnIndex(Feed.COLUMN_FEED_AMOUNT)); // EntriesDbHandler.COLUMN_FEED_AMOUNT));
                 //Feed f = new Feed(id, timestamp, feedAmount);
                 Feed f = new Feed(id, Feed.COLUMN_FEED_TB, timestamp, feedAmount, null);
-                entriesMap.addSerializable(f);
+                entriesMap.addSummarizable(f);
             } else if (e.equals(EntriesDbHandler.EntryType.Nappy)) {
 
                 int nappyDirty = cursor.getInt(cursor.getColumnIndex(Nappy.COLUMN_NAPPY_DIRTY)); //EntriesDbHandler.COLUMN_NAPPY_DIRTY));
@@ -290,11 +382,20 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
                 //Nappy n = new Nappy(id, timestamp, nappyDirty, nappyWet, nappyNote);
                 Nappy n = new Nappy(id, Nappy.TABLE_NAME, timestamp, nappyDirty, nappyWet, nappyNote);
-                entriesMap.addSerializable(n);
+                entriesMap.addSummarizable(n);
             } else if (e.equals(EntriesDbHandler.EntryType.Note)) {
                 String noteValue = cursor.getString(cursor.getColumnIndex(Note.COLUMN_NOTE_VALUE)); //EntriesDbHandler.COLUMN_NOTE_VALUE));
                 Note n = new Note(id, Note.TABLE_NAME, timestamp, noteValue);
-                entriesMap.addSerializable(n);
+                entriesMap.addSummarizable(n);
+            } else if (e.equals(EntriesDbHandler.EntryType.Sleep)) {
+                String columns[] = cursor.getColumnNames();
+                for (String column : columns) {
+                    Log.d(TAG, "COLUMN IN SLEEP: " + column);
+                }
+                String note = cursor.getString(cursor.getColumnIndex(Sleep.COLUMN_SLEEP_NOTE)); //EntriesDbHandler.COLUMN_NOTE_VALUE));
+                Long entTimestamp = cursor.getLong(cursor.getColumnIndex(Sleep.COLUMN_SLEEP_END_TS)); //EntriesDbHandler.COLUMN_NOTE_VALUE));
+                Sleep s = new Sleep(id, Sleep.TABLE_NAME, timestamp, entTimestamp, note);
+                entriesMap.addSummarizable(s);
             } else {
                 throw new IllegalArgumentException("Invalid enum: " + e.name());
             }
@@ -303,6 +404,8 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         Log.d(TAG, "Cursor swapped; EntryMap.size(): " + entriesMap.size());
     }
 
+
+    // TODO: Use strategy pattern for this!.
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
@@ -343,11 +446,26 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 vh = new SummaryViewHolder(view);
                 break;
 
+            case SLEEP_VIEW_HOLDER:
+                view = layoutInflater.inflate(R.layout.log_list_sleep,
+                        parent,
+                        shouldAttachParentImmediately);
+                vh = new SleepViewHolder(view);
+                break;
+
+            case NOTE_VIEW_HOLDER:
+                view = layoutInflater.inflate(R.layout.log_list_note,
+                        parent,
+                        shouldAttachParentImmediately);
+                vh = new NoteViewHolder(view);
+                break;
+
             default: throw new IllegalArgumentException("Invalid viewType:" + vh);
         }
         return vh;
     }
 
+    // TODO: Rework it to use STRATEGY.
     @Override
     public int getItemViewType(int position) {
         if (entriesMap.get(position) instanceof Feed) {
@@ -358,6 +476,10 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             return NAPPY_VIEW_HOLDER;
         } else if (entriesMap.get(position) instanceof Summary) {
             return SUMMARY_VIEW_HOLDER;
+        } else if (entriesMap.get(position) instanceof Sleep) {
+            return SLEEP_VIEW_HOLDER;
+        } else if (entriesMap.get(position) instanceof Note) {
+            return NOTE_VIEW_HOLDER;
         } else {
             throw new IllegalArgumentException("Item at position(" + position +") is neither FeedingItem or DateItem");
         }

@@ -89,7 +89,7 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
         createAllEntriesView(db);
         Log.d(TAG, "DB Created ok.");
 
-        EntriesDbHandler.getInstance(context).printOrphans();
+//        EntriesDbHandler.getInstance(context).printOrphans();
     }
 
     // TODO: ADD
@@ -252,8 +252,6 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
 
             db.beginTransaction();
             try {
-                // TODO: Replace the below with string contstants (e.g. Entry.COLUMN...)
-                // Or change into db.insert(..)
                 ContentValues entryCv = nappy.asEntry().asContentValues();
                 entryCv.remove(Entry.COLUMN_ID);
                 rowId = db.insert(Entry.TABLE_NAME, null, entryCv);
@@ -275,11 +273,65 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
         }
 
         synchronized long insertSleep(Sleep sleep) {
-            throw new UnsupportedOperationException("insertSleep not implemented yet");
+            SQLiteDatabase db = instance.getWritableDatabase();
+            long rowId;
+
+            ContentValues values = sleep.asContentValues();
+            if (values.containsKey(Sleep.COLUMN_ID)) {
+                values.remove(Sleep.COLUMN_ID);
+            }
+
+            db.beginTransaction();
+            try {
+                ContentValues entryCv = sleep.asEntry().asContentValues();
+                entryCv.remove(Entry.COLUMN_ID);
+                rowId = db.insert(Entry.TABLE_NAME, null, entryCv);
+
+                ContentValues sleepCv = sleep.asContentValues();
+                sleepCv.put(Sleep.COLUMN_ID, rowId);
+                db.insert(Sleep.TABLE_NAME, null, sleepCv);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+
+            if (rowId != -1) {
+                notifyOnSleepChange();
+                notifyOnEntriesChange();
+            }
+            return rowId;
         }
 
+        synchronized long insertNote(Note note) {
+            SQLiteDatabase db = instance.getWritableDatabase();
+            long rowId;
 
+            ContentValues values = note.asContentValues();
+            if (values.containsKey(Note.COLUMN_ID)) {
+                values.remove(Note.COLUMN_ID);
+            }
 
+            db.beginTransaction();
+            try {
+                ContentValues entryCv = note.asEntry().asContentValues();
+                entryCv.remove(Entry.COLUMN_ID);
+                rowId = db.insert(Entry.TABLE_NAME, null, entryCv);
+
+                ContentValues noteCv = note.asContentValues();
+                noteCv.put(Note.COLUMN_ID, rowId);
+// FIXME: Fails constraints: ENTRY_TB_CK
+                db.insert(Note.TABLE_NAME, null, noteCv);
+                db.setTransactionSuccessful();
+            } finally {
+                db.endTransaction();
+            }
+
+            if (rowId != -1) {
+                notifyOnNoteChange();
+                notifyOnEntriesChange();
+            }
+            return rowId;
+        }
 
 //        ContentValues cv = nappy.asContentValues();
 //        cv.remove("_id"); // if _id is specified -> it most likely give an error.
@@ -313,7 +365,37 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
     }
 
     synchronized int deleteSleepById(long id) {
-        throw new UnsupportedOperationException("deleteSleepById was not implemented yet");
+        int rowsAffected = instance.getWritableDatabase()
+                .delete(
+                        Entry.TABLE_NAME,
+                        Entry.COLUMN_ID + "=? AND " +
+                                Entry.COLUMN_ENTRY_TB + "=?",
+                        new String[] { String.valueOf( id ), Sleep.TABLE_NAME } ); // equivalent to "_ID =" + id
+
+        if (rowsAffected > 0) {
+            notifyOnSleepChange();
+            notifyOnEntriesChange();
+        } else {
+            throw new IllegalArgumentException("Could not delete Sleep.id=" + id);
+        }
+        return rowsAffected;
+    }
+
+    synchronized int deleteNoteById(long id) {
+        int rowsAffected = instance.getWritableDatabase()
+                .delete(
+                        Entry.TABLE_NAME,
+                        Entry.COLUMN_ID + "=? AND " +
+                                Entry.COLUMN_ENTRY_TB + "=?",
+                        new String[] { String.valueOf( id ), Note.TABLE_NAME } ); // equivalent to "_ID =" + id
+
+        if (rowsAffected > 0) {
+            notifyOnNoteChange();
+            notifyOnEntriesChange();
+        } else {
+            throw new IllegalArgumentException("Could not delete Note.id=" + id);
+        }
+        return rowsAffected;
     }
 
 
@@ -329,6 +411,14 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
 //  TODO: Mechanism of notification of other stuff:
     private void notifyOnNappyChange() {
         context.getContentResolver().notifyChange(EntriesProvider.URI_NAPPIES, null, false);
+    }
+
+    private void notifyOnSleepChange() {
+        context.getContentResolver().notifyChange(EntriesProvider.URI_SLEEPS, null, false);
+    }
+
+    private void notifyOnNoteChange() {
+        context.getContentResolver().notifyChange(EntriesProvider.URI_NOTES, null, false);
     }
 
     public void printOrphans() {

@@ -184,77 +184,6 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    /**
-     * The following is a textWatcher for milkTimeEditText
-     *
-     * TODO: Implement something similar to this one;
-     * TODO: Make it as a separate class/file related to resources/UI; this class is used for Nappies
-     *   as well as for Milk and is likely to be used elsewhere
-     * http://www.techrepublic.com/article/pro-tip-write-a-validate-as-you-go-android-textwatcher-for-date-entry-fields/
-     */
-    public static class TimeTextWatcher implements TextWatcher {
-        EditText et;
-
-        public TimeTextWatcher(EditText et) {
-            this.et = et;
-        }
-
-        @Override
-        public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-        }
-
-        public void setDefaultTimeIfEntryInvalid() {
-            String entry = et.getText().toString();
-            int[] hhmm = DateUtils.toHoursMinArray(entry);
-            boolean isEntryValid = (hhmm != null);
-            if (!isEntryValid) {
-                setDefaultTime();
-            } else {
-                // empty.
-            }
-        }
-
-        public int[] getHoursMins() {
-            String entry = et.getText().toString();
-            return DateUtils.toHoursMinArray(entry);
-        }
-
-        public long getTimeMilis() {
-            int[] hhmm = getHoursMins();
-            if (hhmm == null) {
-                throw new NullPointerException("getHoursMins returned null; field contains invalid time. Try using setDefaultTimeIfEntryInvalid before using getHoursMins");
-            }
-
-            LocalDateTime ldt = DateUtils.applyTimeToCurrentLocalDate(hhmm[0], hhmm[1]);
-            return ldt.toDateTime().getMillis();
-        }
-
-        public void setDefaultTime() {
-            //android.text.format.DateFormat df = new android.text.format.DateFormat();
-            long timeInMillis = System.currentTimeMillis();
-
-            CharSequence csTime = DateFormat.format("hh:mm", timeInMillis); // was: df.
-            et.setText(csTime);
-        }
-
-        @Override
-        public void onTextChanged(CharSequence s, int start, int before, int count) {
-            int[] hhmm = DateUtils.toHoursMinArray(s.toString());
-            boolean isEntryValid = (hhmm != null);
-            if (!isEntryValid) {
-                Log.d(TAG, "Invalid time: " + s.toString());
-                et.setError("Invalid time");
-            } else {
-                Log.d(TAG, "Time ok: " + s.toString());
-            }
-        }
-
-        @Override
-        public void afterTextChanged(Editable s) {
-
-        }
-    }
 
     @Override
     protected void onResume() {
@@ -466,15 +395,17 @@ public class MainActivity extends AppCompatActivity implements
                 }
                 case NAPPY_ADDER_FRAG_TAG: {
                     frag = new NappyAdderFragment();
-
+                    ((NappyAdderFragment) frag).setOnCloseListener(backButton);
                     break;
                 }
                 case SLEEP_ADDER_FRAG_TAG: {
                     frag = new SleepAdderFragment();
+                    ((SleepAdderFragment) frag).setOnCloseListener(backButton);
                     break;
                 }
                 case NOTE_ADDER_FRAG_TAG: {
                     frag = new NoteAdderFragment();
+                    ((NoteAdderFragment) frag).setOnCloseListener(backButton);
                     break;
                 }
                 default: {

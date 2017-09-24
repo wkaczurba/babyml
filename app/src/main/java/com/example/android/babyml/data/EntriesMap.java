@@ -18,7 +18,7 @@ public class EntriesMap {
     private Map<LocalDate, List<Summarizable>> lit = new LinkedHashMap<>();
     private List<Object> flat = null;
 
-    public void addSerializable(Summarizable o) {
+    public void addSummarizable(Summarizable o) {
         LocalDate date = DateUtils.summarizableToLocalDate(o);
 
         if (lit.containsKey(date)) {

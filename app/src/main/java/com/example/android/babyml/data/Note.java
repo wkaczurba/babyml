@@ -11,10 +11,6 @@ import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
-/**
- * Created by wkaczurb on 9/15/2017.
- */
-
 @ToString
 @EqualsAndHashCode(exclude={"_id"})
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)

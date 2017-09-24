@@ -2,6 +2,7 @@ package com.example.android.babyml.data;
 
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.annotation.Nullable;
 
 import com.example.android.babyml.legacy.FeedingContract;
 
@@ -90,6 +91,7 @@ public class Nappy implements Summarizable {
                 values.getAsString(COLUMN_NAPPY_NOTE)
         );
     }
+    // TODO: Add fromCursor (?)
 
     public Entry asEntry() {
         return new Entry(_id, this.tb, ts);

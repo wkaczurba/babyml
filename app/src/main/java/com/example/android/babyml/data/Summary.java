@@ -1,18 +1,16 @@
 package com.example.android.babyml.data;
 
 import org.joda.time.LocalDate;
-
 import lombok.Getter;
 import lombok.Setter;
 
 /**
- * Created by wkaczurb on 9/18/2017.
+ * Class for summarizing values from consecutive entries
+ * TODO: Use decorator pattern for Summary
  */
-
-// TODO: Use decorator pattern for Summary;
 public class Summary {
     //DateTime day;
-    public final LocalDate date;
+    private final LocalDate date;
     @Getter
     @Setter
     int feedAmount;
@@ -22,7 +20,7 @@ public class Summary {
     int dirtyNappies;
     private int string;
 
-    public Summary(LocalDate date)
+    Summary(LocalDate date)
     {
         this.date = date;
     }

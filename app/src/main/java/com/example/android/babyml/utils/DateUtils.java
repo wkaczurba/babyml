@@ -10,18 +10,12 @@ import org.joda.time.LocalTime;
 
 import java.util.TimeZone;
 
-/**
- * Created by WKaczurb on 8/12/2017.
- */
-
 public class DateUtils {
     /**
      * Function gets current date time and applies particular time to it.
      * If hour/min are ahead of current time - a day earlier is returned.
      *
-     * TODO: Move this to Utils class.
-     *
-     * @return
+     * @return LocalDateTime
      */
     public static LocalDateTime applyTimeToCurrentLocalDate(int hour, int min) {
         LocalDateTime ldtNow = LocalDateTime.now();
@@ -50,7 +44,7 @@ public class DateUtils {
         return milisToLocalDate( s.getTs() );
     }
 
-    public static LocalDate milisToLocalDate(long millis) {
+    private static LocalDate milisToLocalDate(long millis) {
         DateTime dt = new DateTime(millis, DateTimeZone.forTimeZone(TimeZone.getDefault()));
         return dt.toLocalDate();
     }

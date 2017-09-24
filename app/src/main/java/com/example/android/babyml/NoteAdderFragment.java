@@ -22,20 +22,27 @@ import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import lombok.Getter;
+import lombok.Setter;
+
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class NoteAdderFragment extends Fragment implements View.OnClickListener {
 
-    // TODO: Rework everything.
-
     EditText noteTimeEditText;
     Button storeNoteButton;
-    MainActivity.TimeTextWatcher ttw;
+    TimeTextWatcher ttw;
 
-    private EntriesDbHandler mDb;
-
+    @Getter
+    @Setter
+    OnCloseListener onCloseListener = new OnCloseListener() {
+        @Override
+        public void close() {
+            getActivity().finish();
+        }
+    };
 
     public NoteAdderFragment() {
     }
@@ -51,14 +58,13 @@ public class NoteAdderFragment extends Fragment implements View.OnClickListener 
     public void onStart() {
         Context context = getActivity();
         // Required empty public constructor
-        EntriesDbHandler mDb = EntriesDbHandler.getInstance(context);
         View view = getView();
         super.onStart();
         noteTimeEditText = (EditText) view.findViewById(R.id.note_time_et);
 
         DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");
         noteTimeEditText.setText(dtf.print(LocalTime.now()));
-        ttw = new MainActivity.TimeTextWatcher(noteTimeEditText);
+        ttw = new TimeTextWatcher(noteTimeEditText);
         noteTimeEditText.addTextChangedListener(ttw);
         setIme(context);
 
@@ -76,11 +82,6 @@ public class NoteAdderFragment extends Fragment implements View.OnClickListener 
             long timemilis = ttw.getTimeMilis();
             String note = null;
 
-            // mDb:
-            if (mDb == null) { // NOT SURE WHY THIS HAPPENS.
-                mDb = EntriesDbHandler.getInstance(ctx);
-            }
-
             ContentValues contentValues = new Note(-1, Note.TABLE_NAME, timemilis, note).asContentValues();
                     Uri uri = getActivity().getContentResolver().insert(
                     EntriesProvider.URI_NOTES,
@@ -89,7 +90,7 @@ public class NoteAdderFragment extends Fragment implements View.OnClickListener 
 
             Toast.makeText(ctx, "ROWID=" + id, Toast.LENGTH_LONG).show();
 
-            getActivity().finish();
+            onCloseListener.close();
         } else {
             Toast.makeText(ctx, "Invalid clik",Toast.LENGTH_LONG).show();
         }
