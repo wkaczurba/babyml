@@ -18,9 +18,9 @@
         app:layout_constraintTop_toBottomOf="@+id/linear_buttons_row">
 
         <TextView
-            android:id="@+id/textView"
+            android:id="@+id/sleep_from_tw"
             android:layout_height="wrap_content"
-            android:text="SLEEP"
+            android:text="Sleep From:"
             android:layout_width="wrap_content" />
 
         <EditText
@@ -38,6 +38,28 @@
         android:textAlignment="center"
         android:textSize="18sp"
         android:visibility="visible" />
+
+        <TextView
+            android:id="@+id/sleep_to_tw"
+            android:layout_height="wrap_content"
+            android:text="To:"
+            android:layout_width="wrap_content" />
+
+        <EditText
+            android:id="@+id/sleep_time_end_et"
+            android:layout_width="86dp"
+            android:layout_height="48dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp"
+            android:elevation="0dp"
+            android:fontFamily="false"
+            android:gravity="center"
+            android:imeOptions="actionDone"
+            android:inputType="time"
+            android:text="13:35"
+            android:textAlignment="center"
+            android:textSize="18sp"
+            android:visibility="visible" />
 
         <Button
             android:id="@+id/store_sleep_button"
@@ -74,5 +96,29 @@
         <!--app:layout_constraintGuide_percent="0.052083332" />-->
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/sleep_note_tw"
+        android:layout_height="wrap_content"
+        android:text="Note:"
+        android:layout_width="wrap_content"
+        android:layout_gravity="left"
+        android:paddingLeft="10dp"/>
+
+    <EditText
+        android:id="@+id/sleep_time_note_et"
+        android:layout_width="match_parent"
+        android:layout_height="96dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:elevation="0dp"
+        android:fontFamily="false"
+        android:gravity="center"
+        android:imeOptions="actionDone"
+        android:inputType="time"
+        android:text=""
+        android:textAlignment="center"
+        android:textSize="18sp"
+        android:visibility="visible" />
 
 </LinearLayout>

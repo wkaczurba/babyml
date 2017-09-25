@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.android.babyml.data.EntriesDbHandler;
 import com.example.android.babyml.data.EntriesMap;
@@ -21,10 +22,14 @@ import com.example.android.babyml.data.Summary;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import java.util.TimeZone;
+
+import lombok.Getter;
+import lombok.Setter;
 
 // FIXME: On changing TimeZones items in text moxes are not updated.
 
@@ -38,14 +43,14 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public final static int DATE_VIEW_HOLDER = 1;
     public static final int NAPPY_VIEW_HOLDER = 2;
     public static final int SUMMARY_VIEW_HOLDER = 3;
-    private static final int SLEEP_VIEW_HOLDER = 4;
-    private static final int NOTE_VIEW_HOLDER = 5;
+    public static final int SLEEP_VIEW_HOLDER = 4;
+    public static final int NOTE_VIEW_HOLDER = 5;
 
     public interface ListItemClickListener {
         public void onListItemClick(int clickItemIndex);
     }
 
-    static abstract class Item {};
+//    static abstract class Item {};
     private EntriesMap entriesMap;
 
     /**
@@ -66,12 +71,13 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public class FeedingViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
+        @Getter
         private Feed feed;
         public TextView logTextView;
 
-        public Feed getFeed() {
-            return feed;
-        }
+//        public Feed getFeed() {
+//            return feed;
+//        }
 
         public FeedingViewHolder(View itemView) {
             super(itemView);
@@ -115,9 +121,9 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         private LocalDate date;
         public TextView dateTextView;
 
-        public LocalDate getDate() {
-            return date;
-        }
+//        public LocalDate getDate() {
+//            return date;
+//        }
 
         public DateViewHolder(View itemView) {
             super(itemView);
@@ -151,6 +157,7 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public class NappyViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView logListNappyTv;
+        @Getter
         private Nappy nappy;
 
         public NappyViewHolder(View itemView) {
@@ -159,9 +166,9 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             itemView.setOnClickListener(this);
         }
 
-        public Nappy getNappy() {
-            return nappy;
-        }
+//        public Nappy getNappy() {
+//            return nappy;
+//        }
 
         private void bind(int position) {
             if (position < 0 || position >= entriesMap.size()) {
@@ -196,12 +203,13 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public class SummaryViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
+        @Getter
         private Summary summary; // FIXME: This should probabyl contain something different (?)
         public TextView summaryTextView;
 
-        public Summary getSummary() {
-            return summary;
-        }
+//        public Summary getSummary() {
+//            return summary;
+//        }
 
         public SummaryViewHolder(View itemView) {
             super(itemView);
@@ -239,16 +247,18 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public class SleepViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView logListSleepTv;
+
+        @Getter
+        @Setter
+        Context ctx;
+
+        @Getter
         private Sleep sleep;
 
         public SleepViewHolder(View itemView) {
             super(itemView);
             logListSleepTv = (TextView) itemView.findViewById(R.id.log_list_sleep_tv);
             itemView.setOnClickListener(this);
-        }
-
-        public Sleep getSleep() {
-            return sleep;
         }
 
         private void bind(int position) {
@@ -260,14 +270,44 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             Object o = entriesMap.get(position);
             if (o instanceof Sleep) {
                 sleep = (Sleep) o;
+                long start = sleep.getTs();
+                long end = sleep.getEndTs();
+                String note = sleep.getNote();
 
                 // Format the stuff: (TODO: Move to formatting or somewhere); it is common with FeedingViewHolder.bind(...)
                 DateTimeZone currentTz = DateTimeZone.forTimeZone(TimeZone.getDefault());
-                DateTime dt = new DateTime(sleep.getTs(), currentTz);
+                DateTime dt = new DateTime(start, currentTz);
                 DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");
-                CharSequence time = dtf.print(dt);
+                CharSequence startTime = dtf.print(dt);
 
-                String s = String.format(time + " sleep"); // can be "sleep=" + n.getDirrty();
+                DateTime endTs = new DateTime(end, currentTz);
+                CharSequence endTime = dtf.print(endTs);
+
+// FIXME: Simplify once DB is correct.
+                String lengthS = "?";
+                if (end < start) {
+                    Toast.makeText(ctx, "Error in DB: end < start", Toast.LENGTH_LONG).show();
+                } else {
+                    long lengthMillis = (end - start);
+                    LocalTime lengthLt = new LocalTime((int) (lengthMillis / 3600_000L), (int) (lengthMillis / 60_000L));
+                    lengthS = dtf.print(lengthLt);
+                }
+
+                // Process note:
+                if (note == null) {
+                    note = "";
+                } else {
+                    StringBuilder sb = new StringBuilder("; ");
+                    if (note.length() > 20) {
+                        sb.append(note.substring(0, 20) + "...");
+                    } else {
+                        sb.append(note);
+                    }
+                    note = sb.toString();
+                }
+
+                // TODO: Add note.!
+                String s = String.format(startTime + "-" + endTime + " sleep (" + lengthS + " long) " + note); // can be "sleep=" + n.getDirrty();
                 logListSleepTv.setText(s);
             } else { //if (o instanceof DateItem) { // DateItem
                 throw new IllegalArgumentException("Invalid object; expected Sleep; got: " + o.getClass());
@@ -283,6 +323,8 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     public class NoteViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView logListNoteTv;
+
+        @Getter
         private Note note;
 
         public NoteViewHolder(View itemView) {
@@ -291,12 +333,10 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             itemView.setOnClickListener(this);
         }
 
-        public Note getNote() {
-            return note;
-        }
-
         private void bind(int position) {
+            Log.d(TAG, "In binding note.");
             if (position < 0 || position >= entriesMap.size()) {
+                Log.d(TAG, "Binding (note) skipped.");
                 return;
             }
 
@@ -304,14 +344,16 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             Object o = entriesMap.get(position);
             if (o instanceof Note) {
                 note = (Note) o;
+                long ts = note.getTs(); // timestamp;
+                String value = note.getValue();
 
                 // Format the stuff: (TODO: Move to formatting or somewhere); it is common with FeedingViewHolder.bind(...)
                 DateTimeZone currentTz = DateTimeZone.forTimeZone(TimeZone.getDefault());
-                DateTime dt = new DateTime(note.getTs(), currentTz);
+                DateTime dt = new DateTime(ts, currentTz);
                 DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");
                 CharSequence time = dtf.print(dt);
 
-                String s = String.format(time + " note"); // can be "note=" + n.getDirrty();
+                String s = new StringBuilder(time).append(" ").append(value).toString(); // can be "note=" + n.getDirrty();
                 logListNoteTv.setText(s);
             } else { //if (o instanceof DateItem) { // DateItem
                 throw new IllegalArgumentException("Invalid object; expected Note; got: " + o.getClass());
@@ -451,6 +493,7 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         parent,
                         shouldAttachParentImmediately);
                 vh = new SleepViewHolder(view);
+                ((SleepViewHolder) vh).setCtx(parent.getContext());
                 break;
 
             case NOTE_VIEW_HOLDER:
@@ -485,6 +528,7 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         }
     }
 
+    // TODO: Refactor this.
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         switch (holder.getItemViewType()) {
@@ -492,7 +536,8 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             case DATE_VIEW_HOLDER: ((DateViewHolder) holder).bind(position); break;
             case NAPPY_VIEW_HOLDER: ((NappyViewHolder) holder).bind(position); break;
             case SUMMARY_VIEW_HOLDER: ((SummaryViewHolder) holder).bind(position); break;
-// TODO: Add another view_holder for summary of feedings.
+            case SLEEP_VIEW_HOLDER: ((SleepViewHolder) holder).bind(position); break;
+            case NOTE_VIEW_HOLDER: ((NoteViewHolder) holder).bind(position); break;
             default: break;
         }
     }

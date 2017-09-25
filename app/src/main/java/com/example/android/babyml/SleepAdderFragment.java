@@ -29,8 +29,10 @@ import lombok.Setter;
  */
 public class SleepAdderFragment extends Fragment implements View.OnClickListener {
     EditText sleepTimeEditText;
+    EditText sleepTimeEndEditText;
+    EditText sleepTimeNoteEditText;
     Button storeSleepButton;
-    TimeTextWatcher ttw;
+    TimeTextWatcher ttw, ttw2;
 
     @Getter
     @Setter
@@ -59,13 +61,22 @@ public class SleepAdderFragment extends Fragment implements View.OnClickListener
 
         assert view != null;
         sleepTimeEditText = (EditText) view.findViewById(R.id.sleep_time_et);
-        if (sleepTimeEditText == null)
+        sleepTimeEndEditText = (EditText) view.findViewById(R.id.sleep_time_end_et);
+        sleepTimeNoteEditText = (EditText) view.findViewById(R.id.sleep_time_note_et);
+
+        // TODO: Consider throwing an exception if things are not found.
+        if (sleepTimeEditText == null ||
+            sleepTimeEndEditText == null ||
+            sleepTimeNoteEditText == null)
             return;
 
         DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");
         sleepTimeEditText.setText(dtf.print(LocalTime.now()));
         ttw = new TimeTextWatcher(sleepTimeEditText);
+// FIXME: Handle starting end in next day; make sure that end is not before start, etc...
+        ttw2 = new TimeTextWatcher(sleepTimeEndEditText);
         sleepTimeEditText.addTextChangedListener(ttw);
+        sleepTimeEndEditText.addTextChangedListener(ttw2);
 
         storeSleepButton = (Button) view.findViewById(R.id.store_sleep_button);
         storeSleepButton.setOnClickListener(this);
@@ -78,8 +89,8 @@ public class SleepAdderFragment extends Fragment implements View.OnClickListener
         if (v.equals(this.storeSleepButton)) {
 
             long timemilis = ttw.getTimeMilis();
-            long endTs = ttw.getTimeMilis() + 200000;
-            String note = null;
+            long endTs = ttw2.getTimeMilis();
+            String note = sleepTimeNoteEditText.getText().toString();
 
             ContentValues contentValues = new Sleep(-1, Sleep.TABLE_NAME, timemilis, endTs, note).asContentValues();
                     Uri uri = getActivity().getContentResolver().insert(

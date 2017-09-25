@@ -36,6 +36,8 @@ import com.example.android.babyml.data.EntriesUtils;
 import com.example.android.babyml.data.Entry;
 import com.example.android.babyml.data.Feed;
 import com.example.android.babyml.data.Nappy;
+import com.example.android.babyml.data.Note;
+import com.example.android.babyml.data.Sleep;
 import com.example.android.babyml.utils.DateUtils;
 import com.example.android.babyml.utils.DebugUtils;
 
@@ -44,6 +46,8 @@ import java.util.Map;
 
 import static com.example.android.babyml.LogAdapter.FEEDING_VIEW_HOLDER;
 import static com.example.android.babyml.LogAdapter.NAPPY_VIEW_HOLDER;
+import static com.example.android.babyml.LogAdapter.SLEEP_VIEW_HOLDER;
+import static com.example.android.babyml.LogAdapter.NOTE_VIEW_HOLDER;
 
 // TODO: Review these ones for sliding tabs:
 //   https://developer.android.com/training/implementing-navigation/lateral.html
@@ -265,6 +269,8 @@ public class MainActivity extends AppCompatActivity implements
                 switch (itemViewType) {
                     case FEEDING_VIEW_HOLDER: // fall-through
                     case NAPPY_VIEW_HOLDER:
+                    case SLEEP_VIEW_HOLDER:
+                    case NOTE_VIEW_HOLDER:
                         swipeFlags = ItemTouchHelper.RIGHT | ItemTouchHelper.LEFT;
                         break;
                     default:
@@ -279,34 +285,92 @@ public class MainActivity extends AppCompatActivity implements
                 if (direction == ItemTouchHelper.RIGHT || direction == ItemTouchHelper.LEFT) {
                     int itemViewType = viewHolder.getItemViewType();
 
-                    if (itemViewType == FEEDING_VIEW_HOLDER) { // TODO: Change 0 to use FINAL STATIC INT!!
-                        LogAdapter.FeedingViewHolder logViewHolder = (LogAdapter.FeedingViewHolder) viewHolder;
+                    switch (itemViewType) {
+                        case FEEDING_VIEW_HOLDER:
+                            LogAdapter.FeedingViewHolder logViewHolder = (LogAdapter.FeedingViewHolder) viewHolder;
 
-                        long lid = logViewHolder.getAdapterPosition();
-                        Feed feed = logViewHolder.getFeed();
-                            //mDb.deleteFeeding(feed.getId());
+                            long lid = logViewHolder.getAdapterPosition();
+                            Feed feed = logViewHolder.getFeed();
 
-                        Uri deleteFeedUri = EntriesProvider.URI_FEEDS
-                                .buildUpon()
-                                .appendPath(String.valueOf(feed.get_id()))
-                                .build();
+                            Uri deleteUri = EntriesProvider.URI_FEEDS
+                                    .buildUpon()
+                                    .appendPath(String.valueOf(feed.get_id()))
+                                    .build();
 
-                        getContentResolver().delete(deleteFeedUri, null, null);
-                    } else if (itemViewType == NAPPY_VIEW_HOLDER) {
-                        LogAdapter.NappyViewHolder nappyViewHolder = (LogAdapter.NappyViewHolder) viewHolder;
-                        long lid = nappyViewHolder.getAdapterPosition();
-                        Nappy nappy = nappyViewHolder.getNappy();
-                        //mDb.deleteNappy(nappy.getId());
-                        Uri deleteUri = EntriesProvider.URI_NAPPIES.buildUpon()
-                                        .appendPath(String.valueOf(nappy.get_id()))
-                                        .build();
-                        getContentResolver().delete(deleteUri, null, null);
-                    } else {
+                            getContentResolver().delete(deleteUri, null, null);
+                            break;
+                        case NAPPY_VIEW_HOLDER:
+                            LogAdapter.NappyViewHolder nappyViewHolder = (LogAdapter.NappyViewHolder) viewHolder;
+                            lid = nappyViewHolder.getAdapterPosition();
+                            Nappy nappy = nappyViewHolder.getNappy();
 
-                        return;
-                        // DO NOTHING. This can be: DATE_VIEW_HOLDER or SUMMARY_VIEW_HOLDER or other.
-                        //throw new IllegalArgumentException("ItemViewType = " + itemViewType);
+                            deleteUri = EntriesProvider.URI_NAPPIES.buildUpon()
+                                    .appendPath(String.valueOf(nappy.get_id()))
+                                    .build();
+                            getContentResolver().delete(deleteUri, null, null);
+
+                            break;
+                        case SLEEP_VIEW_HOLDER:
+                            LogAdapter.SleepViewHolder sleepViewHolder = (LogAdapter.SleepViewHolder) viewHolder;
+                            lid = sleepViewHolder.getAdapterPosition();
+                            Sleep sleep = sleepViewHolder.getSleep();
+
+                            deleteUri = EntriesProvider.URI_SLEEPS.buildUpon()
+                                    .appendPath(String.valueOf(sleep.get_id()))
+                                    .build();
+                            getContentResolver().delete(deleteUri, null, null);
+//                            // TODO: Implement
+//                            throw new UnsupportedOperationException("Not implemented yet;");
+                            break;
+                        case NOTE_VIEW_HOLDER:
+                            LogAdapter.NoteViewHolder noteViewHolder = (LogAdapter.NoteViewHolder) viewHolder;
+                            lid = noteViewHolder.getAdapterPosition();
+                            Note note = noteViewHolder.getNote();
+
+                            if (note == null) {
+                                throw new NullPointerException("note var is not supposed to be null!");
+                            }
+
+
+                            deleteUri = EntriesProvider.URI_NOTES.buildUpon()
+                                    .appendPath(String.valueOf(note.get_id()))
+                                    .build();
+                            getContentResolver().delete(deleteUri, null, null);
+
+//                            throw new UnsupportedOperationException("Not implemented yet;");
+                            break;
+                        default:
+                            break;
                     }
+
+//                    if (itemViewType == FEEDING_VIEW_HOLDER) { // TODO: Change 0 to use FINAL STATIC INT!!
+//                        LogAdapter.FeedingViewHolder logViewHolder = (LogAdapter.FeedingViewHolder) viewHolder;
+//
+//                        long lid = logViewHolder.getAdapterPosition();
+//                        Feed feed = logViewHolder.getFeed();
+//                            //mDb.deleteFeeding(feed.getId());
+//
+//                        Uri deleteFeedUri = EntriesProvider.URI_FEEDS
+//                                .buildUpon()
+//                                .appendPath(String.valueOf(feed.get_id()))
+//                                .build();
+//
+//                        getContentResolver().delete(deleteFeedUri, null, null);
+//                    } else if (itemViewType == NAPPY_VIEW_HOLDER) {
+//                        LogAdapter.NappyViewHolder nappyViewHolder = (LogAdapter.NappyViewHolder) viewHolder;
+//                        long lid = nappyViewHolder.getAdapterPosition();
+//                        Nappy nappy = nappyViewHolder.getNappy();
+//                        //mDb.deleteNappy(nappy.getId());
+//                        Uri deleteUri = EntriesProvider.URI_NAPPIES.buildUpon()
+//                                .appendPath(String.valueOf(nappy.get_id()))
+//                                .build();
+//                        getContentResolver().delete(deleteUri, null, null);
+//                    } else {
+//
+//                        return;
+//                        // DO NOTHING. This can be: DATE_VIEW_HOLDER or SUMMARY_VIEW_HOLDER or other.
+//                        //throw new IllegalArgumentException("ItemViewType = " + itemViewType);
+//                    }
                 }
             }
         };
