@@ -10,6 +10,8 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.example.android.babyml.utils.DateUtils;
+import com.example.android.babyml.utils.MiscUiUtils;
+
 import org.joda.time.LocalDateTime;
 
 /**
@@ -28,7 +30,7 @@ class TimeTextWatcher implements TextWatcher {
 
     public TimeTextWatcher(EditText et) {
         this.et = et;
-        setIme(et.getContext(), et);
+        MiscUiUtils.setIme(et.getContext(), et);
     }
 
     @Override
@@ -86,14 +88,14 @@ class TimeTextWatcher implements TextWatcher {
 
     }
 
-    // TODO: Consider bundling it together with TimeTextWatcher
-    void setIme(Context context, View view) {
-        InputMethodManager inputManager =
-                (InputMethodManager) context.
-                        getSystemService(Context.INPUT_METHOD_SERVICE);
-
-        inputManager.hideSoftInputFromWindow(
-                view.getWindowToken(),
-                InputMethodManager.HIDE_NOT_ALWAYS);
-    }
+    // TODO: Consider moving it to MiscUiUtils.
+//    public static void setIme(Context context, View view) {
+//        InputMethodManager inputManager =
+//                (InputMethodManager) context.
+//                        getSystemService(Context.INPUT_METHOD_SERVICE);
+//
+//        inputManager.hideSoftInputFromWindow(
+//                view.getWindowToken(),
+//                InputMethodManager.HIDE_NOT_ALWAYS);
+//    }
 }

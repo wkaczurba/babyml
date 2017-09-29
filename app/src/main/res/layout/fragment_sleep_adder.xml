@@ -97,28 +97,46 @@
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/sleep_note_tw"
+    <CheckBox
+        android:id="@+id/sleep_include_note_cb"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Note:"
-        android:layout_width="wrap_content"
-        android:layout_gravity="left"
-        android:paddingLeft="10dp"/>
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:text="Include note:" />
+
+    <!--<TextView-->
+        <!--android:id="@+id/sleep_note_tw"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_gravity="start"-->
+        <!--android:paddingLeft="10dp"-->
+        <!--android:paddingRight="10dp"-->
+        <!--android:paddingStart="10dp"-->
+        <!--android:paddingEnd="10dp"-->
+        <!--android:text="Note:" />-->
 
     <EditText
         android:id="@+id/sleep_time_note_et"
         android:layout_width="match_parent"
-        android:layout_height="96dp"
+        android:layout_height="36dp"
+        android:layout_marginEnd="8dp"
         android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         android:layout_marginStart="8dp"
-        android:elevation="0dp"
-        android:fontFamily="false"
         android:gravity="center"
-        android:imeOptions="actionDone"
-        android:inputType="time"
         android:text=""
         android:textAlignment="center"
         android:textSize="18sp"
-        android:visibility="visible" />
+        android:visibility="visible"
+        android:imeOptions="actionDone"
+        android:inputType="textImeMultiLine"
+        android:selectAllOnFocus="false" />
+
+    <!-- Removed: android:elevation="0dp"
+         android:fontFamily="false"-->
+
 
 </LinearLayout>

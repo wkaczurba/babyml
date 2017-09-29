@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -30,9 +31,10 @@ import lombok.Setter;
 public class SleepAdderFragment extends Fragment implements View.OnClickListener {
     EditText sleepTimeEditText;
     EditText sleepTimeEndEditText;
-    EditText sleepTimeNoteEditText;
     Button storeSleepButton;
     TimeTextWatcher ttw, ttw2;
+    CheckBox sleepIncludeNoteCheckBox; // sleep_include_note_cb
+    EditText sleepTimeNoteEditText; // sleep_time_note_et
 
     @Getter
     @Setter
@@ -63,6 +65,7 @@ public class SleepAdderFragment extends Fragment implements View.OnClickListener
         sleepTimeEditText = (EditText) view.findViewById(R.id.sleep_time_et);
         sleepTimeEndEditText = (EditText) view.findViewById(R.id.sleep_time_end_et);
         sleepTimeNoteEditText = (EditText) view.findViewById(R.id.sleep_time_note_et);
+        sleepIncludeNoteCheckBox = (CheckBox) view.findViewById(R.id.sleep_include_note_cb); // CheckBox sleep_include_note_cb
 
         // TODO: Consider throwing an exception if things are not found.
         if (sleepTimeEditText == null ||
@@ -80,6 +83,9 @@ public class SleepAdderFragment extends Fragment implements View.OnClickListener
 
         storeSleepButton = (Button) view.findViewById(R.id.store_sleep_button);
         storeSleepButton.setOnClickListener(this);
+        sleepIncludeNoteCheckBox.setOnClickListener(this);
+
+        updateVisibilityOfNoteEditText();
     }
 
     @Override
@@ -87,21 +93,42 @@ public class SleepAdderFragment extends Fragment implements View.OnClickListener
         Context ctx = getActivity();
 
         if (v.equals(this.storeSleepButton)) {
-
-            long timemilis = ttw.getTimeMilis();
-            long endTs = ttw2.getTimeMilis();
-            String note = sleepTimeNoteEditText.getText().toString();
-
-            ContentValues contentValues = new Sleep(-1, Sleep.TABLE_NAME, timemilis, endTs, note).asContentValues();
-                    Uri uri = getActivity().getContentResolver().insert(
-                    EntriesProvider.URI_SLEEPS,
-                    contentValues);
-//            long id = Long.valueOf(uri.getLastPathSegment());
-//            Toast.makeText(ctx, "ROWID=" + id, Toast.LENGTH_LONG).show();
-
-            onCloseListener.close();
+            storeSleepAndClose();
+        } else if (v.equals(this.sleepIncludeNoteCheckBox)) {
+            updateVisibilityOfNoteEditText();
         } else {
             Toast.makeText(ctx, "Invalid clik",Toast.LENGTH_LONG).show();
         }
+    }
+
+    public void updateVisibilityOfNoteEditText() {
+        if (sleepIncludeNoteCheckBox.isChecked()) {
+            sleepTimeNoteEditText.setVisibility(View.VISIBLE);
+        } else {
+            sleepTimeNoteEditText.setVisibility(View.GONE);
+        }
+    }
+
+    private String getNote() {
+        if (sleepTimeEditText.getVisibility() == View.VISIBLE) {
+            return sleepTimeNoteEditText.getText().toString();
+        } else {
+            return null;
+        }
+    }
+
+    private void storeSleepAndClose() {
+        Context context = getContext();
+        long timemilis = ttw.getTimeMilis();
+        long endTs = ttw2.getTimeMilis();
+
+        ContentValues contentValues = new Sleep(-1, Sleep.TABLE_NAME, timemilis, endTs, getNote()).asContentValues();
+        Uri uri = context.getContentResolver().insert(
+                EntriesProvider.URI_SLEEPS,
+                contentValues);
+//            long id = Long.valueOf(uri.getLastPathSegment());
+//            Toast.makeText(ctx, "ROWID=" + id, Toast.LENGTH_LONG).show();
+
+        onCloseListener.close();
     }
 }

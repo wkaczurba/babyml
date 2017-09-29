@@ -101,7 +101,13 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");
                 CharSequence time = dtf.print(dt);
 
-                String s = String.format(time + " milk = %d", feed.getAmount());
+// Format note
+//                StringBuilder noteSb = new StringBuilder();
+//                if (feed.getNote() != null && feed.getNote().length() > 0) {
+//                    noteSb.append("; ").append(feed.getNote());
+//                }
+// End
+                String s = String.format("%s milk = %d%s", time, feed.getAmount(), formatNote(feed.getNote()));
 
                 logTextView.setText(s);
             } else { //if (o instanceof DateItem) { // DateItem
@@ -185,8 +191,15 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 DateTime dt = new DateTime(nappy.getTs(), currentTz);
                 DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");
                 CharSequence time = dtf.print(dt);
-
-                String s = String.format(time + " dirty nappy"); // can be "nappy=" + n.getDirrty();
+// Format note
+//                StringBuilder noteSb = new StringBuilder();
+//                if (nappy.getNote() != null && nappy.getNote().length() > 0) {
+//                    noteSb.append("; ").append(nappy.getNote());
+//
+//
+//                }
+// End
+                String s = String.format("%s dirty nappy%s", time, formatNote(nappy.getNote())); // can be "nappy=" + n.getDirrty();
                 logListNappyTv.setText(s);
             } else { //if (o instanceof DateItem) { // DateItem
                 throw new IllegalArgumentException("Invalid object; expected Nappy; got: " + o.getClass());
@@ -198,6 +211,20 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         public void onClick(View v) {
             int clickedPosition = getAdapterPosition();
                 mOnClickListener.onListItemClick(clickedPosition);
+        }
+    }
+
+    public String formatNote(String note) {
+        if (note == null) {
+            return "";
+        } else {
+            StringBuilder sb = new StringBuilder("; ");
+            if (note.length() > 20) {
+                sb.append(note.substring(0, 20) + "...");
+            } else {
+                sb.append(note);
+            }
+            return sb.toString();
         }
     }
 
@@ -272,7 +299,7 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 sleep = (Sleep) o;
                 long start = sleep.getTs();
                 long end = sleep.getEndTs();
-                String note = sleep.getNote();
+//                String note = sleep.getNote();
 
                 // Format the stuff: (TODO: Move to formatting or somewhere); it is common with FeedingViewHolder.bind(...)
                 DateTimeZone currentTz = DateTimeZone.forTimeZone(TimeZone.getDefault());
@@ -294,20 +321,22 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 }
 
                 // Process note:
-                if (note == null) {
-                    note = "";
-                } else {
-                    StringBuilder sb = new StringBuilder("; ");
-                    if (note.length() > 20) {
-                        sb.append(note.substring(0, 20) + "...");
-                    } else {
-                        sb.append(note);
-                    }
-                    note = sb.toString();
-                }
+// Note formatting.
+//                if (note == null) {
+//                    note = "";
+//                } else {
+//                    StringBuilder sb = new StringBuilder("; ");
+//                    if (note.length() > 20) {
+//                        sb.append(note.substring(0, 20) + "...");
+//                    } else {
+//                        sb.append(note);
+//                    }
+//                    note = sb.toString();
+//                }
+// Note formating
 
                 // TODO: Add note.!
-                String s = String.format(startTime + "-" + endTime + " sleep (" + lengthS + " long) " + note); // can be "sleep=" + n.getDirrty();
+                String s = String.format(startTime + "-" + endTime + " sleep (" + lengthS + " long)" + formatNote(sleep.getNote())); // can be "sleep=" + n.getDirrty();
                 logListSleepTv.setText(s);
             } else { //if (o instanceof DateItem) { // DateItem
                 throw new IllegalArgumentException("Invalid object; expected Sleep; got: " + o.getClass());
@@ -373,9 +402,10 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         long id = cursor.getLong(cursor.getColumnIndex(Feed.COLUMN_ID));
         int amt = cursor.getInt(cursor.getColumnIndex(Feed.COLUMN_FEED_AMOUNT));
         long ts = cursor.getLong(cursor.getColumnIndex(Feed.COLUMN_FEED_TS));
+        String note = cursor.getString(cursor.getColumnIndex(Feed.COLUMN_FEED_NOTE));
 
         //return new Feed(id, ts, amt);
-        return new Feed(id, Feed.COLUMN_FEED_TB, ts, amt, null);
+        return new Feed(id, Feed.COLUMN_FEED_TB, ts, amt, note);
     }
 
     public static EntriesDbHandler.EntryType getEntryType(Cursor cursor) {
@@ -412,22 +442,21 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             // TODO: Consider changing to switch.case...:
             if (e.equals(EntriesDbHandler.EntryType.Feed)) {
                 int feedAmount = cursor.getInt(cursor.getColumnIndex(Feed.COLUMN_FEED_AMOUNT)); // EntriesDbHandler.COLUMN_FEED_AMOUNT));
-                //Feed f = new Feed(id, timestamp, feedAmount);
-                Feed f = new Feed(id, Feed.COLUMN_FEED_TB, timestamp, feedAmount, null);
+                String feedNote = cursor.getString(cursor.getColumnIndex(Feed.COLUMN_FEED_NOTE));
+                // TODO: Consider using Feed.fromCursor.
+                Feed f = new Feed(id, Feed.TABLE_NAME, timestamp, feedAmount, feedNote);
                 entriesMap.addSummarizable(f);
             } else if (e.equals(EntriesDbHandler.EntryType.Nappy)) {
-
                 int nappyDirty = cursor.getInt(cursor.getColumnIndex(Nappy.COLUMN_NAPPY_DIRTY)); //EntriesDbHandler.COLUMN_NAPPY_DIRTY));
                 int nappyWet = cursor.getInt(cursor.getColumnIndex(Nappy.COLUMN_NAPPY_WET)); //EntriesDbHandler.COLUMN_NAPPY_DIRTY));
                 String nappyNote = cursor.getString(cursor.getColumnIndex(Nappy.COLUMN_NAPPY_NOTE)); //EntriesDbHandler.COLUMN_NAPPY_DIRTY));
-                // FIXME: More parameters to be added here.  (COLUMN_NAPPY_WET, COLUMN_NAPPY_NOTE)
-
-                //Nappy n = new Nappy(id, timestamp, nappyDirty, nappyWet, nappyNote);
+                // TODO: Consider using Nappy.fromCursor.
                 Nappy n = new Nappy(id, Nappy.TABLE_NAME, timestamp, nappyDirty, nappyWet, nappyNote);
                 entriesMap.addSummarizable(n);
             } else if (e.equals(EntriesDbHandler.EntryType.Note)) {
                 String noteValue = cursor.getString(cursor.getColumnIndex(Note.COLUMN_NOTE_VALUE)); //EntriesDbHandler.COLUMN_NOTE_VALUE));
                 Note n = new Note(id, Note.TABLE_NAME, timestamp, noteValue);
+                // TODO: Consider using Note.fromCursor.
                 entriesMap.addSummarizable(n);
             } else if (e.equals(EntriesDbHandler.EntryType.Sleep)) {
                 String columns[] = cursor.getColumnNames();
@@ -437,6 +466,7 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 String note = cursor.getString(cursor.getColumnIndex(Sleep.COLUMN_SLEEP_NOTE)); //EntriesDbHandler.COLUMN_NOTE_VALUE));
                 Long entTimestamp = cursor.getLong(cursor.getColumnIndex(Sleep.COLUMN_SLEEP_END_TS)); //EntriesDbHandler.COLUMN_NOTE_VALUE));
                 Sleep s = new Sleep(id, Sleep.TABLE_NAME, timestamp, entTimestamp, note);
+                // TODO: Consider using Sleep.fromCursor.
                 entriesMap.addSummarizable(s);
             } else {
                 throw new IllegalArgumentException("Invalid enum: " + e.name());

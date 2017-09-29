@@ -127,7 +127,7 @@ public class EntriesProvider extends ContentProvider {
                 throw new IllegalArgumentException("Cannot insert an ENTRY; Can insert Feed or other ones...");
 
             case CODE_FEED:
-                Log.d(TAG, "values:" + values.keySet());
+                Log.d(TAG, "values:" + values.keySet() + ";" + values.toString() );
                 long _id = EntriesDbHandler.getInstance(getContext())
                         .insertFeed(Feed.fromContentValues(values));
                 if (_id == -1) {

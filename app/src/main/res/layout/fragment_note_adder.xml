@@ -75,4 +75,37 @@
 
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/note_note_tw"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:paddingEnd="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingStart="10dp"
+        android:text="Note:" />
+
+    <EditText
+        android:id="@+id/note_note_et"
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginEnd="8dp"
+        android:gravity="center"
+        android:text=""
+        android:textAlignment="center"
+        android:textSize="18sp"
+        android:visibility="visible"
+        android:imeOptions="actionDone"
+        android:inputType="textImeMultiLine"
+        android:selectAllOnFocus="false"
+        />
+
 </LinearLayout>

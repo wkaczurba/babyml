@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -42,6 +43,8 @@ public class NappyAdderFragment extends Fragment implements View.OnClickListener
     EditText nappyTimeEditText;
     Button storeNappyButton;
     TimeTextWatcher ttw;
+    CheckBox nappyIncludeNoteCheckBox; // nappy_include_note_cb
+    EditText nappyNoteEditText; // nappy_time_note_et
 
     public NappyAdderFragment() {
     }
@@ -65,9 +68,21 @@ public class NappyAdderFragment extends Fragment implements View.OnClickListener
         nappyTimeEditText.setText(dtf.print(LocalTime.now()));
         ttw = new TimeTextWatcher(nappyTimeEditText);
         nappyTimeEditText.addTextChangedListener(ttw);
-
+        nappyIncludeNoteCheckBox = (CheckBox) view.findViewById(R.id.nappy_include_note_cb); // nappy_include_note_cb
+        nappyNoteEditText = (EditText) view.findViewById(R.id.nappy_note_et); // nappy_time_note_et
         storeNappyButton = (Button) view.findViewById(R.id.store_nappy_button);
         storeNappyButton.setOnClickListener(this);
+
+        nappyIncludeNoteCheckBox.setOnClickListener(this);
+        updateVisibilityOfNoteEditText();
+    }
+
+    private String getNote() {
+        if (nappyNoteEditText.getVisibility() == View.VISIBLE) {
+            return nappyNoteEditText.getText().toString();
+        } else {
+            return null;
+        }
     }
 
     @Override
@@ -75,20 +90,33 @@ public class NappyAdderFragment extends Fragment implements View.OnClickListener
         Context ctx = getActivity();
 
         if (v.equals(this.storeNappyButton)) {
-
-            long timemilis = ttw.getTimeMilis();
-            int dirty = 1; // Possible extension: for weirdly coloured nappies.
-            String note = null;
-            int wet = 0;
-
-            ContentValues contentValues = new Nappy(-1, Nappy.COLUMN_NAPPY_TB, timemilis, dirty, wet, note).asContentValues();
-            Uri uri = getActivity().getContentResolver().insert(
-                    EntriesProvider.URI_NAPPIES,
-                    contentValues);
-
-            onCloseListener.close();
+            storeNappyAndClose();
+        } else if (v.equals(nappyIncludeNoteCheckBox)) {
+            updateVisibilityOfNoteEditText();
         } else {
             Toast.makeText(ctx, "Invalid clik",Toast.LENGTH_LONG).show();
         }
     }
+
+    public void updateVisibilityOfNoteEditText() {
+        if (nappyIncludeNoteCheckBox.isChecked()) {
+            nappyNoteEditText.setVisibility(View.VISIBLE);
+        } else {
+            nappyNoteEditText.setVisibility(View.GONE);
+        }
+    }
+
+    private void storeNappyAndClose() {
+        long timemilis = ttw.getTimeMilis();
+        int dirty = 1; // Possible extension: for weirdly coloured nappies.
+        int wet = 0;
+
+        ContentValues contentValues = new Nappy(-1, Nappy.COLUMN_NAPPY_TB, timemilis, dirty, wet, getNote()).asContentValues();
+        Uri uri = getActivity().getContentResolver().insert(
+                EntriesProvider.URI_NAPPIES,
+                contentValues);
+
+        onCloseListener.close();
+    }
+
 }

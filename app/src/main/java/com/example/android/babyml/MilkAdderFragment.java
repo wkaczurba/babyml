@@ -9,7 +9,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,6 +19,7 @@ import android.widget.Toast;
 import com.example.android.babyml.data.EntriesDbHandler;
 import com.example.android.babyml.data.EntriesProvider;
 import com.example.android.babyml.data.Feed;
+import com.example.android.babyml.utils.MiscUiUtils;
 
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
@@ -48,6 +51,8 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
 
     TextView milkAmountTextView;
     EditText milkTimeEditText;
+    CheckBox milkIncludeNoteCheckBox; // milk_include_note_cb;
+    EditText milkNoteEditText; // milk_note_et;
     Button clearButton, plusMilkButton, plusNappyButton, add10mlButton, add20mlButton,
             add50mlButton, add100mlButton, storeMilkButton, deleteAllButton;
     TimeTextWatcher milkTimeTextWatcher;
@@ -95,6 +100,12 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
         storeMilkButton = (Button) view.findViewById(R.id.store_milk_button);
         deleteAllButton = (Button) view.findViewById(R.id.delete_all);
 
+        milkIncludeNoteCheckBox = (CheckBox) view.findViewById(R.id.milk_include_note_cb); // milk_include_note_cb;
+        milkNoteEditText = (EditText) view.findViewById(R.id.milk_note_et); // milk_note_et;
+
+//        // FIXME: This does not close the thing.
+//        MiscUiUtils.setIme(context, milkNoteEditText);
+
         // Set on click listener for all buttons.
         Button[] buttons = new Button[] {
                 clearButton, /*plusMilkButton, plusNappyButton,*/ add10mlButton,
@@ -111,13 +122,15 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
         DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");
         milkTimeEditText.setText(dtf.print(LocalTime.now()));
 
+        milkIncludeNoteCheckBox.setOnClickListener(this);
+
         // Seting Time-related things:
         milkTimeTextWatcher = new TimeTextWatcher(milkTimeEditText);
         milkTimeEditText.addTextChangedListener(milkTimeTextWatcher);
 
         // Setting milk value:
         updateMilkAmount();
-
+        updateVisibilityOfNoteEditText();
     }
 
 //    public static class ItemSelectedListener implements AdapterView.OnItemSelectedListener {
@@ -197,28 +210,63 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
             milkAmountValue += 100;
             updateMilkAmount();
         } else if (v.equals(storeMilkButton)) {
-            if (milkAmountValue == 0) {
-                milkAmountTextView.setError("Cannot be 0.");
-                return;
-            }
-            milkTimeTextWatcher.setDefaultTimeIfEntryInvalid();
-            long timeMillis = milkTimeTextWatcher.getTimeMilis();
-
-
-            Uri uri = context.getContentResolver().insert(EntriesProvider.URI_FEEDS,
-                    new Feed(-1, Feed.COLUMN_FEED_TB, timeMillis, milkAmountValue, null).asContentValues());
-            Log.d(TAG, "Inserted: " + uri.toString());
-
-            Toast.makeText(context, "Item inserted ok.", Toast.LENGTH_LONG).show();
-            milkAmountValue = 0;
-            updateMilkAmount();
-
-            onCloseListener.close();
+            storeMilkAndClose();
         } else if (v.equals(deleteAllButton)) {
             // TODO: Add question first.
             context.getContentResolver().delete(EntriesProvider.URI_FEEDS, null, null);
+        } else if (v.equals(milkIncludeNoteCheckBox)) {
+            updateVisibilityOfNoteEditText();
         } else {
             Log.d(TAG, "Unknown item clicked: " + v);
         }
+    }
+
+    public void updateVisibilityOfNoteEditText() {
+        if (milkIncludeNoteCheckBox.isChecked()) {
+            milkNoteEditText.setVisibility(View.VISIBLE);
+        } else {
+            milkNoteEditText.setVisibility(View.GONE);
+        }
+    }
+
+    private String getNote() {
+        if (milkNoteEditText.getVisibility() == View.VISIBLE) {
+            return milkNoteEditText.getText().toString();
+        } else {
+            return null;
+        }
+    }
+
+    private void storeMilkAndClose() {
+        Context context = getActivity();
+        if (milkAmountValue == 0) {
+            milkAmountTextView.setError("Cannot be 0.");
+            return;
+        }
+        milkTimeTextWatcher.setDefaultTimeIfEntryInvalid();
+        long timeMillis = milkTimeTextWatcher.getTimeMilis();
+
+        Uri uri = context.getContentResolver().insert(EntriesProvider.URI_FEEDS,
+                new Feed(-1, Feed.COLUMN_FEED_TB, timeMillis, milkAmountValue, getNote()).asContentValues());
+        Log.d(TAG, "Inserted: " + uri.toString());
+
+        Toast.makeText(context, "Item inserted ok.", Toast.LENGTH_LONG).show();
+        milkAmountValue = 0;
+        updateMilkAmount();
+
+        MiscUiUtils.closeKeyboard(getActivity());
+        onCloseListener.close();
+    }
+
+
+
+    void setIme(Context context, View view) {
+        InputMethodManager inputManager =
+                (InputMethodManager) context.
+                        getSystemService(Context.INPUT_METHOD_SERVICE);
+
+        inputManager.hideSoftInputFromWindow(
+                view.getWindowToken(),
+                InputMethodManager.HIDE_NOT_ALWAYS);
     }
 }

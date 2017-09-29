@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.babyml.data.EntriesDbHandler;
@@ -21,6 +22,7 @@ import com.example.android.babyml.data.Note;
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.w3c.dom.Text;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -34,6 +36,8 @@ public class NoteAdderFragment extends Fragment implements View.OnClickListener 
     EditText noteTimeEditText;
     Button storeNoteButton;
     TimeTextWatcher ttw;
+    TextView noteNoteTextView; // note_note_tw
+    EditText noteNoteEditText; // note_note_et
 
     @Getter
     @Setter
@@ -65,12 +69,18 @@ public class NoteAdderFragment extends Fragment implements View.OnClickListener 
         DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");
         noteTimeEditText.setText(dtf.print(LocalTime.now()));
         ttw = new TimeTextWatcher(noteTimeEditText);
+        noteNoteTextView = (TextView) view.findViewById(R.id.note_note_tw); // note_note_tw
+        noteNoteEditText = (EditText) view.findViewById(R.id.note_note_et); // note_note_et
+
         noteTimeEditText.addTextChangedListener(ttw);
         setIme(context);
 
         storeNoteButton = (Button) view.findViewById(R.id.store_note_button);
         storeNoteButton.setOnClickListener(this);
+    }
 
+    private String getNote() {
+        return noteNoteEditText.getText().toString();
     }
 
     @Override
@@ -78,19 +88,7 @@ public class NoteAdderFragment extends Fragment implements View.OnClickListener 
         Context ctx = getActivity();
 
         if (v.equals(this.storeNoteButton)) {
-
-            long timemilis = ttw.getTimeMilis();
-            String note = null;
-
-            ContentValues contentValues = new Note(-1, Note.TABLE_NAME, timemilis, note).asContentValues();
-                    Uri uri = getActivity().getContentResolver().insert(
-                    EntriesProvider.URI_NOTES,
-                    contentValues);
-            long id = Long.valueOf(uri.getLastPathSegment());
-
-            Toast.makeText(ctx, "ROWID=" + id, Toast.LENGTH_LONG).show();
-
-            onCloseListener.close();
+            storeNoteAndClose();
         } else {
             Toast.makeText(ctx, "Invalid clik",Toast.LENGTH_LONG).show();
         }
@@ -108,5 +106,21 @@ public class NoteAdderFragment extends Fragment implements View.OnClickListener 
         inputManager.hideSoftInputFromWindow(
                 view.getWindowToken(),
                 InputMethodManager.HIDE_NOT_ALWAYS);
+    }
+
+
+    private void storeNoteAndClose() {
+        Context context = getContext();
+        long timemilis = ttw.getTimeMilis();
+
+        ContentValues contentValues = new Note(-1, Note.TABLE_NAME, timemilis, getNote()).asContentValues();
+        Uri uri = getActivity().getContentResolver().insert(
+                EntriesProvider.URI_NOTES,
+                contentValues);
+        long id = Long.valueOf(uri.getLastPathSegment());
+
+        Toast.makeText(context, "ROWID=" + id, Toast.LENGTH_LONG).show();
+
+        onCloseListener.close();
     }
 }
