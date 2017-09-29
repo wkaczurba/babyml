@@ -257,16 +257,4 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
         MiscUiUtils.closeKeyboard(getActivity());
         onCloseListener.close();
     }
-
-
-
-    void setIme(Context context, View view) {
-        InputMethodManager inputManager =
-                (InputMethodManager) context.
-                        getSystemService(Context.INPUT_METHOD_SERVICE);
-
-        inputManager.hideSoftInputFromWindow(
-                view.getWindowToken(),
-                InputMethodManager.HIDE_NOT_ALWAYS);
-    }
 }

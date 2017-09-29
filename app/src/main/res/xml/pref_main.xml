@@ -13,6 +13,7 @@
         android:key="show_daily_summary"
         android:summaryOn="Shown"
         android:summary="Hidden"
+        android:visibility="gone"
         android:title="Show daily summary"/>
 
 

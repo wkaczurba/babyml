@@ -121,7 +121,7 @@
     <EditText
         android:id="@+id/sleep_time_note_et"
         android:layout_width="match_parent"
-        android:layout_height="36dp"
+        android:layout_height="40dp"
         android:layout_marginEnd="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"

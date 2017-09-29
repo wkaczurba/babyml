@@ -26,6 +26,7 @@ import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import java.util.List;
 import java.util.TimeZone;
 
 import lombok.Getter;
@@ -64,6 +65,9 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         mOnClickListener = onClickListener;
     }
 
+    public Object get(int position) {
+        return entriesMap.get(position);
+    }
 
     /**
      * Created by WKaczurb on 8/6/2017.

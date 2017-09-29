@@ -27,6 +27,8 @@ import lombok.Setter;
 
 /**
  * A simple {@link Fragment} subclass.
+ *
+ * FIXME: Datetime "sleepTimeEditText" is after date "sleepTimeEndEditText". FIX THIS.
  */
 public class SleepAdderFragment extends Fragment implements View.OnClickListener {
     EditText sleepTimeEditText;

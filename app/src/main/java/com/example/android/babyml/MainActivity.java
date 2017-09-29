@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity implements
     // Database:
     EntriesDbHandler mDb; // Add closing;
     RecyclerView logRecyclerView;
-    FloatingActionButton fab;
+//    FloatingActionButton fab;
     TextView bottomBarMilkTv;
     TextView bottomBarNappyTv;
     TextView bottomBarNoteTv;
@@ -172,9 +172,14 @@ public class MainActivity extends AppCompatActivity implements
     public static class LogListItemClickListener implements LogAdapter.ListItemClickListener {
         Context context;
         Toast mToast;
+        LogAdapter mAdapter;
 
         public LogListItemClickListener(Context context) {
             this.context = context;
+        }
+
+        public void setAdapter(LogAdapter adapter) {
+            mAdapter = adapter;
         }
 
         @Override
@@ -183,8 +188,40 @@ public class MainActivity extends AppCompatActivity implements
             if (mToast != null) {
                 mToast.cancel();
             }
-            mToast = Toast.makeText(context, "Item #" + clickItemIndex + " clicked", Toast.LENGTH_LONG);
+            //mToast = Toast.makeText(context, "Item #" + clickItemIndex + " clicked", Toast.LENGTH_LONG);
+            if (mAdapter != null) {
+                // TODO: Disable this if not ready.
+                Object o = mAdapter.get(clickItemIndex);
+                handleItemClick(o, clickItemIndex);
+            }
+        }
+
+        public void handleItemClick(Object o, int pos) {
+            long id = -1;
+
+            // TODO: This should be handled using Strategy Pattern.
+            String type;
+            if (o == null) {
+                return;
+            } else if (o instanceof Feed) {
+                id = ((Feed) o).get_id();
+                type = "Feed; id=" + id;
+            } else if (o instanceof Nappy) {
+                id = ((Nappy) o).get_id();
+                type = "Nappy; id=" + id;
+            } else if (o instanceof Note) {
+                id = ((Note) o).get_id();
+                type = "Note; id=" + id;
+            } else if (o instanceof Sleep) {
+                id = ((Sleep) o).get_id();
+                type = "Sleep; id=" + id;
+            } else {
+                type = "Other";
+            }
+            mToast = Toast.makeText(context, "Item #" + pos + " clicked ("+ type +")", Toast.LENGTH_LONG);
             mToast.show();
+
+
         }
     }
 
@@ -236,8 +273,10 @@ public class MainActivity extends AppCompatActivity implements
         logRecyclerView.setLayoutManager(layoutManager);
         logRecyclerView.setHasFixedSize(true);
 
+
         mLogListItemClickListener = new LogListItemClickListener(this);
         mAdapter = new LogAdapter(mLogListItemClickListener);
+        mLogListItemClickListener.setAdapter(mAdapter);
         logRecyclerView.setAdapter(mAdapter);
 
         // add Time Elapsed Fragment
@@ -379,8 +418,8 @@ public class MainActivity extends AppCompatActivity implements
         itemTouchHelper.attachToRecyclerView(logRecyclerView);
 
         // Getting FloatingActionButton:
-        fab = (FloatingActionButton) findViewById(R.id.fab_add);
-        fab.setOnClickListener(this);
+//        fab = (FloatingActionButton) findViewById(R.id.fab_add);
+//        fab.setOnClickListener(this);
 
         // Adding bottom-bar items:
         bottomBarMilkTv = (TextView) findViewById(R.id.bottom_bar_milk_tv);
@@ -603,12 +642,14 @@ public class MainActivity extends AppCompatActivity implements
 
         if (v.equals(logRecyclerView)) {
             Toast.makeText(this, "logRecyclerView to be handled yet", Toast.LENGTH_LONG).show();
-        } else if (v.equals(fab)) {
-            Intent intent = new Intent(this, AddEntryActivity.class);
-            // TODO: putExtra parameters here
-            startActivity(intent);
-
-        } else if (v.equals(bottomBarMilkTv)) {
+        }
+//        else if (v.equals(fab)) {
+//            Intent intent = new Intent(this, AddEntryActivity.class);
+//            // TODO: putExtra parameters here
+//            startActivity(intent);
+//
+//        }
+        else if (v.equals(bottomBarMilkTv)) {
             safeAddWhatever(MILK_ADDER_FRAG_TAG);
             //safeAddMilkAdderFrag();
         } else if (v.equals(bottomBarNappyTv)) {
