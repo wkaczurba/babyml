@@ -1,16 +1,17 @@
 package com.example.android.babyml.data;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
+@SuppressWarnings("WeakerAccess")
 @ToString
 @EqualsAndHashCode(exclude={"_id"})
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -48,9 +49,9 @@ public class Note implements Summarizable {
     @Override
     public void addSummary(Summary summary) {
         // TODO: Add any summary-related stuff.
-        return;
     }
 
+    @SuppressLint("Assert")
     public ContentValues asContentValues() {
         ContentValues values = new ContentValues();
         assert (values.getAsString(COLUMN_NOTE_TB).equals(TABLE_NAME));
@@ -70,6 +71,7 @@ public class Note implements Summarizable {
                 values.getAsString(COLUMN_NOTE_VALUE));
     }
 
+    @SuppressWarnings("unused")
     public static Note fromCursor(Cursor cursor) {
         return new Note(
                 cursor.getLong(cursor.getColumnIndex(COLUMN_ID)),

@@ -1,5 +1,6 @@
 package com.example.android.babyml.data;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -13,6 +14,8 @@ import lombok.experimental.FieldDefaults;
 
 /**
  * Created by wkaczurb on 9/15/2017.
+ *
+ * Feed for mapping.
  */
 
 @ToString
@@ -85,6 +88,7 @@ public final class Feed implements Summarizable {
                         cursor.getString(cursor.getColumnIndex(Feed.COLUMN_FEED_NOTE)));
     }
 
+    @SuppressWarnings("WeakerAccess")
     public Entry asEntry() {
         return new Entry(_id, this.tb, ts);
     }

@@ -2,10 +2,13 @@ package com.example.android.babyml.data;
 
 import android.content.ContentProvider;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
+
+import org.jetbrains.annotations.NotNull;
 
 // TODO: Consider adding Strategy pattern to make handling easier.
 
@@ -80,47 +83,42 @@ public class EntriesProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(@NotNull Uri uri, String selection, String[] selectionArgs) {
         switch (sUriMatcher.match(uri)) {
-            // TODO: Review all of this:
-            case CODE_ENTRY: // fall-through
-            case CODE_ENTRY_WITH_ID:
-                throw new IllegalArgumentException("Unhandled query; sUriMatcher=" + sUriMatcher.match(uri));
-            case CODE_FEED:
-                return EntriesDbHandler.getInstance(getContext()).deleteAllFeeds();
             case CODE_FEED_WITH_ID:
                 long id = Long.valueOf(uri.getLastPathSegment());
                 return EntriesDbHandler.getInstance(getContext()).deleteFeedById(id);
-            case CODE_NAPPY:
-                throw new IllegalArgumentException("Unhandled query; sUriMatcher=" + sUriMatcher.match(uri));
             case CODE_NAPPY_WITH_ID:
                 id = Long.valueOf(uri.getLastPathSegment());
                 return EntriesDbHandler.getInstance(getContext()).deleteNappyById(id);
-            case CODE_SLEEP:
-                throw new IllegalArgumentException("Unhandled query; sUriMatcher=" + sUriMatcher.match(uri));
             case CODE_SLEEP_WITH_ID:
                 id = Long.valueOf(uri.getLastPathSegment());
                 return EntriesDbHandler.getInstance(getContext()).deleteSleepById(id);
-            case CODE_NOTE:
-                throw new IllegalArgumentException("Unhandled query; sUriMatcher=" + sUriMatcher.match(uri));
-            case CODE_NOTE_WITH_ID: {
+            case CODE_NOTE_WITH_ID:
                 id = Long.valueOf(uri.getLastPathSegment());
                 return EntriesDbHandler.getInstance(getContext()).deleteNoteById(id);
-            }
+
+            case CODE_FEED: // Uncomment if needed to support the function.
+                //return EntriesDbHandler.getInstance(getContext()).deleteAllFeeds();
+            case CODE_ENTRY: // fall-through
+            case CODE_ENTRY_WITH_ID:
+            case CODE_NAPPY:
+            case CODE_SLEEP:
+            case CODE_NOTE:
             default:
                 throw new IllegalArgumentException("Unhandled query; sUriMatcher=" + sUriMatcher.match(uri));
         }
     }
 
     @Override
-    public String getType(Uri uri) {
+    public String getType(@NotNull Uri uri) {
         // TODO: Implement this to handle requests for the MIME type of the data
         // at the given URI.
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues values) {
+    public Uri insert(@NotNull Uri uri, ContentValues values) {
         switch (sUriMatcher.match(uri)) {
             case CODE_ENTRY: // fall-through logic
             case CODE_ENTRY_WITH_ID:
@@ -177,8 +175,13 @@ public class EntriesProvider extends ContentProvider {
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection,
+    public Cursor query(@NotNull Uri uri, String[] projection, String selection,
                         String[] selectionArgs, String sortOrder) {
+        Context context = getContext();
+        if (context == null) {
+            throw new NullPointerException("Context is null;");
+        }
+
         if (sortOrder == null) {
             throw new IllegalArgumentException("No sortOrder specified");
         }
@@ -186,7 +189,7 @@ public class EntriesProvider extends ContentProvider {
         switch (sUriMatcher.match(uri)) {
             case CODE_ENTRY:
                 Cursor cursor = EntriesDbHandler
-                        .getInstance(getContext())
+                        .getInstance(context)
                         .getAllEntriesCursor(
                                 projection,
                                 selection,
@@ -194,49 +197,39 @@ public class EntriesProvider extends ContentProvider {
                                 sortOrder,
                                 null); // limit = null
 
-                cursor.setNotificationUri(getContext().getContentResolver(), URI_ENTRIES);
+                cursor.setNotificationUri(context.getContentResolver(), URI_ENTRIES);
                 return cursor;
             case CODE_ENTRY_WITH_ID:
                 throw new UnsupportedOperationException("FUNCTION TO BE IMPLEMENTED");
             case CODE_FEED:
                 cursor = EntriesDbHandler
-                        .getInstance(getContext())
+                        .getInstance(context)
                         .getAllFeedingsCursor(
                                 projection,
                                 selection,
                                 selectionArgs,
                                 sortOrder,
                                 null); // limit = null;
-                cursor.setNotificationUri(getContext().getContentResolver(), URI_FEEDS);
+                cursor.setNotificationUri(context.getContentResolver(), URI_FEEDS);
                 return cursor;
+
+            // TODO: Implement the following cases CODE_FEED_WITH_ID, CODE_NAPPY, CODE_NAPPY_WITH_ID, CODE_SLEEP, CODE_SLEEP_WITH_ID, CODE_NOTE, CODE_NOTE_WITH_ID:
             case CODE_FEED_WITH_ID:
-                // TODO: Implement
-                throw new UnsupportedOperationException("FUNCTION TO BE IMPLEMENTED");
             case CODE_NAPPY:
-                // TODO: Implement
-                throw new UnsupportedOperationException("FUNCTION TO BE IMPLEMENTED");
             case CODE_NAPPY_WITH_ID:
-                // TODO: Implement
-                throw new UnsupportedOperationException("FUNCTION TO BE IMPLEMENTED");
             case CODE_SLEEP:
-                // TODO: Implement
-                throw new UnsupportedOperationException("FUNCTION TO BE IMPLEMENTED");
             case CODE_SLEEP_WITH_ID:
-                // TODO: Implement
-                throw new UnsupportedOperationException("FUNCTION TO BE IMPLEMENTED");
             case CODE_NOTE:
-                // TODO: Implement
-                throw new UnsupportedOperationException("FUNCTION TO BE IMPLEMENTED");
             case CODE_NOTE_WITH_ID:
-                // TODO: Implement
                 throw new UnsupportedOperationException("FUNCTION TO BE IMPLEMENTED");
+
             default:
                 throw new UnsupportedOperationException("Not yet implemented");
         }
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection,
+    public int update(@NotNull Uri uri, ContentValues values, String selection,
                       String[] selectionArgs) {
 
         switch (sUriMatcher.match(uri)) { // fall-through logic

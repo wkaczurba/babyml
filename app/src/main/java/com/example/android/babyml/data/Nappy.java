@@ -1,16 +1,10 @@
 package com.example.android.babyml.data;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.annotation.Nullable;
-
-import com.example.android.babyml.legacy.FeedingContract;
-
-import java.io.Serializable;
 
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -18,8 +12,10 @@ import lombok.experimental.FieldDefaults;
 
 /**
  * Created by wkaczurb on 9/15/2017.
+ *
  */
 
+@SuppressWarnings("WeakerAccess")
 @ToString
 @EqualsAndHashCode(exclude={"_id"})
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)
@@ -69,6 +65,7 @@ public class Nappy implements Summarizable {
         summary.setDirtyNappies(summary.getDirtyNappies() + 1);
     }
 
+    @SuppressLint("Assert")
     public ContentValues asContentValues() {
         ContentValues values = new ContentValues();
         assert (values.getAsString(COLUMN_NAPPY_TB).equals(TABLE_NAME));
@@ -100,7 +97,7 @@ public class Nappy implements Summarizable {
 
     // DB-Related ---------------
     static void createNappyTable(SQLiteDatabase db) {
-        // TODO: Rework the stuff below.
+        // TODO: Rework to use constatn Strings:
         String SQL_CREATE_NAPPY_TB =
                 "CREATE TABLE NAPPY_TB (\n" +
                 "  _ID INTEGER PRIMARY KEY,\n" +

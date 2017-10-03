@@ -32,7 +32,7 @@ import org.joda.time.*;
 
 import com.example.android.babyml.data.EntriesDbHandler;
 import com.example.android.babyml.data.EntriesProvider;
-import com.example.android.babyml.data.EntriesUtils;
+//import com.example.android.babyml.data.EntriesUtils;
 import com.example.android.babyml.data.Entry;
 import com.example.android.babyml.data.Feed;
 import com.example.android.babyml.data.Nappy;
@@ -264,7 +264,7 @@ public class MainActivity extends AppCompatActivity implements
 
         // Getting database instance:
         mDb = EntriesDbHandler.getInstance(this);
-        EntriesUtils.tryUpgradeFromOld(this); // Upgrading from OldDb to the new one.
+//        EntriesUtils.tryUpgradeFromOld(this); // Upgrading from OldDb to the new one.
 
         // RecyclerView:
         logRecyclerView = (RecyclerView) findViewById(R.id.log_rv);

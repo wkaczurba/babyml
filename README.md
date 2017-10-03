@@ -7,7 +7,7 @@ This project implements following Android elements:
 Data/persistence-perspective:
  - ContentProvider and ContentResolver for decoupling
  - SQLiteDb in the ContentProvider
- - CurosrLoader for ContentProvider (TODO).
+ - CurosrLoader for ContentProvider
  - Shared Prerences
  - Saved state
  - (no cloud as of yet)
@@ -21,7 +21,6 @@ From task perspectives:
  - Uses multiple Intents for various activities
 
 ** This app is currently missing: **
- - TODO: Add use Content-provider + Loaders / Async task to pull data
  - Getting data from the web.
  - Services (reminders about next feds)
  - Support for cloud.

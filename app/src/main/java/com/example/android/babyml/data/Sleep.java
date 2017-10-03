@@ -5,12 +5,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 import lombok.experimental.FieldDefaults;
 
+@SuppressWarnings("WeakerAccess")
 @ToString
 @EqualsAndHashCode(exclude={"_id"})
 @FieldDefaults(makeFinal = true, level = AccessLevel.PRIVATE)

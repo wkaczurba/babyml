@@ -4,7 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
-import com.example.android.babyml.legacy.FeedingContract;
+//import com.example.android.babyml.legacy.FeedingContract;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -15,6 +15,7 @@ import lombok.experimental.FieldDefaults;
 
 /**
  * Created by wkaczurb on 9/20/2017.
+ *
  */
 
 @ToString
@@ -39,7 +40,8 @@ public class Entry {
         return values;
     }
 
-    static Entry fromContentValues(ContentValues values) {
+    @SuppressWarnings("unused")
+    public static Entry fromContentValues(ContentValues values) {
         return new Entry(
                 values.getAsLong(COLUMN_ID),
                 values.getAsString(COLUMN_ENTRY_TB),

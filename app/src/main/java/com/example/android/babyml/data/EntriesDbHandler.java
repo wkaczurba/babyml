@@ -14,16 +14,13 @@ import android.view.WindowContentFrameStats;
  * Refer to docs/sqlite_database.sql to understand how things are arranged.
  */
 
-
-// TODO: As a singleton I guess...
 public class EntriesDbHandler extends SQLiteOpenHelper {
 
-    static final String TAG = EntriesDbHandler.class.getSimpleName();
-    static final String DB_NAME = "entries.db";
-    static final int DB_VERSION = 1;
+    private static final String TAG = EntriesDbHandler.class.getSimpleName();
+    private static final String DB_NAME = "entries.db";
+    private static final int DB_VERSION = 1;
 
-    // TODO: Move it to a separate contract.
-    public static final String VIEW_ENTRIES_V_ALL = "ENTRIES_V_ALL";
+    private static final String VIEW_ENTRIES_V_ALL = "ENTRIES_V_ALL";
     private final Context context;
 
     public static enum EntryType {
@@ -88,11 +85,9 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
         Sleep.createSleepTable(db);
         createAllEntriesView(db);
         Log.d(TAG, "DB Created ok.");
-
 //        EntriesDbHandler.getInstance(context).printOrphans();
     }
 
-    // TODO: ADD
     private void createAllEntriesView(SQLiteDatabase db) {
         String CREATE_VIEW =
                 "CREATE VIEW ENTRIES_V_ALL AS\n" +
@@ -128,8 +123,6 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
 
         db.beginTransaction();
         try {
-            // TODO: Replace the below with string contstants (e.g. Entry.COLUMN...)
-            // Or change into db.insert(..)
             ContentValues entryCv = feed.asEntry().asContentValues();
             entryCv.remove(Entry.COLUMN_ID);
             rowId = db.insert(Entry.TABLE_NAME, null, entryCv);
@@ -199,8 +192,6 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
             String limit // 1 for latest feed
     ) {
 
-        // TODO: SELECT * FROM ENTRY_TB JOIN FEED_TB USING (_ID);
-
         if (sortOrder == null) {
             throw new IllegalArgumentException("Unexpected call -> getAllFeedinsCursor with empty sort order");
         }
@@ -258,7 +249,7 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
 
                 ContentValues nappyCv = nappy.asContentValues();
                 nappyCv.put(Nappy.COLUMN_ID, rowId);
-// FIXME: Fails constraints: ENTRY_TB_CK
+// FIXME: ?(NOT SURE) Fails constraints: ENTRY_TB_CK
                 db.insert(Nappy.TABLE_NAME, null, nappyCv);
                 db.setTransactionSuccessful();
             } finally {
@@ -319,7 +310,7 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
 
                 ContentValues noteCv = note.asContentValues();
                 noteCv.put(Note.COLUMN_ID, rowId);
-// FIXME: Fails constraints: ENTRY_TB_CK
+// FIXME: (NOT SURE) Fails constraints: ENTRY_TB_CK
                 db.insert(Note.TABLE_NAME, null, noteCv);
                 db.setTransactionSuccessful();
             } finally {
@@ -398,8 +389,6 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
         return rowsAffected;
     }
 
-
-
     private void notifyOnEntriesChange() {
         context.getContentResolver().notifyChange(EntriesProvider.URI_ENTRIES, null, false);
     }
@@ -408,7 +397,6 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
         context.getContentResolver().notifyChange(EntriesProvider.URI_FEEDS, null, false);
     }
 
-//  TODO: Mechanism of notification of other stuff:
     private void notifyOnNappyChange() {
         context.getContentResolver().notifyChange(EntriesProvider.URI_NAPPIES, null, false);
     }

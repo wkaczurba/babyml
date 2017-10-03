@@ -1,4 +1,5 @@
 //package com.example.android.babyml;
+// TODO: Remove.
 //
 ////import android.app.Fragment;
 //import android.support.v4.app.Fragment;

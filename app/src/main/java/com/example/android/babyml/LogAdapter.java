@@ -423,9 +423,7 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     public void swapCursor(Cursor cursor) {
-        LocalDate oldDate = null;
         entriesMap = new EntriesMap();
-
 
         if (cursor == null) {
             Log.d(TAG, "swapCursor.cursor == null");
