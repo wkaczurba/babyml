@@ -26,4 +26,3 @@ From task perspectives:
  - Support for cloud.
 
 
-

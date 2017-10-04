@@ -1,4 +1,4 @@
-package com.example.android.babyml;
+package com.example.android.babyml.ui;
 
 import android.content.Context;
 import android.database.Cursor;
@@ -10,9 +10,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.android.babyml.data.EntriesDbHandler;
+import com.example.android.babyml.R;
 import com.example.android.babyml.data.EntriesMap;
 import com.example.android.babyml.data.Entry;
+import com.example.android.babyml.data.EntryType;
 import com.example.android.babyml.data.Feed;
 import com.example.android.babyml.data.Nappy;
 import com.example.android.babyml.data.Note;
@@ -26,7 +27,6 @@ import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import java.util.List;
 import java.util.TimeZone;
 
 import lombok.Getter;
@@ -47,9 +47,6 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public static final int SLEEP_VIEW_HOLDER = 4;
     public static final int NOTE_VIEW_HOLDER = 5;
 
-    public interface ListItemClickListener {
-        public void onListItemClick(int clickItemIndex);
-    }
 
 //    static abstract class Item {};
     private EntriesMap entriesMap;
@@ -403,7 +400,7 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     // Helper:
     public static Feed cursorToFeed(Cursor cursor) {
-        long id = cursor.getLong(cursor.getColumnIndex(Feed.COLUMN_ID));
+        long id = cursor.getLong(cursor.getColumnIndex(Feed.COLUMN_FEED_ID));
         int amt = cursor.getInt(cursor.getColumnIndex(Feed.COLUMN_FEED_AMOUNT));
         long ts = cursor.getLong(cursor.getColumnIndex(Feed.COLUMN_FEED_TS));
         String note = cursor.getString(cursor.getColumnIndex(Feed.COLUMN_FEED_NOTE));
@@ -412,12 +409,12 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         return new Feed(id, Feed.COLUMN_FEED_TB, ts, amt, note);
     }
 
-    public static EntriesDbHandler.EntryType getEntryType(Cursor cursor) {
-        EntriesDbHandler.EntryType e;
+    public static EntryType getEntryType(Cursor cursor) {
+        EntryType e;
         String tb = cursor.getString(cursor.getColumnIndex(Entry.COLUMN_ENTRY_TB)); // WAS: EntriesDbHandler.COLUMN_TB));
 
 
-        e = EntriesDbHandler.EntryType.getEntryType(tb);
+        e = EntryType.getEntryType(tb);
 
         return e;
     }
@@ -436,31 +433,31 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         cursor.moveToPosition(-1); // This is necessary as same cursor will be reused for reloading on device rotation.
         while (cursor.moveToNext()) {
 
-            EntriesDbHandler.EntryType e = getEntryType(cursor);
+            EntryType e = getEntryType(cursor);
 
-            long id = cursor.getLong(cursor.getColumnIndex(Entry.COLUMN_ID)); // EntriesDbHandler.COLUMN_ID_FOREIGN));
+            long id = cursor.getLong(cursor.getColumnIndex(Entry.COLUMN_ENTRY_ID)); // EntriesDbHandler.COLUMN_ID_FOREIGN));
             long timestamp = cursor.getLong(cursor.getColumnIndex(Entry.COLUMN_ENTRY_TS)); //EntriesDbHandler.COLUMN_TS));
 
             // TODO: Consider changing to switch.case...:
-            if (e.equals(EntriesDbHandler.EntryType.Feed)) {
+            if (e.equals(EntryType.Feed)) {
                 int feedAmount = cursor.getInt(cursor.getColumnIndex(Feed.COLUMN_FEED_AMOUNT)); // EntriesDbHandler.COLUMN_FEED_AMOUNT));
                 String feedNote = cursor.getString(cursor.getColumnIndex(Feed.COLUMN_FEED_NOTE));
                 // TODO: Consider using Feed.fromCursor.
                 Feed f = new Feed(id, Feed.TABLE_NAME, timestamp, feedAmount, feedNote);
                 entriesMap.addSummarizable(f);
-            } else if (e.equals(EntriesDbHandler.EntryType.Nappy)) {
+            } else if (e.equals(EntryType.Nappy)) {
                 int nappyDirty = cursor.getInt(cursor.getColumnIndex(Nappy.COLUMN_NAPPY_DIRTY)); //EntriesDbHandler.COLUMN_NAPPY_DIRTY));
                 int nappyWet = cursor.getInt(cursor.getColumnIndex(Nappy.COLUMN_NAPPY_WET)); //EntriesDbHandler.COLUMN_NAPPY_DIRTY));
                 String nappyNote = cursor.getString(cursor.getColumnIndex(Nappy.COLUMN_NAPPY_NOTE)); //EntriesDbHandler.COLUMN_NAPPY_DIRTY));
                 // TODO: Consider using Nappy.fromCursor.
                 Nappy n = new Nappy(id, Nappy.TABLE_NAME, timestamp, nappyDirty, nappyWet, nappyNote);
                 entriesMap.addSummarizable(n);
-            } else if (e.equals(EntriesDbHandler.EntryType.Note)) {
+            } else if (e.equals(EntryType.Note)) {
                 String noteValue = cursor.getString(cursor.getColumnIndex(Note.COLUMN_NOTE_VALUE)); //EntriesDbHandler.COLUMN_NOTE_VALUE));
                 Note n = new Note(id, Note.TABLE_NAME, timestamp, noteValue);
                 // TODO: Consider using Note.fromCursor.
                 entriesMap.addSummarizable(n);
-            } else if (e.equals(EntriesDbHandler.EntryType.Sleep)) {
+            } else if (e.equals(EntryType.Sleep)) {
                 String columns[] = cursor.getColumnNames();
                 for (String column : columns) {
                     Log.d(TAG, "COLUMN IN SLEEP: " + column);

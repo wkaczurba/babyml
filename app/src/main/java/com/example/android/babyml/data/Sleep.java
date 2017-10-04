@@ -17,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 public class Sleep implements Summarizable {
     // DB-related
     public static final String TABLE_NAME = "SLEEP_TB";
-    public static final String COLUMN_ID = "_ID";
+    public static final String COLUMN_SLEEP_ID = "_ID";
     public static final String COLUMN_SLEEP_TB = "SLEEP_TB";
     public static final String COLUMN_SLEEP_TS = "SLEEP_TS";
     public static final String COLUMN_SLEEP_END_TS = "SLEEP_END_TS";
@@ -57,10 +57,11 @@ public class Sleep implements Summarizable {
 
     public ContentValues asContentValues() {
         if (!tb.equals(TABLE_NAME)) {
-            throw new IllegalArgumentException("tb does not equal " + TABLE_NAME + "; got: " + tb + " instead.");
+            throw new IllegalArgumentException("Sleep.tb must equal " + TABLE_NAME + "; got= '" + tb + "'" );
         }
+
         ContentValues values = new ContentValues();
-        values.put(COLUMN_ID, _id);
+        values.put(COLUMN_SLEEP_ID, _id);
         values.put(COLUMN_SLEEP_TB, tb);
         values.put(COLUMN_SLEEP_TS, ts);
         values.put(COLUMN_SLEEP_END_TS, endTs);
@@ -70,7 +71,7 @@ public class Sleep implements Summarizable {
 
     static Sleep fromContentValues(ContentValues values) {
         return new Sleep(
-                values.getAsLong(COLUMN_ID),
+                values.getAsLong(COLUMN_SLEEP_ID),
                 values.getAsString(COLUMN_SLEEP_TB),
                 values.getAsLong(COLUMN_SLEEP_TS),
                 values.getAsLong(COLUMN_SLEEP_END_TS),
@@ -79,7 +80,7 @@ public class Sleep implements Summarizable {
 
     public static Sleep fromCursor(Cursor cursor) {
         return new Sleep(
-                cursor.getLong(cursor.getColumnIndex(COLUMN_ID)),
+                cursor.getLong(cursor.getColumnIndex(COLUMN_SLEEP_ID)),
                 cursor.getString(cursor.getColumnIndex(COLUMN_SLEEP_TB)),
                 cursor.getLong(cursor.getColumnIndex(COLUMN_SLEEP_TS)),
                 cursor.getLong(cursor.getColumnIndex(COLUMN_SLEEP_END_TS)),
@@ -90,25 +91,22 @@ public class Sleep implements Summarizable {
         return new Entry(_id, this.tb, ts);
     }
 
-
-    //public static final String COLUMN_FEED_TB = "FEED_TB";
-
     static void createSleepTable(SQLiteDatabase db) {
         // Notes
         String SQL_CREATE_SLEEP_TB =
-                "CREATE TABLE SLEEP_TB (\n" +
-                "  _ID INTEGER PRIMARY KEY,\n" +
-                "  SLEEP_TB VARCHAR2(30) CONSTRAINT SLEEP_TB_CK CHECK (SLEEP_TB='SLEEP_TB') DEFAULT('SLEEP_TB'),\n" +
-                "  SLEEP_TS TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,\n" +
-                "  SLEEP_END_TS TIMESTAMP NOT NULL, -- (?)\n" +
-                "  SLEEP_NOTE TEXT,\n" +
-                "  CONSTRAINT SLEEP_ID_FK FOREIGN KEY (_ID) REFERENCES ENTRY_TB(_ID) ON DELETE CASCADE\n" +
+                "CREATE TABLE "+TABLE_NAME+" (\n" +
+                "  "+COLUMN_SLEEP_ID+" INTEGER PRIMARY KEY,\n" +
+                "  "+COLUMN_SLEEP_TB+" VARCHAR2(30) CONSTRAINT SLEEP_TB_CK CHECK ("+COLUMN_SLEEP_TB+"='"+TABLE_NAME+"') DEFAULT('"+TABLE_NAME+"'),\n" +
+                "  "+COLUMN_SLEEP_TS+" TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,\n" +
+                "  "+COLUMN_SLEEP_END_TS+" TIMESTAMP NOT NULL, -- (?)\n" +
+                "  "+COLUMN_SLEEP_NOTE+" TEXT,\n" +
+                "  CONSTRAINT SLEEP_ID_FK FOREIGN KEY ("+COLUMN_SLEEP_ID+") REFERENCES " + Entry.TABLE_NAME+ "("+Entry.COLUMN_ENTRY_ID +") ON DELETE CASCADE\n" +
                 ");\n";
 
         db.execSQL(SQL_CREATE_SLEEP_TB);
 
         String SQL_CREATE_SLEEP_TS_INDEX =
-                "CREATE INDEX SLEEP_TB_IDX ON SLEEP_TB(SLEEP_TS);\n";
+                "CREATE INDEX SLEEP_TB_IDX ON "+TABLE_NAME+"("+COLUMN_SLEEP_TS+");\n";
 
         db.execSQL(SQL_CREATE_SLEEP_TS_INDEX);
     }

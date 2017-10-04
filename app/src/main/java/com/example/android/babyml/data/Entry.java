@@ -34,7 +34,7 @@ public class Entry {
 
     public ContentValues asContentValues() {
         ContentValues values = new ContentValues();
-        values.put(COLUMN_ID, _id);
+        values.put(COLUMN_ENTRY_ID, _id);
         values.put(COLUMN_ENTRY_TB, tb);
         values.put(COLUMN_ENTRY_TS, ts);
         return values;
@@ -43,14 +43,14 @@ public class Entry {
     @SuppressWarnings("unused")
     public static Entry fromContentValues(ContentValues values) {
         return new Entry(
-                values.getAsLong(COLUMN_ID),
+                values.getAsLong(COLUMN_ENTRY_ID),
                 values.getAsString(COLUMN_ENTRY_TB),
                 values.getAsLong(COLUMN_ENTRY_TS));
     }
 
     public static Entry fromCursor(Cursor cursor) {
         return new Entry(
-                cursor.getLong(cursor.getColumnIndex(COLUMN_ID)),
+                cursor.getLong(cursor.getColumnIndex(COLUMN_ENTRY_ID)),
                 cursor.getString(cursor.getColumnIndex(COLUMN_ENTRY_TB)),
                 cursor.getLong(cursor.getColumnIndex(COLUMN_ENTRY_TS)));
     }
@@ -58,7 +58,7 @@ public class Entry {
 
     // DB-Related stuff:
     public static final String TABLE_NAME = "ENTRY_TB";
-    public static final String COLUMN_ID = "_ID";
+    public static final String COLUMN_ENTRY_ID = "_ID";
     public static final String COLUMN_ENTRY_TB = "ENTRY_TB";
     public static final String COLUMN_ENTRY_TS = "ENTRY_TS";
 

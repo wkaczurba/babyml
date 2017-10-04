@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.android.babyml.data.EntriesProvider;
+import com.example.android.babyml.data.EntriesProviderContract;
 import com.example.android.babyml.data.Nappy;
 
 import org.joda.time.LocalTime;
@@ -113,7 +114,7 @@ public class NappyAdderFragment extends Fragment implements View.OnClickListener
 
         ContentValues contentValues = new Nappy(-1, Nappy.COLUMN_NAPPY_TB, timemilis, dirty, wet, getNote()).asContentValues();
         Uri uri = getActivity().getContentResolver().insert(
-                EntriesProvider.URI_NAPPIES,
+                EntriesProviderContract.URI_NAPPIES,
                 contentValues);
 
         onCloseListener.close();

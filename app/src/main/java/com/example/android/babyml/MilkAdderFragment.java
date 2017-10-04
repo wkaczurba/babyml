@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.example.android.babyml.data.EntriesDbHandler;
 import com.example.android.babyml.data.EntriesProvider;
+import com.example.android.babyml.data.EntriesProviderContract;
 import com.example.android.babyml.data.Feed;
 import com.example.android.babyml.utils.MiscUiUtils;
 
@@ -86,8 +87,6 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
         Context context = getActivity(); //getActivity();
 
         View view = getView();
-        // Getting database instance:
-        EntriesDbHandler dbHelper = EntriesDbHandler.getInstance(context); // FIXME.
 
         // Added from MainActivity
         milkAmountTextView = (TextView) view.findViewById(R.id.milk_amount_tv);
@@ -213,7 +212,7 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
             storeMilkAndClose();
         } else if (v.equals(deleteAllButton)) {
             // TODO: Add question first.
-            context.getContentResolver().delete(EntriesProvider.URI_FEEDS, null, null);
+            context.getContentResolver().delete(EntriesProviderContract.URI_FEEDS, null, null);
         } else if (v.equals(milkIncludeNoteCheckBox)) {
             updateVisibilityOfNoteEditText();
         } else {
@@ -246,7 +245,7 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
         milkTimeTextWatcher.setDefaultTimeIfEntryInvalid();
         long timeMillis = milkTimeTextWatcher.getTimeMilis();
 
-        Uri uri = context.getContentResolver().insert(EntriesProvider.URI_FEEDS,
+        Uri uri = context.getContentResolver().insert(EntriesProviderContract.URI_FEEDS,
                 new Feed(-1, Feed.COLUMN_FEED_TB, timeMillis, milkAmountValue, getNote()).asContentValues());
         Log.d(TAG, "Inserted: " + uri.toString());
 

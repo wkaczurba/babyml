@@ -15,6 +15,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.android.babyml.data.EntriesProvider;
+import com.example.android.babyml.data.EntriesProviderContract;
 import com.example.android.babyml.data.Sleep;
 
 import org.joda.time.LocalTime;
@@ -126,7 +127,7 @@ public class SleepAdderFragment extends Fragment implements View.OnClickListener
 
         ContentValues contentValues = new Sleep(-1, Sleep.TABLE_NAME, timemilis, endTs, getNote()).asContentValues();
         Uri uri = context.getContentResolver().insert(
-                EntriesProvider.URI_SLEEPS,
+                EntriesProviderContract.URI_SLEEPS,
                 contentValues);
 //            long id = Long.valueOf(uri.getLastPathSegment());
 //            Toast.makeText(ctx, "ROWID=" + id, Toast.LENGTH_LONG).show();

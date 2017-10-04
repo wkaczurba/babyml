@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.example.android.babyml.data.EntriesDbHandler;
 import com.example.android.babyml.data.EntriesProvider;
+import com.example.android.babyml.data.EntriesProviderContract;
 import com.example.android.babyml.data.Note;
 
 import org.joda.time.LocalTime;
@@ -115,7 +116,7 @@ public class NoteAdderFragment extends Fragment implements View.OnClickListener 
 
         ContentValues contentValues = new Note(-1, Note.TABLE_NAME, timemilis, getNote()).asContentValues();
         Uri uri = getActivity().getContentResolver().insert(
-                EntriesProvider.URI_NOTES,
+                EntriesProviderContract.URI_NOTES,
                 contentValues);
         long id = Long.valueOf(uri.getLastPathSegment());
 

@@ -1,0 +1,4 @@
+// UI enhancements -> Review these ones for sliding tabs:
+//   https://developer.android.com/training/implementing-navigation/lateral.html
+//   https://developer.android.com/samples/SlidingTabsBasic/src/com.example.android.common/view/SlidingTabLayout.html
+

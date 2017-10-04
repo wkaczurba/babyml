@@ -7,6 +7,7 @@ import android.util.Log;
 
 import com.example.android.babyml.data.EntriesDbHandler;
 import com.example.android.babyml.data.EntriesProvider;
+import com.example.android.babyml.data.EntriesProviderContract;
 import com.example.android.babyml.data.Entry;
 import com.example.android.babyml.data.Feed;
 
@@ -17,7 +18,7 @@ import com.example.android.babyml.data.Feed;
 public class DebugUtils {
     public static void printAllEntries(Context ctx, String tag) {
         String s = "printAllEntries():\n";
-        Uri uri = EntriesProvider.URI_ENTRIES;
+        Uri uri = EntriesProviderContract.URI_ENTRIES;
 
         Cursor cursor = ctx.getContentResolver()
                 .query(uri,  null, null, null, Entry.COLUMN_ENTRY_TS  + " DESC");
@@ -41,7 +42,7 @@ public class DebugUtils {
 
     public static void printAllFeeds(Context ctx, String tag) {
         String s = "printAllFeeds():\n";
-        Uri uri = EntriesProvider.URI_FEEDS;
+        Uri uri = EntriesProviderContract.URI_FEEDS;
 
         Cursor cursor = ctx.getContentResolver()
                 .query(uri,  null, null, null, Feed.COLUMN_FEED_TS + " DESC");

@@ -7,51 +7,18 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
+import static com.example.android.babyml.data.EntriesProviderContract.*;
 
 import org.jetbrains.annotations.NotNull;
 
 // TODO: Consider adding Strategy pattern to make handling easier.
 
 public class EntriesProvider extends ContentProvider {
-    public static final String AUTHORITY = "com.example.android.babyml.provider";
-    public static final String SCHEME = "content://";
 
-    // URIs
-    public static final String PATH_ENTRY = "entry";
-    public static final int CODE_ENTRY = 100;
-    public static final int CODE_ENTRY_WITH_ID = 101;
-    public static final String ENTRIES = SCHEME + AUTHORITY + "/entry";
-    public static final Uri URI_ENTRIES = Uri.parse(ENTRIES);
-//    public static final String ENTRY_BASE = ENTRIES + "/"; // This is for one ENTRY;
-    public static final String PATH_FEED = "feed";
 
-    public static final int CODE_FEED = 200;
-    public static final int CODE_FEED_WITH_ID = 201;
-
-    public static final String FEEDS = SCHEME + AUTHORITY + "/feed";
-    public static final Uri URI_FEEDS = Uri.parse(FEEDS);
-//    public static final String FEED_BASE = FEEDS + "/"; // This is for one FEED;
-
-    public static final String PATH_NAPPY = "nappy";
-    public static final int CODE_NAPPY = 300;
-    public static final int CODE_NAPPY_WITH_ID = 301;
-    public static final String NAPPIES = SCHEME + AUTHORITY + "/nappy";
-    public static final Uri URI_NAPPIES = Uri.parse(NAPPIES);
-//    public static final String NAPPY_BASE = NAPPIES + "/"; // This is for one NAPPY.
-
-    public static final String PATH_SLEEP = "sleep";
-    public static final int CODE_SLEEP = 400;
-    public static final int CODE_SLEEP_WITH_ID = 401;
-    public static final String SLEEPS = SCHEME + AUTHORITY + "/sleep";
-    public static final Uri URI_SLEEPS = Uri.parse(SLEEPS);
-
-    public static final String PATH_NOTE = "note";
-    public static final int CODE_NOTE = 500;
-    public static final int CODE_NOTE_WITH_ID = 501;
-    public static final String NOTES = SCHEME + AUTHORITY + "/note";
-    public static final Uri URI_NOTES = Uri.parse(NOTES);
 //    public static final String NOTE_BASE = NOTES + "/"; // This is for one NAPPY.
     private static final String TAG = EntriesProvider.class.getSimpleName();
+    private EntriesDbHandler dbHandler;
 
     // URI Matchers
     public static final UriMatcher sUriMatcher = buildUriMatcher();
@@ -87,16 +54,16 @@ public class EntriesProvider extends ContentProvider {
         switch (sUriMatcher.match(uri)) {
             case CODE_FEED_WITH_ID:
                 long id = Long.valueOf(uri.getLastPathSegment());
-                return EntriesDbHandler.getInstance(getContext()).deleteFeedById(id);
+                return dbHandler.deleteFeedById(id);
             case CODE_NAPPY_WITH_ID:
                 id = Long.valueOf(uri.getLastPathSegment());
-                return EntriesDbHandler.getInstance(getContext()).deleteNappyById(id);
+                return dbHandler.deleteNappyById(id);
             case CODE_SLEEP_WITH_ID:
                 id = Long.valueOf(uri.getLastPathSegment());
-                return EntriesDbHandler.getInstance(getContext()).deleteSleepById(id);
+                return dbHandler.deleteSleepById(id);
             case CODE_NOTE_WITH_ID:
                 id = Long.valueOf(uri.getLastPathSegment());
-                return EntriesDbHandler.getInstance(getContext()).deleteNoteById(id);
+                return dbHandler.deleteNoteById(id);
 
             case CODE_FEED: // Uncomment if needed to support the function.
                 //return EntriesDbHandler.getInstance(getContext()).deleteAllFeeds();
@@ -126,8 +93,7 @@ public class EntriesProvider extends ContentProvider {
 
             case CODE_FEED:
                 Log.d(TAG, "values:" + values.keySet() + ";" + values.toString() );
-                long _id = EntriesDbHandler.getInstance(getContext())
-                        .insertFeed(Feed.fromContentValues(values));
+                long _id = dbHandler.insertFeed(Feed.fromContentValues(values));
                 if (_id == -1) {
                     return null;
                 }
@@ -136,8 +102,7 @@ public class EntriesProvider extends ContentProvider {
                 throw new IllegalArgumentException("Cannot insert an ENTRY; Can insert Feed or other ones...");
 
             case CODE_NAPPY:
-                _id = EntriesDbHandler.getInstance(getContext())
-                        .insertNappy(Nappy.fromContentValues(values));
+                _id = dbHandler.insertNappy(Nappy.fromContentValues(values));
                 if (_id == -1) {
                     return null;
                 }
@@ -146,8 +111,7 @@ public class EntriesProvider extends ContentProvider {
                 throw new IllegalArgumentException("Cannot insert an ENTRY; Can insert Feed or other ones...");
 
             case CODE_SLEEP:
-                _id = EntriesDbHandler.getInstance(getContext())
-                        .insertSleep(Sleep.fromContentValues(values));
+                _id = dbHandler.insertSleep(Sleep.fromContentValues(values));
                 if (_id == -1) {
                     return null;
                 }
@@ -155,8 +119,7 @@ public class EntriesProvider extends ContentProvider {
             case CODE_SLEEP_WITH_ID:
                 throw new IllegalArgumentException("Cannot insert an ENTRY; Can insert Feed or other ones...");
             case CODE_NOTE:
-                _id = EntriesDbHandler.getInstance(getContext())
-                        .insertNote(Note.fromContentValues(values));
+                _id = dbHandler.insertNote(Note.fromContentValues(values));
                 if (_id == -1) {
                     return null;
                 }
@@ -171,6 +134,14 @@ public class EntriesProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
+        // getContext must not be called from constructor
+        // as context is not set there yet.
+        Context context = this.getContext();
+        if (context == null) {
+            throw new IllegalArgumentException("Context invalid");
+        }
+
+        dbHandler = new EntriesDbHandler(context);
         return true;
     }
 
@@ -188,9 +159,7 @@ public class EntriesProvider extends ContentProvider {
 
         switch (sUriMatcher.match(uri)) {
             case CODE_ENTRY:
-                Cursor cursor = EntriesDbHandler
-                        .getInstance(context)
-                        .getAllEntriesCursor(
+                Cursor cursor = dbHandler.getAllEntriesCursor(
                                 projection,
                                 selection,
                                 selectionArgs,
@@ -202,9 +171,7 @@ public class EntriesProvider extends ContentProvider {
             case CODE_ENTRY_WITH_ID:
                 throw new UnsupportedOperationException("FUNCTION TO BE IMPLEMENTED");
             case CODE_FEED:
-                cursor = EntriesDbHandler
-                        .getInstance(context)
-                        .getAllFeedingsCursor(
+                cursor = dbHandler.getAllFeedingsCursor(
                                 projection,
                                 selection,
                                 selectionArgs,

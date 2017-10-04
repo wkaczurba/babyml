@@ -1,83 +1,51 @@
 package com.example.android.babyml;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
 import android.preference.PreferenceManager;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.content.CursorLoader;
-import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
-import org.joda.time.*;
 
-import com.example.android.babyml.data.EntriesDbHandler;
-import com.example.android.babyml.data.EntriesProvider;
-//import com.example.android.babyml.data.EntriesUtils;
-import com.example.android.babyml.data.Entry;
+import com.example.android.babyml.data.EntriesProviderContract;
 import com.example.android.babyml.data.Feed;
 import com.example.android.babyml.data.Nappy;
 import com.example.android.babyml.data.Note;
 import com.example.android.babyml.data.Sleep;
-import com.example.android.babyml.utils.DateUtils;
-import com.example.android.babyml.utils.DebugUtils;
+import com.example.android.babyml.ui.LogAdapter;
+import com.example.android.babyml.ui.ToastListItemClickListener;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.example.android.babyml.LogAdapter.FEEDING_VIEW_HOLDER;
-import static com.example.android.babyml.LogAdapter.NAPPY_VIEW_HOLDER;
-import static com.example.android.babyml.LogAdapter.SLEEP_VIEW_HOLDER;
-import static com.example.android.babyml.LogAdapter.NOTE_VIEW_HOLDER;
-
-// TODO: Review these ones for sliding tabs:
-//   https://developer.android.com/training/implementing-navigation/lateral.html
-//   https://developer.android.com/samples/SlidingTabsBasic/src/com.example.android.common/view/SlidingTabLayout.html
+import static com.example.android.babyml.ui.LogAdapter.FEEDING_VIEW_HOLDER;
+import static com.example.android.babyml.ui.LogAdapter.NAPPY_VIEW_HOLDER;
+import static com.example.android.babyml.ui.LogAdapter.SLEEP_VIEW_HOLDER;
+import static com.example.android.babyml.ui.LogAdapter.NOTE_VIEW_HOLDER;
 
 public class MainActivity extends AppCompatActivity implements
-        View.OnClickListener, SharedPreferences.OnSharedPreferenceChangeListener,
-        LoaderManager.LoaderCallbacks<Cursor> {
-
-    // FIXME: Do we need mDb here (it has been already added to AddEntryActivity.
+        View.OnClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
     public static String TAG = MainActivity.class.getSimpleName();
-    private static final int ID_ENTRIES_LOADER     = 1;
-    private static final int ID_LATEST_FEED_LOADER = 2;
-
-    // Database:
-    EntriesDbHandler mDb; // Add closing;
     RecyclerView logRecyclerView;
-//    FloatingActionButton fab;
     TextView bottomBarMilkTv;
     TextView bottomBarNappyTv;
     TextView bottomBarNoteTv;
     TextView bottomBarSleepTv;
-
-    // FRAGMENTS:
-//    TimeElapsedFragment timeElapsedFrag;
-//    MilkAdderFragment milkAdderFragment;
-//    NappyAdderFragment nappyAdderFragment;
-//    SleepAdderFragment sleepAdderFragment;
-//    NoteAdderFragment noteAdderFragment;
 
     public static final String TIME_ELAPSED_FRAG_TAG = "TIME_ELAPSED_FRAG";
     public static final String MILK_ADDER_FRAG_TAG = "MILK_ADDER_FRAG";
@@ -85,64 +53,12 @@ public class MainActivity extends AppCompatActivity implements
     public static final String SLEEP_ADDER_FRAG_TAG = "SLEEP_ADDER_FRAG";
     public static final String NOTE_ADDER_FRAG_TAG = "NOTE_ADDER_FRAG";
 
+    // Loaders:
+    MainActivityLoader loader;
+
     // Log-related items:
     LogAdapter mAdapter;
-    LogListItemClickListener mLogListItemClickListener;
-    private int mPosition = RecyclerView.NO_POSITION;
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
-        switch (id) {
-            case ID_ENTRIES_LOADER:
-                Uri entriesQueryUri = EntriesProvider.URI_ENTRIES; // FIXME: This should come from a separate class (decoupled from EntriesProvider)
-                String[] projection = null; // not used by the content provider
-                String selection = null; // not used by the content provider
-                String[] selectionArgs = null; // not used by the content provider
-                String sortOrder = null; // not used by the content provider
-
-                return new CursorLoader(this,
-                        entriesQueryUri,
-                        projection,
-                        selection,
-                        selectionArgs,
-                        Entry.COLUMN_ENTRY_TS + " DESC");
-            case ID_LATEST_FEED_LOADER:
-                Uri feedsUri = EntriesProvider.URI_FEEDS;
-                return new CursorLoader(this,
-                        feedsUri,
-                        null,
-                        null,
-                        null,
-                        Feed.COLUMN_FEED_TS + " DESC");
-            default:
-                throw new IllegalArgumentException("Invalid id supplied: " + id);
-        }
-    }
-
-    @Override
-    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-        DebugUtils.printAllEntries(this, TAG);
-        DebugUtils.printAllFeeds(this, TAG);
-
-        switch (loader.getId()) {
-            case ID_ENTRIES_LOADER:
-                mAdapter.swapCursor(data);
-                if (mPosition == RecyclerView.NO_POSITION)
-                    mPosition = 0;
-                logRecyclerView.smoothScrollToPosition(mPosition);
-                break;
-
-            case ID_LATEST_FEED_LOADER:
-                updateTimeElapsed(data);
-                break;
-
-
-            default: break;
-        }
-
-        // Optionally: HERE -> remove Progression Icon if disaplyed
-        // TODO: Update time.
-    }
+    ToastListItemClickListener mToastListItemClickListener;
 
     // TODO: Remove it or move to loader!
     private void updateTimeElapsed(Cursor cursor) {
@@ -161,70 +77,6 @@ public class MainActivity extends AppCompatActivity implements
             frag.setTimeZero(f.getTs());
         }
     }
-
-
-    @Override
-    public void onLoaderReset(Loader<Cursor> loader) {
-        mAdapter.swapCursor(null);
-        updateTimeElapsed(null);
-    }
-
-    public static class LogListItemClickListener implements LogAdapter.ListItemClickListener {
-        Context context;
-        Toast mToast;
-        LogAdapter mAdapter;
-
-        public LogListItemClickListener(Context context) {
-            this.context = context;
-        }
-
-        public void setAdapter(LogAdapter adapter) {
-            mAdapter = adapter;
-        }
-
-        @Override
-        public void onListItemClick(int clickItemIndex) {
-            // get from cursor + output as Toast.
-            if (mToast != null) {
-                mToast.cancel();
-            }
-            //mToast = Toast.makeText(context, "Item #" + clickItemIndex + " clicked", Toast.LENGTH_LONG);
-            if (mAdapter != null) {
-                // TODO: Disable this if not ready.
-                Object o = mAdapter.get(clickItemIndex);
-                handleItemClick(o, clickItemIndex);
-            }
-        }
-
-        public void handleItemClick(Object o, int pos) {
-            long id = -1;
-
-            // TODO: This should be handled using Strategy Pattern.
-            String type;
-            if (o == null) {
-                return;
-            } else if (o instanceof Feed) {
-                id = ((Feed) o).get_id();
-                type = "Feed; id=" + id;
-            } else if (o instanceof Nappy) {
-                id = ((Nappy) o).get_id();
-                type = "Nappy; id=" + id;
-            } else if (o instanceof Note) {
-                id = ((Note) o).get_id();
-                type = "Note; id=" + id;
-            } else if (o instanceof Sleep) {
-                id = ((Sleep) o).get_id();
-                type = "Sleep; id=" + id;
-            } else {
-                type = "Other";
-            }
-            mToast = Toast.makeText(context, "Item #" + pos + " clicked ("+ type +")", Toast.LENGTH_LONG);
-            mToast.show();
-
-
-        }
-    }
-
 
     @Override
     protected void onResume() {
@@ -247,14 +99,6 @@ public class MainActivity extends AppCompatActivity implements
             if (frag != null)
                 fragments.put(tag, frag);
         }
-//
-//        timeElapsedFrag = (TimeElapsedFragment) getSupportFragmentManager().findFragmentByTag(TIME_ELAPSED_FRAG_TAG);
-//        milkAdderFragment = (MilkAdderFragment) getSupportFragmentManager().findFragmentByTag(MILK_ADDER_FRAG_TAG);
-//        nappyAdderFragment = (NappyAdderFragment) getSupportFragmentManager().findFragmentByTag(NAPPY_ADDER_FRAG_TAG);
-//        sleepAdderFragment = (SleepAdderFragment) getSupportFragmentManager().findFragmentByTag(SLEEP_ADDER_FRAG_TAG);
-//        noteAdderFragment = (NoteAdderFragment) getSupportFragmentManager().findFragmentByTag(NOTE_ADDER_FRAG_TAG);
-//
-//
     }
 
     @Override
@@ -263,7 +107,7 @@ public class MainActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_main);
 
         // Getting database instance:
-        mDb = EntriesDbHandler.getInstance(this);
+//        mDb = EntriesDbHandler.getInstance(this);
 //        EntriesUtils.tryUpgradeFromOld(this); // Upgrading from OldDb to the new one.
 
         // RecyclerView:
@@ -274,9 +118,9 @@ public class MainActivity extends AppCompatActivity implements
         logRecyclerView.setHasFixedSize(true);
 
 
-        mLogListItemClickListener = new LogListItemClickListener(this);
-        mAdapter = new LogAdapter(mLogListItemClickListener);
-        mLogListItemClickListener.setAdapter(mAdapter);
+        mToastListItemClickListener = new ToastListItemClickListener(this);
+        mAdapter = new LogAdapter(mToastListItemClickListener);
+        mToastListItemClickListener.setAdapter(mAdapter);
         logRecyclerView.setAdapter(mAdapter);
 
         // add Time Elapsed Fragment
@@ -331,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements
                             long lid = logViewHolder.getAdapterPosition();
                             Feed feed = logViewHolder.getFeed();
 
-                            Uri deleteUri = EntriesProvider.URI_FEEDS
+                            Uri deleteUri = EntriesProviderContract.URI_FEEDS
                                     .buildUpon()
                                     .appendPath(String.valueOf(feed.get_id()))
                                     .build();
@@ -343,7 +187,7 @@ public class MainActivity extends AppCompatActivity implements
                             lid = nappyViewHolder.getAdapterPosition();
                             Nappy nappy = nappyViewHolder.getNappy();
 
-                            deleteUri = EntriesProvider.URI_NAPPIES.buildUpon()
+                            deleteUri = EntriesProviderContract.URI_NAPPIES.buildUpon()
                                     .appendPath(String.valueOf(nappy.get_id()))
                                     .build();
                             getContentResolver().delete(deleteUri, null, null);
@@ -354,7 +198,7 @@ public class MainActivity extends AppCompatActivity implements
                             lid = sleepViewHolder.getAdapterPosition();
                             Sleep sleep = sleepViewHolder.getSleep();
 
-                            deleteUri = EntriesProvider.URI_SLEEPS.buildUpon()
+                            deleteUri = EntriesProviderContract.URI_SLEEPS.buildUpon()
                                     .appendPath(String.valueOf(sleep.get_id()))
                                     .build();
                             getContentResolver().delete(deleteUri, null, null);
@@ -371,7 +215,7 @@ public class MainActivity extends AppCompatActivity implements
                             }
 
 
-                            deleteUri = EntriesProvider.URI_NOTES.buildUpon()
+                            deleteUri = EntriesProviderContract.URI_NOTES.buildUpon()
                                     .appendPath(String.valueOf(note.get_id()))
                                     .build();
                             getContentResolver().delete(deleteUri, null, null);
@@ -389,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements
 //                        Feed feed = logViewHolder.getFeed();
 //                            //mDb.deleteFeeding(feed.getId());
 //
-//                        Uri deleteFeedUri = EntriesProvider.URI_FEEDS
+//                        Uri deleteFeedUri = EntriesProviderContract.URI_FEEDS
 //                                .buildUpon()
 //                                .appendPath(String.valueOf(feed.get_id()))
 //                                .build();
@@ -400,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements
 //                        long lid = nappyViewHolder.getAdapterPosition();
 //                        Nappy nappy = nappyViewHolder.getNappy();
 //                        //mDb.deleteNappy(nappy.getId());
-//                        Uri deleteUri = EntriesProvider.URI_NAPPIES.buildUpon()
+//                        Uri deleteUri = EntriesProviderContract.URI_NAPPIES.buildUpon()
 //                                .appendPath(String.valueOf(nappy.get_id()))
 //                                .build();
 //                        getContentResolver().delete(deleteUri, null, null);
@@ -433,8 +277,14 @@ public class MainActivity extends AppCompatActivity implements
 
 
         // Two loaders:
-        getSupportLoaderManager().initLoader(ID_ENTRIES_LOADER, null, this);
-        getSupportLoaderManager().initLoader(ID_LATEST_FEED_LOADER, null, this);
+//        getSupportLoaderManager().initLoader(ID_ENTRIES_LOADER, null, this);
+//        getSupportLoaderManager().initLoader(ID_LATEST_FEED_LOADER, null, this);
+        loader = new MainActivityLoader(this, logRecyclerView, mAdapter, new OnUpdateTimeElapsed() {
+            @Override
+            public void onUpdateTimeElapsed(Cursor data) {
+                updateTimeElapsed(data);
+            }
+        });
     }
 
 

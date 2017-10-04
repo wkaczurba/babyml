@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
-import android.view.WindowContentFrameStats;
 
 /**
  * Created by WKaczurb on 8/5/2017.
@@ -23,56 +22,26 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
     private static final String VIEW_ENTRIES_V_ALL = "ENTRIES_V_ALL";
     private final Context context;
 
-    public static enum EntryType {
-        Feed(com.example.android.babyml.data.Feed.TABLE_NAME),
-        Nappy(com.example.android.babyml.data.Nappy.TABLE_NAME),
-        Note(com.example.android.babyml.data.Note.TABLE_NAME),
-        Sleep(com.example.android.babyml.data.Sleep.TABLE_NAME);
+//    // FIXME: Look at http://www.androiddesignpatterns.com/2012/05/correctly-managing-your-sqlite-database.html
+//    private static EntriesDbHandler instance;
+//
+//    public static EntriesDbHandler getInstance(Context context) {
+//        if (instance == null) {
+//            synchronized(EntriesDbHandler.class) {
+//                if (instance == null) {
+//                    instance = new EntriesDbHandler(context);
+//                }
+//            }
+//        }
+//        return instance;
+//    }
 
-        private String dbTableName;
-        private EntryType(String dbTableName) {
-            dbTableName = dbTableName;
-        }
-
-        public String getTableName() {
-            return dbTableName;
-        }
-
-        public static EntryType getEntryType(String tb) {
-            switch (tb) {
-                case com.example.android.babyml.data.Feed.TABLE_NAME: //"FEED_TB":
-                    return EntryType.Feed;
-                case com.example.android.babyml.data.Note.TABLE_NAME: //"NOTE_TB":
-                    return EntryType.Note;
-                case com.example.android.babyml.data.Nappy.TABLE_NAME: // "NAPPY_TB":
-                    return EntryType.Nappy;
-                case com.example.android.babyml.data.Sleep.TABLE_NAME: // "SLEEP_TB":
-                    return EntryType.Sleep;
-
-                default: throw new IllegalArgumentException("Unknown value: " + tb);
-            }
-        }
-    }
-
-    private static EntriesDbHandler instance;
-
-    public static EntriesDbHandler getInstance(Context context) {
-        if (instance == null) {
-            synchronized(EntriesDbHandler.class) {
-                if (instance == null) {
-                    instance = new EntriesDbHandler(context);
-                }
-            }
-        }
-        return instance;
-    }
-
-    public EntriesDbHandler(Context context) {
+    EntriesDbHandler(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
         this.context = context;
-        if (EntriesDbHandler.instance != null) {
-            throw new UnsupportedOperationException("This constructor should not be called explicitly; use getInstance() instead.");
-        }
+//        if (EntriesDbHandler.instance != null) {
+//            throw new UnsupportedOperationException("This constructor should not be called explicitly; use getInstance() instead.");
+//        }
     }
 
     @Override
@@ -105,7 +74,7 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        Log.d(TAG, String.format("Upgrading of DB from %0d to %0d should take place here...; for now - old version will be dropped.", oldVersion, newVersion));
+        Log.d(TAG, String.format("Upgrading of DB from %d to %d should take place here...; for now - old version will be dropped.", oldVersion, newVersion));
         String SQL_DROP_OLD_TABLE = "DROP TABLE IF EXISTS " + Feed.TABLE_NAME;
         db.execSQL(SQL_DROP_OLD_TABLE);
         onCreate(db);
@@ -113,22 +82,22 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
     }
 
     synchronized long insertFeed(Feed feed) {
-        SQLiteDatabase db = instance.getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
         long rowId;
 
         ContentValues values = feed.asContentValues();
-        if (values.containsKey(Feed.COLUMN_ID)) {
-            values.remove(Feed.COLUMN_ID);
+        if (values.containsKey(Feed.COLUMN_FEED_ID)) {
+            values.remove(Feed.COLUMN_FEED_ID);
         }
 
         db.beginTransaction();
         try {
             ContentValues entryCv = feed.asEntry().asContentValues();
-            entryCv.remove(Entry.COLUMN_ID);
+            entryCv.remove(Entry.COLUMN_ENTRY_ID);
             rowId = db.insert(Entry.TABLE_NAME, null, entryCv);
 
             ContentValues feedCv = feed.asContentValues();
-            feedCv.put(Feed.COLUMN_ID, rowId);
+            feedCv.put(Feed.COLUMN_FEED_ID, rowId);
 
             db.insert(Feed.TABLE_NAME, null, feedCv);
             db.setTransactionSuccessful();
@@ -144,8 +113,9 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
     }
 
     // Delets all feeds.
+    @SuppressWarnings("unused")
     synchronized int deleteAllFeeds() {
-        int rowsAffected = instance.getWritableDatabase()
+        int rowsAffected = getWritableDatabase()
                 .delete(
                         Entry.TABLE_NAME,
                         null,
@@ -159,10 +129,10 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
     }
 
     synchronized int deleteFeedById(long id) {
-        int rowsAffected = instance.getWritableDatabase()
+        int rowsAffected = getWritableDatabase()
                 .delete(
                         Entry.TABLE_NAME,
-                        Entry.COLUMN_ID + "=? AND " +
+                        Entry.COLUMN_ENTRY_ID + "=? AND " +
                         Entry.COLUMN_ENTRY_TB + "=?",
                         new String[] { String.valueOf( id ), Feed.TABLE_NAME } ); // equivalent to "_ID =" + id
 
@@ -182,10 +152,10 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
      * @param selectionArgs - usually null
      * @param sortOrder - usually: Feed.COLUMN_FEED_TS + " DESC"
      * @param limit - null or 1 for the latest one;
-     * @return
+     * @return Cursor - cursor
      */
     synchronized Cursor getAllFeedingsCursor(
-            String[] projection, // null
+            @SuppressWarnings("UnusedParameters") String[] projection, // null
             String selection, //= null
             String[] selectionArgs, //= null; // not used by the content provider
             String sortOrder, // Feed.COLUMN_FEED_TS + " DESC"
@@ -198,7 +168,7 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
 
         printOrphans();
 
-        return instance.getReadableDatabase()
+        return getReadableDatabase()
                 .query(
                         Feed.TABLE_NAME,
                         null,
@@ -212,7 +182,7 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
     }
 
     synchronized Cursor getAllEntriesCursor(
-            String[] projection, // null
+            @SuppressWarnings("UnusedParameters") String[] projection, // null
             String selection, //= null
             String[] selectionArgs, //= null; // not used by the content provider
             String sortOrder, // TRY: Entries.DbHandler.COLUMN_TS  + " DESC"
@@ -220,7 +190,7 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
     ) {
         printOrphans();
 
-        return instance.getReadableDatabase()
+        return getReadableDatabase()
                 .query(
                     EntriesDbHandler.VIEW_ENTRIES_V_ALL,
                     null,
@@ -233,22 +203,22 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
     }
 
     synchronized long insertNappy(Nappy nappy) {
-            SQLiteDatabase db = instance.getWritableDatabase();
+            SQLiteDatabase db = getWritableDatabase();
             long rowId;
 
             ContentValues values = nappy.asContentValues();
-            if (values.containsKey(Nappy.COLUMN_ID)) {
-                values.remove(Nappy.COLUMN_ID);
+            if (values.containsKey(Nappy.COLUMN_NAPPY_ID)) {
+                values.remove(Nappy.COLUMN_NAPPY_ID);
             }
 
             db.beginTransaction();
             try {
                 ContentValues entryCv = nappy.asEntry().asContentValues();
-                entryCv.remove(Entry.COLUMN_ID);
+                entryCv.remove(Entry.COLUMN_ENTRY_ID);
                 rowId = db.insert(Entry.TABLE_NAME, null, entryCv);
 
                 ContentValues nappyCv = nappy.asContentValues();
-                nappyCv.put(Nappy.COLUMN_ID, rowId);
+                nappyCv.put(Nappy.COLUMN_NAPPY_ID, rowId);
 // FIXME: ?(NOT SURE) Fails constraints: ENTRY_TB_CK
                 db.insert(Nappy.TABLE_NAME, null, nappyCv);
                 db.setTransactionSuccessful();
@@ -264,22 +234,22 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
         }
 
         synchronized long insertSleep(Sleep sleep) {
-            SQLiteDatabase db = instance.getWritableDatabase();
+            SQLiteDatabase db = getWritableDatabase();
             long rowId;
 
             ContentValues values = sleep.asContentValues();
-            if (values.containsKey(Sleep.COLUMN_ID)) {
-                values.remove(Sleep.COLUMN_ID);
+            if (values.containsKey(Sleep.COLUMN_SLEEP_ID)) {
+                values.remove(Sleep.COLUMN_SLEEP_ID);
             }
 
             db.beginTransaction();
             try {
                 ContentValues entryCv = sleep.asEntry().asContentValues();
-                entryCv.remove(Entry.COLUMN_ID);
+                entryCv.remove(Entry.COLUMN_ENTRY_ID);
                 rowId = db.insert(Entry.TABLE_NAME, null, entryCv);
 
                 ContentValues sleepCv = sleep.asContentValues();
-                sleepCv.put(Sleep.COLUMN_ID, rowId);
+                sleepCv.put(Sleep.COLUMN_SLEEP_ID, rowId);
                 db.insert(Sleep.TABLE_NAME, null, sleepCv);
                 db.setTransactionSuccessful();
             } finally {
@@ -294,22 +264,22 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
         }
 
         synchronized long insertNote(Note note) {
-            SQLiteDatabase db = instance.getWritableDatabase();
+            SQLiteDatabase db = getWritableDatabase();
             long rowId;
 
             ContentValues values = note.asContentValues();
-            if (values.containsKey(Note.COLUMN_ID)) {
-                values.remove(Note.COLUMN_ID);
+            if (values.containsKey(Note.COLUMN_NOTE_ID)) {
+                values.remove(Note.COLUMN_NOTE_ID);
             }
 
             db.beginTransaction();
             try {
                 ContentValues entryCv = note.asEntry().asContentValues();
-                entryCv.remove(Entry.COLUMN_ID);
+                entryCv.remove(Entry.COLUMN_ENTRY_ID);
                 rowId = db.insert(Entry.TABLE_NAME, null, entryCv);
 
                 ContentValues noteCv = note.asContentValues();
-                noteCv.put(Note.COLUMN_ID, rowId);
+                noteCv.put(Note.COLUMN_NOTE_ID, rowId);
 // FIXME: (NOT SURE) Fails constraints: ENTRY_TB_CK
                 db.insert(Note.TABLE_NAME, null, noteCv);
                 db.setTransactionSuccessful();
@@ -327,7 +297,7 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
 //        ContentValues cv = nappy.asContentValues();
 //        cv.remove("_id"); // if _id is specified -> it most likely give an error.
 //
-//        long rowId = instance.getWritableDatabase()
+//        long rowId = getWritableDatabase()
 //                .insert(Nappy.TABLE_NAME, null, cv);
 //
 //        if (rowId != -1) {
@@ -339,10 +309,10 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
 
     // FIXME
     synchronized int deleteNappyById(long id) {
-        int rowsAffected = instance.getWritableDatabase()
+        int rowsAffected = getWritableDatabase()
                 .delete(
                         Entry.TABLE_NAME,
-                        Entry.COLUMN_ID + "=? AND " +
+                        Entry.COLUMN_ENTRY_ID + "=? AND " +
                                 Entry.COLUMN_ENTRY_TB + "=?",
                         new String[] { String.valueOf( id ), Nappy.TABLE_NAME } ); // equivalent to "_ID =" + id
 
@@ -356,11 +326,11 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
     }
 
     synchronized int deleteSleepById(long id) {
-        int rowsAffected = instance.getWritableDatabase()
+        int rowsAffected = getWritableDatabase()
                 .delete(
                         Entry.TABLE_NAME,
-                        Entry.COLUMN_ID + "=? AND " +
-                                Entry.COLUMN_ENTRY_TB + "=?",
+                        Entry.COLUMN_ENTRY_ID + "=? AND " +
+                        Entry.COLUMN_ENTRY_TB + "=?",
                         new String[] { String.valueOf( id ), Sleep.TABLE_NAME } ); // equivalent to "_ID =" + id
 
         if (rowsAffected > 0) {
@@ -373,11 +343,11 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
     }
 
     synchronized int deleteNoteById(long id) {
-        int rowsAffected = instance.getWritableDatabase()
+        int rowsAffected = getWritableDatabase()
                 .delete(
                         Entry.TABLE_NAME,
-                        Entry.COLUMN_ID + "=? AND " +
-                                Entry.COLUMN_ENTRY_TB + "=?",
+                        Entry.COLUMN_ENTRY_ID + "=? AND " +
+                        Entry.COLUMN_ENTRY_TB + "=?",
                         new String[] { String.valueOf( id ), Note.TABLE_NAME } ); // equivalent to "_ID =" + id
 
         if (rowsAffected > 0) {
@@ -390,34 +360,37 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
     }
 
     private void notifyOnEntriesChange() {
-        context.getContentResolver().notifyChange(EntriesProvider.URI_ENTRIES, null, false);
+        context.getContentResolver().notifyChange(EntriesProviderContract.URI_ENTRIES, null, false);
     }
 
     private void notifyOnFeedChange() {
-        context.getContentResolver().notifyChange(EntriesProvider.URI_FEEDS, null, false);
+        context.getContentResolver().notifyChange(EntriesProviderContract.URI_FEEDS, null, false);
     }
 
     private void notifyOnNappyChange() {
-        context.getContentResolver().notifyChange(EntriesProvider.URI_NAPPIES, null, false);
+        context.getContentResolver().notifyChange(EntriesProviderContract.URI_NAPPIES, null, false);
     }
 
     private void notifyOnSleepChange() {
-        context.getContentResolver().notifyChange(EntriesProvider.URI_SLEEPS, null, false);
+        context.getContentResolver().notifyChange(EntriesProviderContract.URI_SLEEPS, null, false);
     }
 
     private void notifyOnNoteChange() {
-        context.getContentResolver().notifyChange(EntriesProvider.URI_NOTES, null, false);
+        context.getContentResolver().notifyChange(EntriesProviderContract.URI_NOTES, null, false);
     }
 
+    @SuppressWarnings("WeakerAccess")
     public void printOrphans() {
-        Cursor cursor = getInstance(context).getReadableDatabase().rawQuery(
-            "SELECT _ID, ENTRY_TB FROM ENTRY_TB WHERE\n" +
-                    "    (ENTRY_TB='SLEEP_TB' AND _ID NOT IN (SELECT _ID FROM SLEEP_TB)) OR\n" +
-                    "    (ENTRY_TB='FEED_TB' AND _ID NOT IN (SELECT _ID FROM FEED_TB)) OR\n" +
-                    "    (ENTRY_TB='NAPPY_TB' AND _ID NOT IN (SELECT _ID FROM NAPPY_TB)) OR\n" +
-                    "    (ENTRY_TB='NOTE_TB' AND _ID NOT IN (SELECT _ID FROM NOTE_TB));", null);
+        Log.d(TAG, "" + context);
+        SQLiteDatabase db = this.getReadableDatabase();
 
-        Log.d(TAG, String.format("printOrphans.cursor.getCount()= " + cursor.getCount()));
+        Cursor cursor = db.rawQuery(
+                "SELECT _ID, ENTRY_TB FROM ENTRY_TB WHERE\n" +
+                        "    (ENTRY_TB='SLEEP_TB' AND _ID NOT IN (SELECT _ID FROM SLEEP_TB)) OR\n" +
+                        "    (ENTRY_TB='FEED_TB' AND _ID NOT IN (SELECT _ID FROM FEED_TB)) OR\n" +
+                        "    (ENTRY_TB='NAPPY_TB' AND _ID NOT IN (SELECT _ID FROM NAPPY_TB)) OR\n" +
+                        "    (ENTRY_TB='NOTE_TB' AND _ID NOT IN (SELECT _ID FROM NOTE_TB));", null);
+        Log.d(TAG, "printOrphans.cursor.getCount()= " + cursor.getCount());
 
         if (cursor.getCount() > 0) {
             Log.d(TAG, String.format("Found : %d orphans", cursor.getCount()));
@@ -427,13 +400,7 @@ public class EntriesDbHandler extends SQLiteOpenHelper {
                 String tb = cursor.getString(cursor.getColumnIndex("ENTRY_TB"));
                 Log.d(TAG, String.format("ID=%d; %s", id, tb));
             }
-        } else {
-
         }
+        cursor.close();
     }
-//
-//    private void notifyOnNoteChange() {
-//        context.getContentResolver().notifyChange(EntriesProvider.URI_ENTRIES, null, false);
-//    }
-
 }
