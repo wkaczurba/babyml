@@ -6,7 +6,7 @@ package com.example.android.babyml.ui;
  * Interface for LogAdapter
  */
 
-public interface ListItemClickListener {
-    public void onListItemClick(int clickItemIndex);
+interface ListItemClickListener {
+    void onListItemClick(int clickItemIndex);
 }
 

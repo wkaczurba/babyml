@@ -15,8 +15,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.android.babyml.data.EntriesDbHandler;
-import com.example.android.babyml.data.EntriesProvider;
 import com.example.android.babyml.data.EntriesProviderContract;
 import com.example.android.babyml.data.Note;
 
@@ -61,22 +59,26 @@ public class NoteAdderFragment extends Fragment implements View.OnClickListener 
 
     @Override
     public void onStart() {
+        super.onStart();
+
         Context context = getActivity();
         // Required empty public constructor
         View view = getView();
-        super.onStart();
-        noteTimeEditText = (EditText) view.findViewById(R.id.note_time_et);
+        if (view == null) {
+            throw new IllegalStateException("NoteAdderFragment.onStart() does not return view");
+        }
+        noteTimeEditText = view.findViewById(R.id.note_time_et);
 
         DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");
         noteTimeEditText.setText(dtf.print(LocalTime.now()));
         ttw = new TimeTextWatcher(noteTimeEditText);
-        noteNoteTextView = (TextView) view.findViewById(R.id.note_note_tw); // note_note_tw
-        noteNoteEditText = (EditText) view.findViewById(R.id.note_note_et); // note_note_et
+        noteNoteTextView = view.findViewById(R.id.note_note_tw); // note_note_tw
+        noteNoteEditText = view.findViewById(R.id.note_note_et); // note_note_et
 
         noteTimeEditText.addTextChangedListener(ttw);
         setIme(context);
 
-        storeNoteButton = (Button) view.findViewById(R.id.store_note_button);
+        storeNoteButton = view.findViewById(R.id.store_note_button);
         storeNoteButton.setOnClickListener(this);
     }
 
@@ -118,7 +120,14 @@ public class NoteAdderFragment extends Fragment implements View.OnClickListener 
         Uri uri = getActivity().getContentResolver().insert(
                 EntriesProviderContract.URI_NOTES,
                 contentValues);
-        long id = Long.valueOf(uri.getLastPathSegment());
+        if (uri == null) {
+            throw new NullPointerException("returned uri is null");
+        }
+        String lastPathSegment = uri.getLastPathSegment();
+        if (lastPathSegment == null) {
+            throw new UnsupportedOperationException("uri has not returned valid path segment.");
+        }
+        long id = Long.valueOf(lastPathSegment);
 
         Toast.makeText(context, "ROWID=" + id, Toast.LENGTH_LONG).show();
 

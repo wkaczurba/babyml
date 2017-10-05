@@ -27,6 +27,7 @@ import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import java.util.Locale;
 import java.util.TimeZone;
 
 import lombok.Getter;
@@ -108,7 +109,9 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 //                    noteSb.append("; ").append(feed.getNote());
 //                }
 // End
-                String s = String.format("%s milk = %d%s", time, feed.getAmount(), formatNote(feed.getNote()));
+                Locale locale = Locale.getDefault();
+                String s = String.format(locale,
+                        "%s milk = %d%s", time, feed.getAmount(), formatNote(feed.getNote()));
 
                 logTextView.setText(s);
             } else { //if (o instanceof DateItem) { // DateItem
@@ -254,7 +257,8 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             if (o instanceof Summary) {
                 summary = (Summary) o;
                 //summaryTextView.setText("<SUMMARY TODO>" + summary.toString());
-                String s = String.format("Total %d ml (%d %s); %d dirty %s",
+                Locale locale = Locale.getDefault();
+                String s = String.format(locale, "Total %d ml (%d %s); %d dirty %s",
                         summary.getFeedAmount(),
                         summary.getFeedCounts(),
                         summary.getFeedCounts() == 1 ? "feed" : "feeds",

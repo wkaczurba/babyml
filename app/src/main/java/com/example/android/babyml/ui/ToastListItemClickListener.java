@@ -15,9 +15,9 @@ import com.example.android.babyml.data.Sleep;
  */
 
 public class ToastListItemClickListener implements ListItemClickListener {
-    Context context;
-    Toast mToast;
-    LogAdapter mAdapter;
+    private Context context;
+    private Toast mToast;
+    private LogAdapter mAdapter;
 
     public ToastListItemClickListener(Context context) {
         this.context = context;
@@ -41,9 +41,9 @@ public class ToastListItemClickListener implements ListItemClickListener {
         }
     }
 
-    public void handleItemClick(Object o, int pos) {
-        long id = -1;
-
+    private void handleItemClick(Object o, int pos) {
+        long id;
+        
         // TODO: This should be handled using Strategy Pattern.
         String type;
         if (o == null) {

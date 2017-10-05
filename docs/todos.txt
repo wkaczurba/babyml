@@ -2,3 +2,30 @@
 //   https://developer.android.com/training/implementing-navigation/lateral.html
 //   https://developer.android.com/samples/SlidingTabsBasic/src/com.example.android.common/view/SlidingTabLayout.html
 
+Most important things:
+- solve problem with DB addition of sleep time
+- add decorator pattern for sleep time, so statistics are generated
+- limit notes to short ones so they can be displayed
+  - or use additional window for displaying them.
+
+- locale, time 24 vs 12, oz vs ml
+- sharing via email
+- cloud connectivity
+
+Any other stuff?
+
+Refactoring:
+	EntryType would have to be replaced with "String" if more elements to support
+	+Add abstract factory that can produce variaety of different things.
+        +LogAdapter -> IDs.
+
+	MainActivity -> switch-case in onSwiped should be replaced.
+
+US/EU units (Ozs vs Ml).
+	Time -> AM/PM or 24H.
+
+
+Refactoring:
+	EntryType would have to be replaced with "String" if more elements to support
+	+Add abstract factory that can produce variaety of different things.
+

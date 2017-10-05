@@ -12,8 +12,7 @@ import android.util.Log;
  *
  * Refer to docs/sqlite_database.sql to understand how things are arranged.
  */
-
-public class EntriesDbHandler extends SQLiteOpenHelper {
+class EntriesDbHandler extends SQLiteOpenHelper {
 
     private static final String TAG = EntriesDbHandler.class.getSimpleName();
     private static final String DB_NAME = "entries.db";

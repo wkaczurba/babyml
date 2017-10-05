@@ -59,19 +59,23 @@ public class NappyAdderFragment extends Fragment implements View.OnClickListener
 
     @Override
     public void onStart() {
+        super.onStart();
         Context context = getActivity();
         // Required empty public constructor
         View view = getView();
-        super.onStart();
-        nappyTimeEditText = (EditText) view.findViewById(R.id.nappy_time_et);
+
+        if (view == null) {
+            throw new IllegalStateException("NappyAdderFragment.onStart() does not return view");
+        }
+        nappyTimeEditText = view.findViewById(R.id.nappy_time_et);
 
         DateTimeFormatter dtf = DateTimeFormat.forPattern("HH:mm");
         nappyTimeEditText.setText(dtf.print(LocalTime.now()));
         ttw = new TimeTextWatcher(nappyTimeEditText);
         nappyTimeEditText.addTextChangedListener(ttw);
-        nappyIncludeNoteCheckBox = (CheckBox) view.findViewById(R.id.nappy_include_note_cb); // nappy_include_note_cb
-        nappyNoteEditText = (EditText) view.findViewById(R.id.nappy_note_et); // nappy_time_note_et
-        storeNappyButton = (Button) view.findViewById(R.id.store_nappy_button);
+        nappyIncludeNoteCheckBox = view.findViewById(R.id.nappy_include_note_cb); // nappy_include_note_cb
+        nappyNoteEditText = view.findViewById(R.id.nappy_note_et); // nappy_time_note_et
+        storeNappyButton = view.findViewById(R.id.store_nappy_button);
         storeNappyButton.setOnClickListener(this);
 
         nappyIncludeNoteCheckBox.setOnClickListener(this);

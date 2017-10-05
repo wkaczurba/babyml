@@ -8,6 +8,6 @@ import android.database.Cursor;
  * Interface used for MainActivity / TimeElapsedFragment
  */
 
-public interface OnUpdateTimeElapsed {
-    public void onUpdateTimeElapsed(Cursor data);
+interface OnUpdateTimeElapsed {
+    void onUpdateTimeElapsed(Cursor data);
 }

@@ -4,8 +4,11 @@ import android.net.Uri;
 
 /**
  * Created by WKaczurb on 10/4/2017.
+ *
+ * Constants that are used by ContentProvider and ContentResolver.
  */
 
+@SuppressWarnings("WeakerAccess")
 public class EntriesProviderContract {
     public static final String AUTHORITY = "com.example.android.babyml.provider";
     public static final String SCHEME = "content://";

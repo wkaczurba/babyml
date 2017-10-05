@@ -16,8 +16,6 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.android.babyml.data.EntriesDbHandler;
-import com.example.android.babyml.data.EntriesProvider;
 import com.example.android.babyml.data.EntriesProviderContract;
 import com.example.android.babyml.data.Feed;
 import com.example.android.babyml.utils.MiscUiUtils;
@@ -47,16 +45,16 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
 
     private static final String LOG = MilkAdderFragment.class.getSimpleName();
     // Milk-related items:
-    int milkAmountValue = 0; // FIXME: Save instance.
-    static final String MILK_AMOUNT_VALUE_KEY = "milkAmountValue";
+    private int milkAmountValue = 0; // FIXME: Save instance.
+    private static final String MILK_AMOUNT_VALUE_KEY = "milkAmountValue";
 
-    TextView milkAmountTextView;
-    EditText milkTimeEditText;
-    CheckBox milkIncludeNoteCheckBox; // milk_include_note_cb;
-    EditText milkNoteEditText; // milk_note_et;
-    Button clearButton, plusMilkButton, plusNappyButton, add10mlButton, add20mlButton,
+    private TextView milkAmountTextView;
+    private EditText milkTimeEditText;
+    private CheckBox milkIncludeNoteCheckBox; // milk_include_note_cb;
+    private EditText milkNoteEditText; // milk_note_et;
+    private Button clearButton, plusMilkButton, plusNappyButton, add10mlButton, add20mlButton,
             add50mlButton, add100mlButton, storeMilkButton, deleteAllButton;
-    TimeTextWatcher milkTimeTextWatcher;
+    private TimeTextWatcher milkTimeTextWatcher;
     private String TAG = MilkAdderFragment.class.getSimpleName();
 
     public MilkAdderFragment() {
@@ -87,20 +85,23 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
         Context context = getActivity(); //getActivity();
 
         View view = getView();
+        if (view == null) {
+            throw new IllegalStateException("milkAdderFragment.onStart() does not produce valid view.");
+        }
 
         // Added from MainActivity
-        milkAmountTextView = (TextView) view.findViewById(R.id.milk_amount_tv);
-        milkTimeEditText = (EditText) view.findViewById(R.id.milk_time_et);
-        clearButton = (Button) view.findViewById(R.id.clear_button);
-        add10mlButton = (Button) view.findViewById(R.id.add_10_ml_button);
-        add20mlButton = (Button) view.findViewById(R.id.add_20_ml_button);
-        add50mlButton = (Button) view.findViewById(R.id.add_50_ml_button);
-        add100mlButton = (Button) view.findViewById(R.id.add_100_ml_button);
-        storeMilkButton = (Button) view.findViewById(R.id.store_milk_button);
-        deleteAllButton = (Button) view.findViewById(R.id.delete_all);
+        milkAmountTextView = view.findViewById(R.id.milk_amount_tv);
+        milkTimeEditText = view.findViewById(R.id.milk_time_et);
+        clearButton = view.findViewById(R.id.clear_button);
+        add10mlButton = view.findViewById(R.id.add_10_ml_button);
+        add20mlButton = view.findViewById(R.id.add_20_ml_button);
+        add50mlButton = view.findViewById(R.id.add_50_ml_button);
+        add100mlButton = view.findViewById(R.id.add_100_ml_button);
+        storeMilkButton = view.findViewById(R.id.store_milk_button);
+        deleteAllButton = view.findViewById(R.id.delete_all);
 
-        milkIncludeNoteCheckBox = (CheckBox) view.findViewById(R.id.milk_include_note_cb); // milk_include_note_cb;
-        milkNoteEditText = (EditText) view.findViewById(R.id.milk_note_et); // milk_note_et;
+        milkIncludeNoteCheckBox = view.findViewById(R.id.milk_include_note_cb); // milk_include_note_cb;
+        milkNoteEditText = view.findViewById(R.id.milk_note_et); // milk_note_et;
 
 //        // FIXME: This does not close the thing.
 //        MiscUiUtils.setIme(context, milkNoteEditText);
@@ -162,9 +163,13 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
         Log.d(TAG, "Saved milkAmountValue: " + milkAmountValue);
     }
 
-    protected void updateMilkAmount() {
+    private void updateMilkAmount() {
         milkAmountTextView.setError(null);
-        milkAmountTextView.setText(milkAmountValue + " ml");
+
+        String sb = String.valueOf(milkAmountValue) +
+                " ml";
+
+        milkAmountTextView.setText(sb);
     }
 
     // This is from: https://stackoverflow.com/questions/2342620/how-to-hide-keyboard-after-typing-in-edittext-in-android
@@ -247,6 +252,9 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
 
         Uri uri = context.getContentResolver().insert(EntriesProviderContract.URI_FEEDS,
                 new Feed(-1, Feed.COLUMN_FEED_TB, timeMillis, milkAmountValue, getNote()).asContentValues());
+        if (uri == null) {
+            throw new NullPointerException("Returned uri is null.");
+        }
         Log.d(TAG, "Inserted: " + uri.toString());
 
         Toast.makeText(context, "Item inserted ok.", Toast.LENGTH_LONG).show();

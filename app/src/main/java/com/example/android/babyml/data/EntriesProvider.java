@@ -21,9 +21,9 @@ public class EntriesProvider extends ContentProvider {
     private EntriesDbHandler dbHandler;
 
     // URI Matchers
-    public static final UriMatcher sUriMatcher = buildUriMatcher();
+    private static final UriMatcher sUriMatcher = buildUriMatcher();
 
-    public static UriMatcher buildUriMatcher() {
+    private static UriMatcher buildUriMatcher() {
         UriMatcher uriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
         uriMatcher.addURI(AUTHORITY, PATH_ENTRY, CODE_ENTRY);
@@ -43,8 +43,6 @@ public class EntriesProvider extends ContentProvider {
 
         return uriMatcher;
     }
-
-//    private static final UriMatcher sUriMatcher = buildUriMatcher();
 
     public EntriesProvider() {
     }

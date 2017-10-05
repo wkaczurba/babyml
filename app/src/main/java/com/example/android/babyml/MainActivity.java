@@ -40,25 +40,25 @@ import static com.example.android.babyml.ui.LogAdapter.NOTE_VIEW_HOLDER;
 public class MainActivity extends AppCompatActivity implements
         View.OnClickListener, SharedPreferences.OnSharedPreferenceChangeListener {
 
-    public static String TAG = MainActivity.class.getSimpleName();
-    RecyclerView logRecyclerView;
-    TextView bottomBarMilkTv;
-    TextView bottomBarNappyTv;
-    TextView bottomBarNoteTv;
-    TextView bottomBarSleepTv;
+    private static String TAG = MainActivity.class.getSimpleName();
+    private RecyclerView logRecyclerView;
+    private TextView bottomBarMilkTv;
+    private TextView bottomBarNappyTv;
+    private TextView bottomBarNoteTv;
+    private TextView bottomBarSleepTv;
 
-    public static final String TIME_ELAPSED_FRAG_TAG = "TIME_ELAPSED_FRAG";
-    public static final String MILK_ADDER_FRAG_TAG = "MILK_ADDER_FRAG";
-    public static final String NAPPY_ADDER_FRAG_TAG = "NAPPY_ADDER_FRAG";
-    public static final String SLEEP_ADDER_FRAG_TAG = "SLEEP_ADDER_FRAG";
-    public static final String NOTE_ADDER_FRAG_TAG = "NOTE_ADDER_FRAG";
+    private static final String TIME_ELAPSED_FRAG_TAG = "TIME_ELAPSED_FRAG";
+    private static final String MILK_ADDER_FRAG_TAG = "MILK_ADDER_FRAG";
+    private static final String NAPPY_ADDER_FRAG_TAG = "NAPPY_ADDER_FRAG";
+    private static final String SLEEP_ADDER_FRAG_TAG = "SLEEP_ADDER_FRAG";
+    private static final String NOTE_ADDER_FRAG_TAG = "NOTE_ADDER_FRAG";
 
     // Loaders:
-    MainActivityLoader loader;
+    private MainActivityLoader loader;
 
     // Log-related items:
-    LogAdapter mAdapter;
-    ToastListItemClickListener mToastListItemClickListener;
+    private LogAdapter mAdapter;
+    private ToastListItemClickListener mToastListItemClickListener;
 
     // TODO: Remove it or move to loader!
     private void updateTimeElapsed(Cursor cursor) {
@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity implements
 //        this.updateTimeElapsed();
     }
 
-    public void populateFragmentsMap() {
+    private void populateFragmentsMap() {
         String[] tags = new String[] {
             TIME_ELAPSED_FRAG_TAG,
             MILK_ADDER_FRAG_TAG,
@@ -172,7 +172,6 @@ public class MainActivity extends AppCompatActivity implements
                         case FEEDING_VIEW_HOLDER:
                             LogAdapter.FeedingViewHolder logViewHolder = (LogAdapter.FeedingViewHolder) viewHolder;
 
-                            long lid = logViewHolder.getAdapterPosition();
                             Feed feed = logViewHolder.getFeed();
 
                             Uri deleteUri = EntriesProviderContract.URI_FEEDS
@@ -184,7 +183,6 @@ public class MainActivity extends AppCompatActivity implements
                             break;
                         case NAPPY_VIEW_HOLDER:
                             LogAdapter.NappyViewHolder nappyViewHolder = (LogAdapter.NappyViewHolder) viewHolder;
-                            lid = nappyViewHolder.getAdapterPosition();
                             Nappy nappy = nappyViewHolder.getNappy();
 
                             deleteUri = EntriesProviderContract.URI_NAPPIES.buildUpon()
@@ -195,7 +193,6 @@ public class MainActivity extends AppCompatActivity implements
                             break;
                         case SLEEP_VIEW_HOLDER:
                             LogAdapter.SleepViewHolder sleepViewHolder = (LogAdapter.SleepViewHolder) viewHolder;
-                            lid = sleepViewHolder.getAdapterPosition();
                             Sleep sleep = sleepViewHolder.getSleep();
 
                             deleteUri = EntriesProviderContract.URI_SLEEPS.buildUpon()
@@ -207,7 +204,6 @@ public class MainActivity extends AppCompatActivity implements
                             break;
                         case NOTE_VIEW_HOLDER:
                             LogAdapter.NoteViewHolder noteViewHolder = (LogAdapter.NoteViewHolder) viewHolder;
-                            lid = noteViewHolder.getAdapterPosition();
                             Note note = noteViewHolder.getNote();
 
                             if (note == null) {
@@ -321,16 +317,16 @@ public class MainActivity extends AppCompatActivity implements
     } */
 
 // FRAGMENTS.
-    Map<String, Fragment> fragments = new HashMap<>();
+    private Map<String, Fragment> fragments = new HashMap<>();
 
-    OnCloseListener backButton = new OnCloseListener() {
+    private OnCloseListener backButton = new OnCloseListener() {
         @Override
         public void close() {
             onBackPressed();
         }
     };
 
-    public void safeAddWhatever(String fragment_id) {
+    private void safeAddWhatever(String fragment_id) {
         Fragment frag;
 
         if (!fragments.containsKey(fragment_id)) {
@@ -404,14 +400,13 @@ public class MainActivity extends AppCompatActivity implements
 //        }
 //    }
 
-    public void safeDeleteFragment(String tag) {
-        Fragment frag = null;
+    private void safeDeleteFragment(String tag) {
+        Fragment frag;
         // TODO: Rewrite to support other fragments.
 
         //Fragment frag = getSupportFragmentManager().findFragmentByTag(tag);
         if (fragments.containsKey(tag)) {
             frag = fragments.get(tag);
-            assert(frag != null);
         } else {
             return;
         }
@@ -434,7 +429,7 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     // TODO: rework this function.
-    public void updateTimeElapsedFrag(SharedPreferences sharedPreferences) {
+    private void updateTimeElapsedFrag(SharedPreferences sharedPreferences) {
         boolean showTimeElapsed = sharedPreferences.getBoolean("show_time_passed", true);
 
         if (showTimeElapsed) {
@@ -448,10 +443,10 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        if (key.equals("show_time_passed")) {
-            // FIXME: This cannot be here, as this function will be called when activity is not active, what will lead to crash (java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState)
-            //updateTimeElapsedFrag(sharedPreferences);
-        }
+//        if (key.equals("show_time_passed")) {
+//            // FIXME: This cannot be here, as this function will be called when activity is not active, what will lead to crash (java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState)
+//            //updateTimeElapsedFrag(sharedPreferences);
+//        }
     }
 
     @Override

@@ -2,6 +2,8 @@ package com.example.android.babyml.data;
 
 /**
  * Created by WKaczurb on 10/4/2017.
+ *
+ * Enum for EntryType.
  */
 public enum EntryType {
     Feed(com.example.android.babyml.data.Feed.TABLE_NAME),
@@ -11,10 +13,11 @@ public enum EntryType {
 
     private String dbTableName;
 
-    private EntryType(String dbTableName) {
-        dbTableName = dbTableName;
+    EntryType(String dbTableName) {
+        this.dbTableName = dbTableName;
     }
 
+    @SuppressWarnings("unused")
     public String getTableName() {
         return dbTableName;
     }
@@ -29,7 +32,6 @@ public enum EntryType {
                 return EntryType.Nappy;
             case com.example.android.babyml.data.Sleep.TABLE_NAME: // "SLEEP_TB":
                 return EntryType.Sleep;
-
             default:
                 throw new IllegalArgumentException("Unknown value: " + tb);
         }
