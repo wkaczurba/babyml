@@ -1,12 +1,9 @@
 package com.example.android.babyml;
 
-import android.content.Context;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.util.Log;
-import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.example.android.babyml.utils.DateUtils;
@@ -54,13 +51,27 @@ class TimeTextWatcher implements TextWatcher {
     }
 
     long getTimeMilis() {
+        LocalDateTime ldt = getLocalDateTimeInTheLast24Hours();
+        return ldt.toDateTime().getMillis();
+    }
+
+    LocalDateTime getLocalDateTimeInTheLast24Hours() {
         int[] hhmm = getHoursMins();
         if (hhmm == null) {
             throw new NullPointerException("getHoursMins returned null; field contains invalid time. Try using setDefaultTimeIfEntryInvalid before using getHoursMins");
         }
 
         LocalDateTime ldt = DateUtils.applyTimeToCurrentLocalDate(hhmm[0], hhmm[1]);
-        return ldt.toDateTime().getMillis();
+        return ldt;
+    }
+
+    LocalDateTime getNextLocalDateTimeAfterLocalDateTime(LocalDateTime precedingLdt) {
+        int[] hhmm = getHoursMins();
+        if (hhmm == null) {
+            throw new NullPointerException("getHoursMins returned null; field contains invalid time. Try using setDefaultTimeIfEntryInvalid before using getHoursMins");
+        }
+        LocalDateTime ldt = DateUtils.applyTimeToNextAfterLocalDateTime(precedingLdt, hhmm[0], hhmm[1]);
+        return ldt;
     }
 
     private void setDefaultTime() {

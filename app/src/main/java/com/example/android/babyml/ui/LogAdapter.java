@@ -318,10 +318,14 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 // FIXME: Simplify once DB is correct.
                 String lengthS = "?";
                 if (end < start) {
-                    Toast.makeText(ctx, "Error in DB: end < start", Toast.LENGTH_LONG).show();
+                    String s = String.format("Error in DB: end (%d) < start (%d); ", end, start);
+                    Toast.makeText(ctx, s, Toast.LENGTH_LONG).show();
+
+                    Log.d(TAG, s);
                 } else {
                     long lengthMillis = (end - start);
-                    LocalTime lengthLt = new LocalTime((int) (lengthMillis / 3600_000L), (int) (lengthMillis / 60_000L));
+                    //LocalTime lengthLt = new LocalTime((int) (lengthMillis / 3600_000L), (int) (lengthMillis / 60_000L));
+                    LocalTime lengthLt = LocalTime.fromMillisOfDay(lengthMillis);
                     lengthS = dtf.print(lengthLt);
                 }
 
@@ -469,7 +473,9 @@ public class LogAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 String note = cursor.getString(cursor.getColumnIndex(Sleep.COLUMN_SLEEP_NOTE)); //EntriesDbHandler.COLUMN_NOTE_VALUE));
                 Long entTimestamp = cursor.getLong(cursor.getColumnIndex(Sleep.COLUMN_SLEEP_END_TS)); //EntriesDbHandler.COLUMN_NOTE_VALUE));
                 Sleep s = new Sleep(id, Sleep.TABLE_NAME, timestamp, entTimestamp, note);
+
                 // TODO: Consider using Sleep.fromCursor.
+                // FIXME: Need to generate two views when crossing midnight
                 entriesMap.addSummarizable(s);
             } else {
                 throw new IllegalArgumentException("Invalid enum: " + e.name());

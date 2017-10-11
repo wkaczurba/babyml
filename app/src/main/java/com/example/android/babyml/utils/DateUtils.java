@@ -40,6 +40,30 @@ public class DateUtils {
                 lt.getMinuteOfHour());
     }
 
+
+    public static LocalDateTime applyTimeToNextAfterLocalDateTime(LocalDateTime preceedingLdt, int hour, int min) {
+        LocalTime timeBefore = preceedingLdt.toLocalTime();
+        LocalTime newLt = new LocalTime(hour, min);
+        LocalDateTime newLdt;
+
+        int difference = newLt.getMillisOfDay() - timeBefore.getMillisOfDay();
+        if (difference >= 0) {
+            newLdt = preceedingLdt.plusMillis(difference);
+        } else {
+            newLdt = preceedingLdt.plusMillis(difference).plusDays(1);
+        }
+        return newLdt;
+    }
+
+//    public static LocalDateTime applyTimeToNextAfterTimeMillis(long preecedingMillisTime, int hour, int min) {
+//        LocalTime timeBefore = preceedingLdt.toLocalTime();
+//        LocalTime newLt = new LocalTime(hour, min);
+//
+//        int absDifference = Math.abs(newLt.getMillisOfDay() - timeBefore.getMillisOfDay());
+//        LocalDateTime newLdt = preceedingLdt.plusMillis(absDifference);
+//        return newLdt;
+//    }
+
     public static LocalDate summarizableToLocalDate(Summarizable s) {
         return milisToLocalDate( s.getTs() );
     }

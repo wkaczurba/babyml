@@ -14,10 +14,10 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.android.babyml.data.EntriesProvider;
 import com.example.android.babyml.data.EntriesProviderContract;
 import com.example.android.babyml.data.Sleep;
 
+import org.joda.time.LocalDateTime;
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -122,10 +122,17 @@ public class SleepAdderFragment extends Fragment implements View.OnClickListener
 
     private void storeSleepAndClose() {
         Context context = getContext();
-        long timemilis = ttw.getTimeMilis();
-        long endTs = ttw2.getTimeMilis();
+        LocalDateTime start = ttw.getLocalDateTimeInTheLast24Hours();
+        LocalDateTime end = ttw2.getNextLocalDateTimeAfterLocalDateTime(start); // ttw2.getTimeMilis();
 
-        ContentValues contentValues = new Sleep(-1, Sleep.TABLE_NAME, timemilis, endTs, getNote()).asContentValues();
+        long startTs = start.toDateTime().getMillis();
+        long endTs = end.toDateTime().getMillis();
+
+        if (endTs < startTs) {
+            throw new IllegalArgumentException("endTs ("+endTs+ ") < timemilis; " + startTs);
+        }
+
+        ContentValues contentValues = new Sleep(-1, Sleep.TABLE_NAME, startTs, endTs, getNote()).asContentValues();
         Uri uri = context.getContentResolver().insert(
                 EntriesProviderContract.URI_SLEEPS,
                 contentValues);

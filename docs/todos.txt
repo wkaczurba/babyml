@@ -1,13 +1,17 @@
 // UI enhancements -> Review these ones for sliding tabs:
 //   https://developer.android.com/training/implementing-navigation/lateral.html
 //   https://developer.android.com/samples/SlidingTabsBasic/src/com.example.android.common/view/SlidingTabLayout.html
+// UI+Keyboard+EditText:
+// This is from: https://stackoverflow.com/questions/2342620/how-to-hide-keyboard-after-typing-in-edittext-in-android
 
-Most important things:
-- solve problem with DB addition of sleep time
-- add decorator pattern for sleep time, so statistics are generated
+Critical:
+1. Modify onSwap: FIXME: Modify LogAdapter.swapCursor():
+   Need to generate two views when crossing midnight
+2. add decorator pattern for sleep time, so statistics are generated
+
+Nice to have:
 - limit notes to short ones so they can be displayed
   - or use additional window for displaying them.
-
 - locale, time 24 vs 12, oz vs ml
 - sharing via email
 - cloud connectivity
@@ -20,6 +24,10 @@ Refactoring:
         +LogAdapter -> IDs.
 
 	MainActivity -> switch-case in onSwiped should be replaced.
+
+Add app indexing by Google Search:
+ - https://developer.android.com/studio/write/app-link-indexing.html#intent
+
 
 US/EU units (Ozs vs Ml).
 	Time -> AM/PM or 24H.

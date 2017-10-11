@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -103,9 +102,6 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
         milkIncludeNoteCheckBox = view.findViewById(R.id.milk_include_note_cb); // milk_include_note_cb;
         milkNoteEditText = view.findViewById(R.id.milk_note_et); // milk_note_et;
 
-//        // FIXME: This does not close the thing.
-//        MiscUiUtils.setIme(context, milkNoteEditText);
-
         // Set on click listener for all buttons.
         Button[] buttons = new Button[] {
                 clearButton, /*plusMilkButton, plusNappyButton,*/ add10mlButton,
@@ -133,29 +129,6 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
         updateVisibilityOfNoteEditText();
     }
 
-//    public static class ItemSelectedListener implements AdapterView.OnItemSelectedListener {
-//
-//        Context context;
-//        Toast mToast;
-//        public ItemSelectedListener(Context ctx) {
-//            this.context = ctx;
-//        }
-//
-//        @Override
-//        public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//            if (mToast != null) {
-//                mToast.cancel();
-//            }
-//            mToast = Toast.makeText(context, "Item: " + position + " selected by the spinner", Toast.LENGTH_LONG);
-//            mToast.show();
-//        }
-//
-//        @Override
-//        public void onNothingSelected(AdapterView<?> parent) {
-//
-//        }
-//    }
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -171,20 +144,6 @@ public class MilkAdderFragment extends Fragment implements View.OnClickListener 
 
         milkAmountTextView.setText(sb);
     }
-
-    // This is from: https://stackoverflow.com/questions/2342620/how-to-hide-keyboard-after-typing-in-edittext-in-android
-//    // TODO: Consider bundling it together with TimeTextWatcher
-//    private void setIme(Context context, View view) {
-//        InputMethodManager inputManager =
-//                (InputMethodManager) context.
-//                        getSystemService(Context.INPUT_METHOD_SERVICE);
-//
-////        View view = milkTimeEditText;
-////
-//        inputManager.hideSoftInputFromWindow(
-//                view.getWindowToken(),
-//                InputMethodManager.HIDE_NOT_ALWAYS);
-//    }
 
     @Override
     public void onClick(View v) {
